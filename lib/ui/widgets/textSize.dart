@@ -1,4 +1,3 @@
-
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
@@ -67,11 +66,23 @@ class _ExtendTextState extends State<CustomText> {
     int offset = widget.offset ?? 3;
     if (textwidth > widget.width) {
       int position = widget.text.lastIndexOf('.');
-      if(position < 1){
-        int numberOfCharsToRemove = ((textwidth - widget.width) / (style.fontSize ?? 14)).floor();
+
+      /////////// 版本迁移 begin ///////////
+      if (position < 0) {
+        position = widget.text.length;
+      }
+      /////////// 版本迁移 end ///////////
+
+      if (position < 1) {
+        int numberOfCharsToRemove =
+            ((textwidth - widget.width) / (style.fontSize ?? 14)).floor();
         String overflowText = widget.overflowtext ?? '...';
-        text = widget.text.replaceRange(widget.text.length - numberOfCharsToRemove, widget.text.length, '') + overflowText;
-      }else{
+        text = widget.text.replaceRange(
+                widget.text.length - numberOfCharsToRemove,
+                widget.text.length,
+                '') +
+            overflowText;
+      } else {
         String overflowtext = widget.overflowtext ?? '...';
         int overflowtextLength = overflowtext.length;
         double singTextSize = textwidth / widget.text.length;
@@ -85,15 +96,15 @@ class _ExtendTextState extends State<CustomText> {
               newtext.substring(
                   position - offset - overflowtextLength, newtext.length);
           position -= number;
-          number =
-              ((TextSize.boundingTextSize(newtext, style).width - widget.width) /
+          number = ((TextSize.boundingTextSize(newtext, style).width -
+                      widget.width) /
                   singTextSize)
-                  .ceil();
+              .ceil();
           if (a < 1 || number < 1) {
             break;
           }
-        } while (
-        TextSize.boundingTextSize(newtext, style).width > widget.width - 20);
+        } while (TextSize.boundingTextSize(newtext, style).width >
+            widget.width - 20);
         text = newtext;
       }
     }

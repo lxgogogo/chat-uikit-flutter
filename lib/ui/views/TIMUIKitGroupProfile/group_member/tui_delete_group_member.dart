@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
-
+import 'package:tencent_cloud_chat_uikit/data_services/group/group_services.dart';
+import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/group_member_list.dart';
+import 'package:tencent_im_base/tencent_im_base.dart';
 
 GlobalKey<_DeleteGroupMemberPageState> deleteGroupMemberKey = GlobalKey();
 
@@ -21,6 +22,8 @@ class DeleteGroupMemberPage extends StatefulWidget {
 }
 
 class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
+  final GroupServices _groupServices = serviceLocator<GroupServices>();
+
   List<V2TimGroupMemberFullInfo> selectedGroupMember = [];
   List<V2TimGroupMemberFullInfo?>? searchMemberList;
 
@@ -33,10 +36,15 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     List<V2TimGroupMemberFullInfo?> currentGroupMember =
         Provider.of<TUIGroupProfileModel>(context, listen: false)
             .groupMemberList;
-    final res =
-        await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
+    // final res =
+    //     await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
+    //   keywordList: [searchText],
+    //   groupIDList: [widget.model.groupInfo!.groupID],
+    // ));
+
+    final res = await searchGroupMember(V2TimGroupMemberSearchParam(
       keywordList: [searchText],
-      groupIDList: [widget.model.groupInfo!.groupID],
+      groupIDList: [widget.model.groupID],
     ));
 
     if (res.code == 0) {
@@ -54,9 +62,13 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     } else {
       currentGroupMember = [];
     }
+
+    selectedGroupMember.clear();
+
     setState(() {
-      searchMemberList =
-          isSearchTextExist(searchText) ? currentGroupMember : null;
+      searchMemberList = isSearchTextExist(searchText)
+          ? currentGroupMember
+          : widget.model.groupMemberList;
     });
   }
 
@@ -75,6 +87,21 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
       widget.model.kickOffMember(userIDs);
       Navigator.pop(context);
     }
+  }
+
+  @override
+  void initState() {
+    searchMemberList = widget.model.groupMemberList;
+    super.initState();
+  }
+
+  Future<V2TimValueCallback<V2GroupMemberInfoSearchResult>> searchGroupMember(
+      V2TimGroupMemberSearchParam searchParam) async {
+    final res =
+        await _groupServices.searchGroupMembers(searchParam: searchParam);
+
+    if (res.code == 0) {}
+    return res;
   }
 
   @override
@@ -115,8 +142,7 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
                   )
                 ],
                 shadowColor: theme.weakBackgroundColor,
-                backgroundColor: theme.appbarBgColor ??
-                    theme.primaryColor,
+                backgroundColor: theme.appbarBgColor ?? theme.primaryColor,
                 iconTheme: IconThemeData(
                   color: theme.appbarTextColor,
                 )),

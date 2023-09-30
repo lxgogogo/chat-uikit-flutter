@@ -22,13 +22,21 @@ class MergerMessageScreen extends StatefulWidget {
   final TUIChatSeparateViewModel model;
   final String msgID;
   final MessageItemBuilder? messageItemBuilder;
+  final Function(String qrCode)? onIdentifyQrCode;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
-  const MergerMessageScreen(
-      {Key? key,
-      required this.model,
-      required this.msgID,
-      this.messageItemBuilder})
-      : super(key: key);
+  const MergerMessageScreen({
+    Key? key,
+    required this.model,
+    required this.msgID,
+    this.messageItemBuilder,
+    this.onIdentifyQrCode,
+    required this.onVideoTap,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => MergerMessageScreenState();
@@ -43,6 +51,12 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
   initState() {
     super.initState();
     initMessageList();
+  }
+
+  @override
+  void dispose() {
+    widget.model.cancelSoundSubscription();
+    super.dispose();
   }
 
   void initMessageList() async {
@@ -80,6 +94,18 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
 
     switch (type) {
       case MessageElemType.V2TIM_ELEM_TYPE_CUSTOM:
+        ////////////////// 自定义视频消息兼容 begin //////////////////
+        if (message.customElem?.extension ==
+            '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
+          return TIMUIKitVideoElem(
+            message,
+            chatModel: widget.model,
+            isFrom: "merger",
+            isShowMessageReaction: false,
+            onVideoTap: widget.onVideoTap,
+          );
+        }
+        ////////////////// 自定义视频消息兼容 end //////////////////
         if (widget.messageItemBuilder?.customMessageItemBuilder != null) {
           return widget.messageItemBuilder!.customMessageItemBuilder!(
             message,
@@ -114,11 +140,14 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
             )!;
           }
           return TIMUIKitReplyElem(
-              isShowMessageReaction: false,
-              chatModel: widget.model,
-              message: message,
-              scrollToIndex: () {},
-              clearJump: () {});
+            isShowMessageReaction: false,
+            chatModel: widget.model,
+            message: message,
+            scrollToIndex: () {},
+            clearJump: () {},
+            onIdentifyQrCode: widget.onIdentifyQrCode,
+            onVideoTap: widget.onVideoTap,
+          );
         }
         if (widget.messageItemBuilder?.textMessageItemBuilder != null) {
           return widget.messageItemBuilder!.textMessageItemBuilder!(
@@ -179,6 +208,7 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
           message: message,
           isFrom: "merger",
           key: Key("${message.seq}_${message.timestamp}"),
+          onIdentifyQrCode: widget.onIdentifyQrCode,
         );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
         if (widget.messageItemBuilder?.videoMessageItemBuilder != null) {
@@ -188,10 +218,13 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
             () {},
           )!;
         }
-        return TIMUIKitVideoElem(message,
-            chatModel: widget.model,
-            isFrom: "merger",
-            isShowMessageReaction: false);
+        return TIMUIKitVideoElem(
+          message,
+          chatModel: widget.model,
+          isFrom: "merger",
+          isShowMessageReaction: false,
+          onVideoTap: widget.onVideoTap,
+        );
       case MessageElemType.V2TIM_ELEM_TYPE_LOCATION:
         if (widget.messageItemBuilder?.locationMessageItemBuilder != null) {
           return widget.messageItemBuilder!.locationMessageItemBuilder!(
@@ -210,13 +243,16 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
           )!;
         }
         return TIMUIKitMergerElem(
-            model: widget.model,
-            isShowJump: false,
-            isShowMessageReaction: false,
-            message: message,
-            mergerElem: message.mergerElem!,
-            isSelf: isFromSelf,
-            messageID: message.msgID!);
+          model: widget.model,
+          isShowJump: false,
+          isShowMessageReaction: false,
+          message: message,
+          mergerElem: message.mergerElem!,
+          isSelf: isFromSelf,
+          messageID: message.msgID!,
+          onIdentifyQrCode: widget.onIdentifyQrCode,
+          onVideoTap: widget.onVideoTap,
+        );
       default:
         return Text(TIM_t("未知消息"));
     }

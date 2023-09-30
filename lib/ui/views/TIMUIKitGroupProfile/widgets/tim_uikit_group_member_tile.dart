@@ -3,24 +3,26 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
+import 'package:tencent_cloud_chat_uikit/extensions/group_member_extension.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_add_group_member.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_delete_group_member.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_group_member_list.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
-
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 
 class GroupMemberTile extends TIMUIKitStatelessWidget {
   GroupMemberTile({
     Key? key,
+    this.addGroupMember,
   }) : super(key: key);
+
+  final Function(List<V2TimGroupMemberFullInfo?> memberList)? addGroupMember;
 
   List<V2TimGroupMemberFullInfo?> _getMemberList(memberList, int showRange) {
     if (memberList.length > showRange) {
@@ -40,9 +42,10 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
 
   List<Widget> _groupMemberListBuilder(List memberList, TUITheme theme,
       TUIGroupProfileModel model, int showRange) {
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor() == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor() == DeviceType.Desktop;
     return _getMemberList(memberList, showRange).map((element) {
-      final faceUrl = element?.faceUrl ?? "";
+      final faceUrl = element?.privateAvatar ?? "";
       final showName = _getShowName(element);
       return InkWell(
         onTapDown: (details) {
@@ -60,7 +63,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                 width: isDesktopScreen ? 36 : 50,
                 height: isDesktopScreen ? 36 : 50,
                 child: Avatar(
-                  borderRadius: isDesktopScreen ? BorderRadius.circular(18) : null,
+                  borderRadius:
+                      isDesktopScreen ? BorderRadius.circular(18) : null,
                   faceUrl: faceUrl,
                   showName: showName,
                   type: 1,
@@ -238,7 +242,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                             if (isDesktopScreen) {
                               TUIKitWidePopup.showPopupWindow(
                                   context: context,
-                                  operationKey: TUIKitWideModalOperationKey.addGroupMembers,
+                                  operationKey: TUIKitWideModalOperationKey
+                                      .addGroupMembers,
                                   width: 350,
                                   title: TIM_t("添加群成员"),
                                   height: 460,
@@ -250,6 +255,10 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                                         key: addGroupMemberKey,
                                       ));
                             } else {
+                              if (addGroupMember != null) {
+                                addGroupMember?.call(memberList);
+                                return;
+                              }
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -279,7 +288,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                           onPressed: () {
                             if (isDesktopScreen) {
                               TUIKitWidePopup.showPopupWindow(
-                                operationKey: TUIKitWideModalOperationKey.kickOffGroupMembers,
+                                operationKey: TUIKitWideModalOperationKey
+                                    .kickOffGroupMembers,
                                 context: context,
                                 width: 350,
                                 title: TIM_t("删除群成员"),

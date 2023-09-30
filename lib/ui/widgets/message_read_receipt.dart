@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-
 // ignore: unused_import
 import 'package:provider/provider.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
-import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/utils/message.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/time_ago.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_face_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_file_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_image_elem.dart';
@@ -17,7 +14,7 @@ import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageIt
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_video_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_merger_message_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_im_base/tencent_im_base.dart';
 
 class MessageReadReceipt extends StatefulWidget {
   final V2TimMessage messageItem;
@@ -26,14 +23,27 @@ class MessageReadReceipt extends StatefulWidget {
   final void Function(String userID, TapDownDetails tapDetails)? onTapAvatar;
   final TUIChatSeparateViewModel model;
 
-  const MessageReadReceipt(
-      {Key? key,
-      required this.messageItem,
-      required this.unreadCount,
-      required this.readCount,
-      this.onTapAvatar,
-      required this.model})
-      : super(key: key);
+  /////////// 版本迁移 ///////////
+  final Function(String qrCode)? onIdentifyQrCode;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
+  /////////// 版本迁移 ///////////
+
+  const MessageReadReceipt({
+    Key? key,
+    required this.messageItem,
+    required this.unreadCount,
+    required this.readCount,
+    this.onTapAvatar,
+    required this.model,
+    /////////// 版本迁移 ///////////
+    this.onIdentifyQrCode,
+    required this.onVideoTap,
+    /////////// 版本迁移 ///////////
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MessageReadReceiptState();
@@ -96,6 +106,20 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
 
     switch (type) {
       case MessageElemType.V2TIM_ELEM_TYPE_CUSTOM:
+        ////////////////// 自定义视频消息兼容 begin //////////////////
+        if (message.customElem?.extension ==
+            '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
+          return TIMUIKitVideoElem(
+            message,
+            chatModel: widget.model,
+            isShowMessageReaction: false,
+            isFrom: "merger",
+            /////////// 版本迁移 ///////////
+            onVideoTap: widget.onVideoTap,
+            /////////// 版本迁移 ///////////
+          );
+        }
+        ////////////////// 自定义视频消息兼容 end //////////////////
         return Text(TIM_t("[自定义]"));
       case MessageElemType.V2TIM_ELEM_TYPE_SOUND:
         return TIMUIKitSoundElem(
@@ -137,23 +161,36 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
           message: message,
           isFrom: "merger",
           key: Key("${message.seq}_${message.timestamp}"),
+          /////////// 版本迁移 ///////////
+          onIdentifyQrCode: widget.onIdentifyQrCode,
+          /////////// 版本迁移 ///////////
         );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
-        return TIMUIKitVideoElem(message,
-            chatModel: widget.model,
-            isShowMessageReaction: false,
-            isFrom: "merger");
+        return TIMUIKitVideoElem(
+          message,
+          chatModel: widget.model,
+          isShowMessageReaction: false,
+          isFrom: "merger",
+          /////////// 版本迁移 ///////////
+          onVideoTap: widget.onVideoTap,
+          /////////// 版本迁移 ///////////
+        );
       case MessageElemType.V2TIM_ELEM_TYPE_LOCATION:
         return Text(TIM_t("[位置]"));
       case MessageElemType.V2TIM_ELEM_TYPE_MERGER:
         return TIMUIKitMergerElem(
-            isShowMessageReaction: false,
-            model: widget.model,
-            isShowJump: false,
-            message: message,
-            mergerElem: message.mergerElem!,
-            isSelf: isFromSelf,
-            messageID: message.msgID!);
+          isShowMessageReaction: false,
+          model: widget.model,
+          isShowJump: false,
+          message: message,
+          mergerElem: message.mergerElem!,
+          isSelf: isFromSelf,
+          messageID: message.msgID!,
+          /////////// 版本迁移 ///////////
+          onIdentifyQrCode: widget.onIdentifyQrCode,
+          onVideoTap: widget.onVideoTap,
+          /////////// 版本迁移 ///////////
+        );
       default:
         return Text(TIM_t("未知消息"));
     }
@@ -186,13 +223,15 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
             Container(
               height: isDesktopScreen ? 30 : 40,
               width: isDesktopScreen ? 30 : 40,
-              margin: EdgeInsets.only(right: 12, bottom: isDesktopScreen ? 6 : 0),
+              margin:
+                  EdgeInsets.only(right: 12, bottom: isDesktopScreen ? 6 : 0),
               child: Avatar(faceUrl: faceUrl, showName: showName),
             ),
             Expanded(
                 child: Container(
               alignment: Alignment.centerLeft,
-              padding: EdgeInsets.only(top: 10, bottom: isDesktopScreen ? 14 : 19, right: 28),
+              padding: EdgeInsets.only(
+                  top: 10, bottom: isDesktopScreen ? 14 : 19, right: 28),
               decoration: BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
@@ -200,7 +239,8 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
                               CommonColor.weakDividerColor))),
               child: Text(
                 showName,
-                style: TextStyle(color: Colors.black, fontSize: isDesktopScreen ? 14 : 18),
+                style: TextStyle(
+                    color: Colors.black, fontSize: isDesktopScreen ? 14 : 18),
               ),
             )),
           ],
@@ -266,7 +306,8 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
                     child: Container(
                       height: isDesktopScreen ? 40 : 50.0,
                       alignment: Alignment.bottomCenter,
-                      padding: EdgeInsets.only(bottom: isDesktopScreen ? 8 : 12),
+                      padding:
+                          EdgeInsets.only(bottom: isDesktopScreen ? 8 : 12),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border(
@@ -298,7 +339,8 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
                     child: Container(
                       alignment: Alignment.bottomCenter,
                       height: isDesktopScreen ? 40 : 50.0,
-                      padding: EdgeInsets.only(bottom: isDesktopScreen ? 8 : 12),
+                      padding:
+                          EdgeInsets.only(bottom: isDesktopScreen ? 8 : 12),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border(
@@ -370,11 +412,11 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
               appBar: AppBar(
                   title: Text(
                     TIM_t("消息详情"),
-                    style: TextStyle(color: theme.appbarTextColor, fontSize: 17),
+                    style:
+                        TextStyle(color: theme.appbarTextColor, fontSize: 17),
                   ),
                   shadowColor: theme.weakDividerColor,
-                  backgroundColor: theme.appbarBgColor ??
-                      theme.primaryColor,
+                  backgroundColor: theme.appbarBgColor ?? theme.primaryColor,
                   iconTheme: IconThemeData(
                     color: theme.appbarTextColor,
                   )),

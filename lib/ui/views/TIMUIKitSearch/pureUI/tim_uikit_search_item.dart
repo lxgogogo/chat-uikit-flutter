@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitSearch/tim_uikit_search_item_wide.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 
 class TIMUIKitSearchItem extends TIMUIKitStatelessWidget {
   final String faceUrl;
@@ -65,15 +64,28 @@ class TIMUIKitSearchItem extends TIMUIKitStatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: Stack(
-                  fit: StackFit.expand,
-                  clipBehavior: Clip.none,
-                  children: [Avatar(faceUrl: faceUrl, showName: showName)],
+              /////////// 版本迁移 ///////////
+              ClipOval(
+                child: SizedBox(
+                  width: 50.w,
+                  height: 50.w,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    clipBehavior: Clip.none,
+                    children: [Avatar(faceUrl: faceUrl, showName: showName)],
+                  ),
                 ),
               ),
+              /////////// 版本迁移 ///////////
+              // SizedBox(
+              //   width: 40,
+              //   height: 40,
+              //   child: Stack(
+              //     fit: StackFit.expand,
+              //     clipBehavior: Clip.none,
+              //     children: [Avatar(faceUrl: faceUrl, showName: showName)],
+              //   ),
+              // ),
               Expanded(
                   child: Container(
                 margin: const EdgeInsets.only(left: 12),
@@ -88,13 +100,20 @@ class TIMUIKitSearchItem extends TIMUIKitStatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            lineOne,
-                            style: TextStyle(
+                          /////////// 版本迁移 ///////////
+                          Expanded(
+                            child: Text(
+                              lineOne,
+                              style: TextStyle(
                                 color: theme.darkTextColor,
                                 fontSize: 18.0,
-                                fontWeight: FontWeight.w400),
+                                fontWeight: FontWeight.w400,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
+                          /////////// 版本迁移 ///////////
                           _renderLineOneRight(lineOneRight, theme),
                         ],
                       ),

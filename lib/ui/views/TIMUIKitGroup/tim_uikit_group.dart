@@ -109,8 +109,8 @@ class _TIMUIKitGroupState extends TIMUIKitState<TIMUIKitGroup> {
                   padding: const EdgeInsets.only(bottom: 12),
                   margin: const EdgeInsets.only(right: 12),
                   child: SizedBox(
-                    height: isDesktopScreen ? 30 : 40,
-                    width: isDesktopScreen ? 30 : 40,
+                    height: isDesktopScreen ? 30 : 40, // 36.w
+                    width: isDesktopScreen ? 30 : 40, // 36.w
                     child: Avatar(
                       faceUrl: faceUrl,
                       showName: showName,
@@ -125,7 +125,8 @@ class _TIMUIKitGroupState extends TIMUIKitState<TIMUIKitGroup> {
                   child: Text(
                     showName,
                     style: TextStyle(
-                        color: Colors.black, fontSize: isDesktopScreen ? 14 : 18),
+                        color: Colors.black,
+                        fontSize: isDesktopScreen ? 14 : 18),
                   ),
                 ))
               ],

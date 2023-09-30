@@ -2,16 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
-
+import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_ui_group_member_search.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/group_member_list.dart';
+import 'package:tencent_im_base/tencent_im_base.dart';
 
 class GroupProfileMemberListPage extends StatefulWidget {
   List<V2TimGroupMemberFullInfo?> memberList;
@@ -93,14 +91,14 @@ class GroupProfileMemberListPageState
             Provider.of<TUIGroupProfileModel>(context);
         String option1 = groupProfileModel.groupInfo?.memberCount.toString() ??
             widget.memberList.length.toString();
-        if(isDesktopScreen){
-          return  GroupProfileMemberList(
+        if (isDesktopScreen) {
+          return GroupProfileMemberList(
             customTopArea: PlatformUtils().isWeb
                 ? null
                 : GroupMemberSearchTextField(
-              onTextChange: (text) =>
-                  handleSearchGroupMembers(text, context),
-            ),
+                    onTextChange: (text) =>
+                        handleSearchGroupMembers(text, context),
+                  ),
             memberList: searchMemberList ?? groupProfileModel.groupMemberList,
             removeMember: _kickedOffMember,
             touchBottomCallBack: () {},
@@ -111,7 +109,10 @@ class GroupProfileMemberListPageState
             },
           );
         }
-        return Scaffold(
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+          behavior: HitTestBehavior.opaque,
+          child: Scaffold(
             appBar: AppBar(
                 title: Text(
                   TIM_t_para("群成员({{option1}}人)", "群成员($option1人)")(
@@ -119,8 +120,7 @@ class GroupProfileMemberListPageState
                   style: TextStyle(color: theme.appbarTextColor, fontSize: 17),
                 ),
                 shadowColor: theme.weakBackgroundColor,
-                backgroundColor: theme.appbarBgColor ??
-                    theme.primaryColor,
+                backgroundColor: theme.appbarBgColor ?? theme.primaryColor,
                 iconTheme: IconThemeData(
                   color: theme.appbarTextColor,
                 )),
@@ -139,7 +139,8 @@ class GroupProfileMemberListPageState
                   widget.model.onClickUser!(friendInfo.userID, details);
                 }
               },
-            )
+            ),
+          ),
         );
       },
     );

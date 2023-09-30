@@ -129,7 +129,7 @@ class ProfileWidgetBuilder {
   Widget Function(int? birthday)? birthdayBar;
 
   /// THe card shows the user info of a specific user.
-  Widget Function(V2TimUserFullInfo? userInfo)? userInfoCard;
+  Widget Function(V2TimFriendInfo? userInfo)? userInfoCard;
 
   /// The area shows the buttons,
   /// contains "Send message", "Voice/Video Call", "Delete friend" when has the friend relationship,

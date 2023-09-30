@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
-
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_ui_group_member_search.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/group_member_list.dart';
-
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 
 GlobalKey<_SelectNewGroupOwner> selectNewGroupOwnerKey = GlobalKey();
 
@@ -34,7 +32,6 @@ class _SelectNewGroupOwner extends TIMUIKitState<SelectNewGroupOwner> {
   List<V2TimGroupMemberFullInfo> selectedMember = [];
   List<V2TimGroupMemberFullInfo?>? searchMemberList;
   String? searchText;
-
 
   @override
   void dispose() {
@@ -121,10 +118,9 @@ class _SelectNewGroupOwner extends TIMUIKitState<SelectNewGroupOwner> {
             appBar: AppBar(
               shadowColor: theme.weakBackgroundColor,
               iconTheme: IconThemeData(
-                color: theme.appbarTextColor,
+                color: theme.appbarTextColor, // Colors.white
               ),
-              backgroundColor: theme.appbarBgColor ??
-                  theme.primaryColor,
+              backgroundColor: theme.appbarBgColor ?? theme.primaryColor,
               leading: TextButton(
                 onPressed: () {
                   Navigator.pop(context);
@@ -158,8 +154,8 @@ class _SelectNewGroupOwner extends TIMUIKitState<SelectNewGroupOwner> {
               title: Text(
                 "转让群主",
                 style: TextStyle(
-                  color: theme.appbarTextColor,
-                  fontSize: 16,
+                  color: theme.appbarTextColor, // Colors.white
+                  fontSize: 16, // 18.w
                 ),
               ),
             ),

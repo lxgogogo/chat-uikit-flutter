@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/tim_uikit_group_profile.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 
 enum GroupProfileWidgetEnum {
+  /// The detail card for group.
+  groupAvatar,
+
   /// The detail card for group.
   detailCard,
 
@@ -14,6 +18,14 @@ enum GroupProfileWidgetEnum {
   /// The entrance to the page managing the group.
   /// Works only for group owner and group admin.
   groupManage,
+
+  /// The entrance to the page managing the group.
+  /// Works only for group owner and group admin.
+  groupShutUp,
+
+  /// The entrance to the page managing the group.
+  /// Works only for group owner and group admin.
+  groupBlock,
 
   /// The entrance to the search page with conversation ID.
   searchMessage,
@@ -61,6 +73,10 @@ enum GroupProfileWidgetEnum {
 }
 
 class GroupProfileWidgetBuilder {
+  Widget Function(
+          V2TimGroupInfo groupInfo, Function(String faceUrl) updateFaceUrl)?
+      groupAvatar;
+
   /// The detail card for group.
   Widget Function(V2TimGroupInfo groupInfo,
       Function(String updateGroupName)? updateGroupName)? detailCard;
@@ -75,6 +91,14 @@ class GroupProfileWidgetBuilder {
   /// The entrance to the page managing the group.
   /// Works only for group owner and group admin.
   Widget Function(Function() toDefaultGroupManagementPage)? groupManage;
+
+  /// The entrance to the page managing the group.
+  /// Works only for group owner and group admin.
+  Widget Function(Function() toDefaultGroupShutUpPage)? groupShutUp;
+
+  /// The entrance to the page managing the group.
+  /// Works only for group owner and group admin.
+  Widget Function(GroupProfileOnBlock onBlock)? groupBlock;
 
   /// The entrance to the search page with conversation ID.
   Widget Function()? searchMessage;
@@ -130,22 +154,26 @@ class GroupProfileWidgetBuilder {
   Widget Function(V2TimGroupInfo groupInfo,
       List<V2TimGroupMemberFullInfo?> groupMemberList)? customBuilderFive;
 
-  GroupProfileWidgetBuilder(
-      {this.detailCard,
-      this.memberListTile,
-      this.groupNotice,
-      this.groupManage,
-      this.searchMessage,
-      this.operationDivider,
-      this.groupTypeBar,
-      this.groupJoiningModeBar,
-      this.nameCardBar,
-      this.muteGroupMessageBar,
-      this.pinedConversationBar,
-      this.buttonArea,
-      this.customBuilderOne,
-      this.customBuilderTwo,
-      this.customBuilderThree,
-      this.customBuilderFour,
-      this.customBuilderFive});
+  GroupProfileWidgetBuilder({
+    this.detailCard,
+    this.memberListTile,
+    this.groupNotice,
+    this.groupManage,
+    this.searchMessage,
+    this.operationDivider,
+    this.groupTypeBar,
+    this.groupJoiningModeBar,
+    this.nameCardBar,
+    this.muteGroupMessageBar,
+    this.pinedConversationBar,
+    this.buttonArea,
+    this.customBuilderOne,
+    this.customBuilderTwo,
+    this.customBuilderThree,
+    this.customBuilderFour,
+    this.customBuilderFive,
+    this.groupShutUp,
+    this.groupBlock,
+    this.groupAvatar,
+  });
 }

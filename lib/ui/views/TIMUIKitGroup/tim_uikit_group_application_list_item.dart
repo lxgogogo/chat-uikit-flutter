@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tencent_im_base/tencent_im_base.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
-
-import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
+import 'package:tencent_im_base/tencent_im_base.dart';
 
 enum ApplicationStatus {
   none,
@@ -26,7 +25,6 @@ class TIMUIKitGroupApplicationListItem extends StatefulWidget {
 class TIMUIKitGroupApplicationListItemState
     extends TIMUIKitState<TIMUIKitGroupApplicationListItem> {
   ApplicationStatus applicationStatus = ApplicationStatus.none;
-
 
   String _getUserName() {
     if (widget.applicationInfo.fromUserNickName != null &&
@@ -51,8 +49,8 @@ class TIMUIKitGroupApplicationListItemState
           Container(
             margin: const EdgeInsets.only(right: 12),
             child: SizedBox(
-              height: 40,
-              width: 40,
+              height: 40, // 36.w
+              width: 40, // 36.w
               child: Avatar(
                   faceUrl: widget.applicationInfo.fromUserFaceUrl ?? "",
                   showName: widget.applicationInfo.fromUserNickName ??

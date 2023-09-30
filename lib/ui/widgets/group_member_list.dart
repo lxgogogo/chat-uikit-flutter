@@ -3,16 +3,18 @@
 import 'package:azlistview_all_platforms/azlistview_all_platforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable_for_tencent_im/flutter_slidable.dart';
+import 'package:keframe/keframe.dart';
 import 'package:lpinyin/lpinyin.dart';
 import 'package:provider/provider.dart';
-import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-import 'package:tencent_im_base/tencent_im_base.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
+import 'package:tencent_cloud_chat_uikit/extensions/group_member_extension.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/optimize_utils.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/az_list_view.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/radio_button.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_im_base/tencent_im_base.dart';
 
 class GroupProfileMemberList extends StatefulWidget {
   final List<V2TimGroupMemberFullInfo?> memberList;
@@ -26,13 +28,17 @@ class GroupProfileMemberList extends StatefulWidget {
   final Function(List<V2TimGroupMemberFullInfo> selectedMember)?
       onSelectedMemberChange;
   // notice: onTapMemberItem and onSelectedMemberChange use together will triger together
-  final Function(V2TimGroupMemberFullInfo memberInfo, TapDownDetails? tapDetails)? onTapMemberItem;
+  final Function(
+          V2TimGroupMemberFullInfo memberInfo, TapDownDetails? tapDetails)?
+      onTapMemberItem;
   // When sliding to the bottom bar callBack
   final Function()? touchBottomCallBack;
 
   final int? maxSelectNum;
 
   Widget? customTopArea;
+
+  String? ignoreUserID;
 
   GroupProfileMemberList({
     Key? key,
@@ -47,6 +53,7 @@ class GroupProfileMemberList extends StatefulWidget {
     this.customTopArea,
     this.touchBottomCallBack,
     this.maxSelectNum,
+    this.ignoreUserID,
   }) : super(key: key);
 
   @override
@@ -76,6 +83,9 @@ class _GroupProfileMemberListState
     final List<ISuspensionBeanImpl> showList = List.empty(growable: true);
     for (var i = 0; i < memberList.length; i++) {
       final item = memberList[i];
+      if (widget.ignoreUserID != null && item?.userID == widget.ignoreUserID) {
+        continue;
+      }
       final showName = _getShowName(item);
       if (item?.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_OWNER ||
           item?.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_ADMIN) {
@@ -117,7 +127,23 @@ class _GroupProfileMemberListState
     final isGroupMember =
         memberInfo.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_MEMBER;
     return Container(
-        color: Colors.white,
+        padding: EdgeInsets.symmetric(
+          horizontal: 12.w,
+          vertical: 5.w,
+        ),
+        margin: EdgeInsets.all(15.w).copyWith(top: 0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 30,
+              spreadRadius: 0,
+              offset: Offset.zero,
+            )
+          ],
+        ),
         child: Slidable(
             endActionPane: widget.canSlideDelete && isGroupMember
                 ? ActionPane(motion: const DrawerMotion(), children: [
@@ -167,13 +193,24 @@ class _GroupProfileMemberListState
                       height: isDesktopScreen ? 30 : 36,
                       margin: const EdgeInsets.only(right: 10),
                       child: Avatar(
-                        faceUrl: memberInfo.faceUrl ?? "",
+                        faceUrl: memberInfo.privateAvatar ?? "",
                         showName: _getShowName(memberInfo),
                         type: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(36.w)),
                       ),
                     ),
-                    Text(_getShowName(memberInfo),
-                        style:  TextStyle(fontSize: isDesktopScreen ? 14 : 16)),
+                    Flexible(
+                      child: Text(
+                        _getShowName(memberInfo),
+                        style: TextStyle(
+                          color: const Color(0xFF1F1F1F),
+                          fontSize: 17.w,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     memberInfo.role ==
                             GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_OWNER
                         ? Container(
@@ -181,7 +218,7 @@ class _GroupProfileMemberListState
                             child: Text(TIM_t("群主"),
                                 style: TextStyle(
                                   color: theme.ownerColor,
-                                  fontSize: isDesktopScreen ? 10 :12,
+                                  fontSize: isDesktopScreen ? 10 : 12,
                                 )),
                             padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                             decoration: BoxDecoration(
@@ -304,22 +341,22 @@ class _GroupProfileMemberListState
                 ? Center(
                     child: Text(TIM_t("暂无群成员")),
                   )
-                : Container(
-              padding: isDesktopScreen ? const EdgeInsets.symmetric( horizontal: 16) : null,
-              child: AZListViewContainer(
-                  memberList: showList,
-                  susItemBuilder: (context, index) {
-                    final model = showList[index];
-                    return getSusItem(
-                        context, theme, model.getSuspensionTag());
-                  },
-                  itemBuilder: (context, index) {
-                    final memberInfo = showList[index].memberInfo
-                    as V2TimGroupMemberFullInfo;
+                : SizeCacheWidget(
+                    child: AZListViewContainer(
+                        memberList: showList,
+                        // susItemBuilder: (context, index) {
+                        //   final model = showList[index];
+                        //   return getSusItem(
+                        //       context, theme, model.getSuspensionTag());
+                        // },
+                        itemBuilder: (context, index) {
+                          final memberInfo = showList[index].memberInfo
+                              as V2TimGroupMemberFullInfo;
 
-                    return _buildListItem(context, memberInfo);
-                  }),
-            ),
+                          return FrameSeparateWidget(
+                              child: _buildListItem(context, memberInfo));
+                        }),
+                  ),
           ))
         ],
       )),

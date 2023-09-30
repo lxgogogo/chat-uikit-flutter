@@ -250,11 +250,13 @@ class TIMUIKitSearchMsgDetailState
                   updateMsgResult(value, true);
                 },
                 initValue: widget.keyword,
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: 16,
-                  color: hexToColor("979797"),
-                ),
+                // prefixText: Text(
+                //   widget.currentConversation.showName ??
+                //       widget.currentConversation.userID ??
+                //       "",
+                //   maxLines: 1,
+                //   overflow: TextOverflow.ellipsis,
+                // ),
               ),
               Expanded(
                   child: Scrollbar(

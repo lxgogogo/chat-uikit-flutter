@@ -121,7 +121,7 @@ class _TIMUIKitLastMsgState extends TIMUIKitState<TIMUIKitLastMsg> {
       case MessageElemType.V2TIM_ELEM_TYPE_MERGER:
         return TIM_t("[聊天记录]");
       default:
-        return null;
+        return TIM_t("未知消息");
     }
   }
 
