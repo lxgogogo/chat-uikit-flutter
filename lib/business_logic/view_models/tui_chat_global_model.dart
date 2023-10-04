@@ -811,6 +811,7 @@ class TUIChatGlobalModel extends ChangeNotifier implements TIMUIKitClass {
     bool? needReadReceipt,
     String? cloudCustomData,
     String? localCustomData,
+    bool? isSupportMessageExtension = false,
   }) {
     final TUIChatModelTools tools = serviceLocator<TUIChatModelTools>();
     List<V2TimMessage> currentHistoryMsgList = _messageListMap[convID] ?? [];
@@ -840,6 +841,7 @@ class TUIChatGlobalModel extends ChangeNotifier implements TIMUIKitClass {
         offlinePushInfo: offlinePushInfo ??
             tools.buildMessagePushInfo(
                 messageInfo, convID, ConvType.values[convType.index]),
+        isSupportMessageExtension: isSupportMessageExtension,
       );
     }
     return null;
@@ -975,6 +977,7 @@ class TUIChatGlobalModel extends ChangeNotifier implements TIMUIKitClass {
     bool? needReadReceipt,
     String? cloudCustomData,
     String? localCustomData,
+    bool? isSupportMessageExtension = false,
   }) async {
     String receiver = convType == ConvType.c2c ? convID : '';
     String groupID = convType == ConvType.group ? convID : '';
@@ -1004,7 +1007,9 @@ class TUIChatGlobalModel extends ChangeNotifier implements TIMUIKitClass {
                 "needTyping": 1,
                 "version": 1,
               }
-            }));
+            }),
+      isSupportMessageExtension: isSupportMessageExtension,
+    );
     if (isEditStatusMessage == false) {
       updateMessage(sendMsgRes, convID, id, convType, groupType, setInputField);
     }
@@ -1120,6 +1125,26 @@ class TUIChatGlobalModel extends ChangeNotifier implements TIMUIKitClass {
       }
     }
     return listWithTimestamp.reversed.toList();
+  }
+
+  /// custom 语音消息自动播放
+  List<V2TimMessage> getSoundMessageList(String conversationID) {
+    final list = messageListMap[conversationID]?.reversed.toList() ?? [];
+    final returnValue = list
+        .where((element) =>
+    element.elemType == MessageElemType.V2TIM_ELEM_TYPE_SOUND)
+        .toList();
+    return returnValue;
+  }
+
+  /// custom 图片左右滑预览
+  List<V2TimMessage> getImgMessageList(String conversationID) {
+    final list = messageListMap[conversationID]?.reversed.toList() ?? [];
+    final returnValue = list
+        .where((element) =>
+    element.elemType == MessageElemType.V2TIM_ELEM_TYPE_IMAGE)
+        .toList();
+    return returnValue;
   }
 
   HistoryMessagePosition getMessageListPosition(String? conversationID) {

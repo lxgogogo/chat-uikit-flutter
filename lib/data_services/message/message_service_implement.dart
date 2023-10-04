@@ -350,6 +350,7 @@ class MessageServiceImpl extends MessageService {
     OfflinePushInfo? offlinePushInfo,
     String? cloudCustomData,
     String? localCustomData,
+    bool? isSupportMessageExtension = false,
   }) async {
     final result =
         await TencentImSDKPlugin.v2TIMManager.getMessageManager().sendMessage(
@@ -362,6 +363,7 @@ class MessageServiceImpl extends MessageService {
               needReadReceipt: needReadReceipt,
               localCustomData: localCustomData,
               cloudCustomData: cloudCustomData,
+              isSupportMessageExtension: isSupportMessageExtension,
             );
     if (result.code != 0) {
       _coreService.callOnCallback(TIMCallback(

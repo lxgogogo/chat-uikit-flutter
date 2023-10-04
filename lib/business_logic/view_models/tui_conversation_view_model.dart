@@ -69,7 +69,21 @@ class TUIConversationViewModel extends ChangeNotifier {
         // ignore: empty_catches
       } catch (e) {}
     } else {
-      _conversationList.sort((a, b) => b!.orderkey!.compareTo(a!.orderkey!));
+      // _conversationList.sort((a, b) => b!.orderkey!.compareTo(a!.orderkey!));
+      /// custom 消息排序规则
+      _conversationList.sort((a, b) {
+        if (a!.isPinned! && !b!.isPinned!) {
+          return -1;
+        } else if (!a.isPinned! && b!.isPinned!) {
+          return 1;
+        } else if (a.recvOpt == 2 && b!.recvOpt != 2) {
+          return 1;
+        } else if (a.recvOpt != 2 && b!.recvOpt == 2) {
+          return -1;
+        } else {
+          return b!.orderkey!.compareTo(a.orderkey!);
+        }
+      });
     }
     return _conversationList;
   }

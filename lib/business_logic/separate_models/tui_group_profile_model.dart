@@ -31,6 +31,10 @@ class TUIGroupProfileModel extends ChangeNotifier {
 
   GroupProfileLifeCycle? get lifeCycle => _lifeCycle;
 
+  /// custom 群成员比较多的时候，数据还未加载完就跳转
+  bool isMemberLoadComplete = false;
+  bool isFirstLoadMembers = false;
+
   set lifeCycle(GroupProfileLifeCycle? value) {
     _lifeCycle = value;
   }
@@ -87,12 +91,19 @@ class TUIGroupProfileModel extends ChangeNotifier {
 
   Future<void> loadGroupMemberList(
       {required String groupID, int count = 100, String? seq}) async {
+    isFirstLoadMembers = true;
+    isMemberLoadComplete = false;
     final String? nextSeq = await _loadGroupMemberListFunction(
         groupID: groupID, seq: seq, count: count);
     if (nextSeq != null && nextSeq != "0" && nextSeq != "") {
+      if (isFirstLoadMembers) {
+        isFirstLoadMembers = false;
+        notifyListeners();
+      }
       return await loadGroupMemberList(
           groupID: groupID, count: count, seq: nextSeq);
     } else {
+      isMemberLoadComplete = true;
       notifyListeners();
     }
   }
@@ -172,6 +183,27 @@ class TUIGroupProfileModel extends ChangeNotifier {
       }));
       if (response.code != 0) {
         _groupInfo?.groupName = originalGroupName;
+      }
+      notifyListeners();
+      return response;
+    }
+    return null;
+  }
+
+  /// custom 群头像
+  Future<V2TimCallback?> setGroupFaceUrl(String faceUrl) async {
+    if (_groupInfo != null) {
+      String? originalFaceUrl = _groupInfo?.faceUrl;
+      _groupInfo?.faceUrl = faceUrl;
+      final response = await _groupServices.setGroupInfo(
+          info: V2TimGroupInfo.fromJson({
+            "groupID": _groupID,
+            "groupType": _groupInfo!.groupType,
+            "faceUrl": faceUrl,
+            // "customInfo": {'customFaceUrl': faceUrl},
+          }));
+      if (response.code != 0) {
+        _groupInfo?.faceUrl = originalFaceUrl;
       }
       notifyListeners();
       return response;
@@ -284,7 +316,13 @@ class TUIGroupProfileModel extends ChangeNotifier {
     return res;
   }
 
+  /// custom 邀请权限
   bool canInviteMember() {
+    final isGroupOwner =
+        _groupInfo?.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_OWNER;
+    final isAdmin =
+        _groupInfo?.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_ADMIN;
+    return isGroupOwner || isAdmin;
     final groupType = _groupInfo?.groupType;
     return groupType == GroupType.Work;
   }
