@@ -13,8 +13,9 @@ GlobalKey<_DeleteGroupMemberPageState> deleteGroupMemberKey = GlobalKey();
 
 class DeleteGroupMemberPage extends StatefulWidget {
   final TUIGroupProfileModel model;
+  final VoidCallback? onClose;
 
-  const DeleteGroupMemberPage({Key? key, required this.model})
+  const DeleteGroupMemberPage({Key? key, required this.model, this.onClose})
       : super(key: key);
 
   @override
@@ -36,13 +37,8 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     List<V2TimGroupMemberFullInfo?> currentGroupMember =
         Provider.of<TUIGroupProfileModel>(context, listen: false)
             .groupMemberList;
-    // final res =
-    //     await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
-    //   keywordList: [searchText],
-    //   groupIDList: [widget.model.groupInfo!.groupID],
-    // ));
-
-    final res = await searchGroupMember(V2TimGroupMemberSearchParam(
+    final res =
+        await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
       keywordList: [searchText],
       groupIDList: [widget.model.groupID],
     ));
@@ -66,9 +62,8 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     selectedGroupMember.clear();
 
     setState(() {
-      searchMemberList = isSearchTextExist(searchText)
-          ? currentGroupMember
-          : widget.model.groupMemberList;
+      searchMemberList =
+          isSearchTextExist(searchText) ? currentGroupMember : null;
     });
   }
 
@@ -85,7 +80,7 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     if (selectedGroupMember.isNotEmpty) {
       final userIDs = selectedGroupMember.map((e) => e.userID).toList();
       widget.model.kickOffMember(userIDs);
-      Navigator.pop(context);
+      widget.onClose ?? Navigator.pop(context);
     }
   }
 

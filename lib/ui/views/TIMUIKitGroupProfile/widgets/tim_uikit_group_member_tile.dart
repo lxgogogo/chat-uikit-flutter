@@ -252,6 +252,7 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                                   },
                                   child: (onClose) => AddGroupMemberPage(
                                         model: model,
+                                        onClose: onClose,
                                         key: addGroupMemberKey,
                                       ));
                             } else {
@@ -300,6 +301,7 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                                 },
                                 child: (onClose) => DeleteGroupMemberPage(
                                   model: model,
+                                  onClose: onClose,
                                   key: deleteGroupMemberKey,
                                 ),
                               );
