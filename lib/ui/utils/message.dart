@@ -37,6 +37,86 @@ class MessageUtils {
     return false;
   }
 
+  // 是否是创建群组信息
+  static bool isCreateGroupMessage(V2TimMessage message) {
+    final isGroup = message.groupID != null;
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'createGroup' && isGroup;
+    }
+    return false;
+  }
+
+  // 是否是红包信息
+  static bool isRedPacketMessage(V2TimMessage message) {
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'redPacket';
+    }
+    return false;
+  }
+
+  // 是否是转账信息
+  static bool isTransferMessage(V2TimMessage message) {
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'transfer';
+    }
+    return false;
+  }
+
+  static bool isExchangeMessage(V2TimMessage message) {
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'exchange';
+    }
+    return false;
+  }
+
+  static bool isFaceTalkMessage(V2TimMessage message) {
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'faceTalk';
+    }
+    return false;
+  }
+
+  static bool isHideCustomTooltip(V2TimMessage message) {
+    if (message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM) {
+      final customElem = message.customElem;
+      return customElem?.extension != 'feed';
+    }
+    return false;
+  }
+
+  static bool isFeedMessage(V2TimMessage message) {
+    final isCustomMessage =
+        message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
+    if (isCustomMessage) {
+      final customElem = message.customElem;
+      return customElem?.extension == 'feed';
+    }
+    return false;
+  }
+
+  static bool isNeedHideMessage(V2TimMessage message) {
+    return isRedPacketMessage(message) ||
+        isTransferMessage(message) ||
+        isExchangeMessage(message) ||
+        isFaceTalkMessage(message) ||
+        isFeedMessage(message);
+  }
+
   static Future<String> _getGroupChangeType(V2TimGroupChangeInfo info,
       List<V2TimGroupMemberFullInfo?> groupMemberList) async {
     int? type = info.type;
@@ -240,6 +320,12 @@ class MessageUtils {
   }
 
   static String handleCustomMessageString(V2TimMessage message) {
+    ////////////////// 自定义视频消息兼容 begin //////////////////
+    if (message.customElem?.extension ==
+        '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
+      return TIM_t("[视频]");
+    }
+    ////////////////// 自定义视频消息兼容 end //////////////////
     return TIM_t("消息");
   }
 

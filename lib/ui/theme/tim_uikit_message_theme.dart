@@ -13,6 +13,9 @@ class MessageThemeData {
   /// Color for messageBackgroundColor
   final Color? messageBackgroundColor;
 
+  /// Color for messageBackgroundColor
+  final Color? messageBackgroundColorFormMe;
+
   /// border radius for text message
   final BorderRadius? messageBorderRadius;
 
@@ -21,6 +24,7 @@ class MessageThemeData {
   MessageThemeData({
     this.messageTextStyle,
     this.messageBackgroundColor,
+    this.messageBackgroundColorFormMe,
     this.messageBorderRadius,
     this.nickNameTextStyle,
     this.timelineTextStyle,
