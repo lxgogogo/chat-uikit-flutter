@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
@@ -163,28 +164,38 @@ class _TIMUIKitMessageReactionWrapperState
     }
 
     return Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: widget.borderRadius ?? borderRadius,
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+        border: Border.all(
+          color: Color.fromRGBO(245, 166, 35, (isShowBorder ? 1 : 0)),
+          width: 2.w,
+        ),
       ),
-      constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                border: Border.all(
-                    color: Color.fromRGBO(245, 166, 35, (isShowBorder ? 1 : 0)),
-                    width: 2)),
-            child: widget.child,
-          ),
-          if (widget.isShowMessageReaction)
-            TIMUIKitMessageReactionShowPanel(message: widget.message)
-        ],
-      ),
+      child: widget.child,
     );
+    // return Container(
+    //   padding: const EdgeInsets.all(10),
+    //   decoration: BoxDecoration(
+    //     color: backgroundColor,
+    //     borderRadius: widget.borderRadius ?? borderRadius,
+    //   ),
+    //   constraints:
+    //       BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Container(
+    //         decoration: BoxDecoration(
+    //             borderRadius: const BorderRadius.all(Radius.circular(5)),
+    //             border: Border.all(
+    //                 color: Color.fromRGBO(245, 166, 35, (isShowBorder ? 1 : 0)),
+    //                 width: 2)),
+    //         child: widget.child,
+    //       ),
+    //       if (widget.isShowMessageReaction)
+    //         TIMUIKitMessageReactionShowPanel(message: widget.message)
+    //     ],
+    //   ),
+    // );
   }
 }
