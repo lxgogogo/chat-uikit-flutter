@@ -4,6 +4,7 @@ import 'dart:math';
 // import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
@@ -54,31 +55,31 @@ class TIMUIKitSoundElem extends StatefulWidget {
 
 class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
   final int charLen = 8;
-  bool isPlaying = false;
-  StreamSubscription<Object>? subscription;
+  // bool isPlaying = false;
+  // StreamSubscription<Object>? subscription;
   bool isShowJumpState = false;
   bool isShining = false;
   final TUIChatGlobalModel globalModel = serviceLocator<TUIChatGlobalModel>();
   final MessageService _messageService = serviceLocator<MessageService>();
   late V2TimSoundElem stateElement = widget.message.soundElem!;
 
-  _playSound() async {
-    if (!SoundPlayer.isInited) {
-      SoundPlayer.initSoundPlayer();
-    }
-    if (widget.localCustomInt == null ||
-        widget.localCustomInt != HistoryMessageDartConstant.read) {
-      globalModel.setLocalCustomInt(widget.msgID,
-          HistoryMessageDartConstant.read, widget.chatModel.conversationID);
-    }
-    if (isPlaying) {
-      SoundPlayer.stop();
-      widget.chatModel.currentPlayedMsgId = "";
-    } else {
-      SoundPlayer.play(url: stateElement.url!);
-      widget.chatModel.currentPlayedMsgId = widget.msgID;
-    }
-  }
+  // _playSound() async {
+  //   if (!SoundPlayer.isInited) {
+  //     SoundPlayer.initSoundPlayer();
+  //   }
+  //   if (widget.localCustomInt == null ||
+  //       widget.localCustomInt != HistoryMessageDartConstant.read) {
+  //     globalModel.setLocalCustomInt(widget.msgID,
+  //         HistoryMessageDartConstant.read, widget.chatModel.conversationID);
+  //   }
+  //   if (isPlaying) {
+  //     SoundPlayer.stop();
+  //     widget.chatModel.currentPlayedMsgId = "";
+  //   } else {
+  //     SoundPlayer.play(url: stateElement.url!);
+  //     widget.chatModel.currentPlayedMsgId = widget.msgID;
+  //   }
+  // }
 
   downloadMessageDetailAndSave() async {
     if (widget.message.msgID != null && widget.message.msgID != '') {
@@ -106,38 +107,38 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
     }
   }
 
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    setState(() {
-      isPlaying = widget.chatModel.currentPlayedMsgId != '' &&
-          widget.chatModel.currentPlayedMsgId == widget.msgID;
-    });
-  }
+  // @override
+  // void didUpdateWidget(oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   setState(() {
+  //     isPlaying = widget.chatModel.currentPlayedMsgId != '' &&
+  //         widget.chatModel.currentPlayedMsgId == widget.msgID;
+  //   });
+  // }
 
   @override
   void initState() {
     super.initState();
-
-    subscription =
-    SoundPlayer.playStateListener(listener: (PlayerState state) {
-      if(state.processingState == ProcessingState.completed){
-        widget.chatModel.currentPlayedMsgId = "";
-      }
-    });
+    //
+    // subscription =
+    // SoundPlayer.playStateListener(listener: (PlayerState state) {
+    //   if(state.processingState == ProcessingState.completed){
+    //     widget.chatModel.currentPlayedMsgId = "";
+    //   }
+    // });
 
     downloadMessageDetailAndSave();
   }
 
-  @override
-  void dispose() {
-    if (isPlaying) {
-      SoundPlayer.stop();
-      widget.chatModel.currentPlayedMsgId = "";
-    }
-    subscription?.cancel();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   if (isPlaying) {
+  //     SoundPlayer.stop();
+  //     widget.chatModel.currentPlayedMsgId = "";
+  //   }
+  //   subscription?.cancel();
+  //   super.dispose();
+  // }
 
   double _getSoundLen() {
     double soundLen = 32;
@@ -213,70 +214,169 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
         }
       }
     }
-    return GestureDetector(
-      onTap: () => _playSound(),
-      child: Container(
-        padding: widget.textPadding ?? const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isShowJumpState
-              ? const Color.fromRGBO(245, 166, 35, 1)
-              : (widget.backgroundColor ?? backgroundColor),
-          borderRadius: widget.borderRadius ?? borderRadius,
-        ),
-        constraints: const BoxConstraints(maxWidth: 240),
-        child: Column(
-          children: [
-            Row(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: widget.chatModel),
+      ],
+      builder: (BuildContext context, Widget? w) {
+        final chatModel = Provider.of<TUIChatSeparateViewModel>(context);
+        return InkWell(
+          onTap: () async {
+            final localUrl = widget.message.soundElem?.localUrl ?? '';
+            final url = widget.message.soundElem?.url ?? '';
+            if (localUrl.isNotEmpty) {
+              chatModel.playSound(
+                message: widget.message,
+                url: localUrl,
+                type: 'file',
+              );
+            } else if (url.isNotEmpty) {
+              chatModel.playSound(
+                message: widget.message,
+                url: url,
+                type: 'url',
+              );
+            } else {
+              final response = await _messageService.getMessageOnlineUrl(
+                msgID: widget.message.msgID!,
+              );
+              if (response.data != null) {
+                widget.message.soundElem = response.data!.soundElem;
+                if (widget.message.soundElem?.url?.isNotEmpty ?? false) {
+                  chatModel.playSound(
+                    message: widget.message,
+                    url: widget.message.soundElem?.url ?? '',
+                    type: 'url',
+                  );
+                }
+              }
+            }
+          },
+          child: Container(
+            padding: widget.textPadding ?? const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isShowJumpState
+                  ? const Color.fromRGBO(245, 166, 35, 1)
+                  : (widget.backgroundColor ?? backgroundColor),
+              borderRadius: widget.borderRadius ?? borderRadius,
+            ),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.55,
+            ),
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: widget.isFromSelf
                   ? [
-                      Container(width: _getSoundLen()),
-                      Text(
-                        "''${stateElement.duration} ",
-                        style: widget.fontStyle,
-                      ),
-                      isPlaying
-                          ? Image.asset(
-                              'images/play_voice_send.gif',
-                              package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
-                            )
-                          : Image.asset(
-                              'images/voice_send.png',
-                              package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
-                            ),
-                    ]
+                Container(width: _getSoundLen()),
+                Text(
+                  "''${stateElement.duration} ",
+                  style: widget.fontStyle,
+                ),
+                chatModel.isPlaying &&
+                    chatModel.currentPlayedMsgId == widget.msgID
+                    ? Image.asset(
+                  'images/play_voice_send.gif',
+                  package: 'tencent_cloud_chat_uikit',
+                  width: 16,
+                  height: 16,
+                )
+                    : Image.asset(
+                  'images/voice_send.png',
+                  package: 'tencent_cloud_chat_uikit',
+                  width: 16,
+                  height: 16,
+                ),
+              ]
                   : [
-                      isPlaying
-                          ? Image.asset(
-                              'images/play_voice_receive.gif',
-                              package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
-                            )
-                          : Image.asset(
-                              'images/voice_receive.png',
-                              width: 16,
-                              height: 16,
-                              package: 'tencent_cloud_chat_uikit',
-                            ),
-                      Text(
-                        " ${stateElement.duration}''",
-                        style: widget.fontStyle,
-                      ),
-                      Container(width: _getSoundLen()),
-                    ],
+                chatModel.isPlaying &&
+                    chatModel.currentPlayedMsgId == widget.msgID
+                    ? Image.asset(
+                  'images/play_voice_receive.gif',
+                  package: 'tencent_cloud_chat_uikit',
+                  width: 16,
+                  height: 16,
+                )
+                    : Image.asset(
+                  'images/voice_receive.png',
+                  width: 16,
+                  height: 16,
+                  package: 'tencent_cloud_chat_uikit',
+                ),
+                Text(
+                  " ${stateElement.duration}''",
+                  style: widget.fontStyle,
+                ),
+                Container(width: _getSoundLen()),
+              ],
             ),
-            if (widget.isShowMessageReaction ?? true)
-              TIMUIKitMessageReactionShowPanel(
-                message: widget.message,
-              )
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
+    // return GestureDetector(
+    //   onTap: () => _playSound(),
+    //   child: Container(
+    //     padding: widget.textPadding ?? const EdgeInsets.all(10),
+    //     decoration: BoxDecoration(
+    //       color: isShowJumpState
+    //           ? const Color.fromRGBO(245, 166, 35, 1)
+    //           : (widget.backgroundColor ?? backgroundColor),
+    //       borderRadius: widget.borderRadius ?? borderRadius,
+    //     ),
+    //     constraints: const BoxConstraints(maxWidth: 240),
+    //     child: Column(
+    //       children: [
+    //         Row(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: widget.isFromSelf
+    //               ? [
+    //                   Container(width: _getSoundLen()),
+    //                   Text(
+    //                     "''${stateElement.duration} ",
+    //                     style: widget.fontStyle,
+    //                   ),
+    //                   isPlaying
+    //                       ? Image.asset(
+    //                           'images/play_voice_send.gif',
+    //                           package: 'tencent_cloud_chat_uikit',
+    //                           width: 16,
+    //                           height: 16,
+    //                         )
+    //                       : Image.asset(
+    //                           'images/voice_send.png',
+    //                           package: 'tencent_cloud_chat_uikit',
+    //                           width: 16,
+    //                           height: 16,
+    //                         ),
+    //                 ]
+    //               : [
+    //                   isPlaying
+    //                       ? Image.asset(
+    //                           'images/play_voice_receive.gif',
+    //                           package: 'tencent_cloud_chat_uikit',
+    //                           width: 16,
+    //                           height: 16,
+    //                         )
+    //                       : Image.asset(
+    //                           'images/voice_receive.png',
+    //                           width: 16,
+    //                           height: 16,
+    //                           package: 'tencent_cloud_chat_uikit',
+    //                         ),
+    //                   Text(
+    //                     " ${stateElement.duration}''",
+    //                     style: widget.fontStyle,
+    //                   ),
+    //                   Container(width: _getSoundLen()),
+    //                 ],
+    //         ),
+    //         if (widget.isShowMessageReaction ?? true)
+    //           TIMUIKitMessageReactionShowPanel(
+    //             message: widget.message,
+    //           )
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }
