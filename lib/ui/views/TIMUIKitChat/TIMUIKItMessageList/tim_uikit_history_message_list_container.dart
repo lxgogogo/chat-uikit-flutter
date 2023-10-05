@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:tencent_cloud_chat_uikit/ui/theme/tim_uikit_message_theme.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/tim_uikit_text_field_controller.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
@@ -40,7 +41,7 @@ class TIMUIKitHistoryMessageListContainer extends StatefulWidget {
   final TIMUIKitInputTextFieldController? textFieldController;
 
   /// the builder for avatar
-  final Widget Function(BuildContext context, V2TimMessage message)?
+  final Widget? Function(BuildContext context, V2TimMessage message)?
       userAvatarBuilder;
 
   /// the builder for tongue
@@ -85,6 +86,18 @@ class TIMUIKitHistoryMessageListContainer extends StatefulWidget {
   /// If provided, the default message action functionality will appear in the right-click context menu instead.
   final Widget? Function(V2TimMessage message)? customMessageHoverBarOnDesktop;
 
+  final Function(String qrCode)? onIdentifyQrCode;
+
+  final Future<void> Function(V2TimMessage message)? onCloudDelete;
+
+  final MessageRewardListBuilder? rewardListBuilder;
+
+  final void Function(
+      V2TimMessage message,
+      dynamic heroTag,
+      V2TimVideoElem videoElement,
+      ) onVideoTap;
+
   const TIMUIKitHistoryMessageListContainer({
     Key? key,
     this.itemBuilder,
@@ -112,6 +125,10 @@ class TIMUIKitHistoryMessageListContainer extends StatefulWidget {
     this.onSecondaryTapAvatar,
     this.groupMemberInfo,
     this.customMessageHoverBarOnDesktop,
+    this.onIdentifyQrCode,
+    this.onCloudDelete,
+    this.rewardListBuilder,
+    required this.onVideoTap,
   }) : super(key: key);
 
   @override
@@ -173,6 +190,10 @@ class _TIMUIKitHistoryMessageListContainerState
           mainHistoryListConfig: widget.mainHistoryListConfig,
           itemBuilder: (context, message) {
             return TIMUIKitHistoryMessageListItem(
+                themeData: MessageThemeData(
+                  messageBackgroundColor: Colors.white,
+                  messageBackgroundColorFormMe: const Color(0xFFB2F417),
+                ),
                 customMessageHoverBarOnDesktop:
                     widget.customMessageHoverBarOnDesktop,
                 groupMemberInfo: widget.groupMemberInfo,
@@ -198,7 +219,12 @@ class _TIMUIKitHistoryMessageListContainerState
                 allowAtUserWhenReply: chatConfig.isAtWhenReply,
                 allowAvatarTap: chatConfig.isAllowClickAvatar,
                 allowLongPress: chatConfig.isAllowLongPressMessage,
-                isUseMessageReaction: chatConfig.isUseMessageReaction);
+                isUseMessageReaction: chatConfig.isUseMessageReaction,
+                onIdentifyQrCode: widget.onIdentifyQrCode,
+                onCloudDelete: widget.onCloudDelete,
+                rewardListBuilder: widget.rewardListBuilder,
+                onVideoTap: widget.onVideoTap,
+            );
           },
           tongueItemBuilder: widget.tongueItemBuilder,
           initFindingMsg: widget.initFindingMsg,
