@@ -294,7 +294,7 @@ class _TIMUIKitProfileState extends TIMUIKitState<TIMUIKitProfile> {
               switch (element) {
                 case ProfileWidgetEnum.userInfoCard:
                   return (customBuilder?.userInfoCard != null
-                      ? customBuilder?.userInfoCard!(userInfo.userProfile)
+                      ? customBuilder?.userInfoCard!(userInfo)
                       : TIMUIKitProfileUserInfoCard(
                           userInfo: userInfo.userProfile))!;
                 case ProfileWidgetEnum.addToBlockListBar:

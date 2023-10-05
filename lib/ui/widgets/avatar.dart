@@ -67,6 +67,7 @@ class Avatar extends TIMUIKitStatelessWidget {
       }
       return CachedNetworkImage(
         imageUrl: faceUrl,
+        fit: BoxFit.cover,
         fadeInDuration: const Duration(milliseconds: 0),
         errorWidget: (BuildContext context, String c, dynamic s) {
           return defaultAvatar();
@@ -142,7 +143,7 @@ class Avatar extends TIMUIKitStatelessWidget {
               child: ClipRRect(
                 borderRadius: borderRadius ??
                     selfInfoViewModel.globalConfig?.defaultAvatarBorderRadius ??
-                    BorderRadius.circular(4.8),
+                    BorderRadius.circular(32),
                 child: getImageWidget(context, theme),
               ),
             ),
@@ -151,7 +152,7 @@ class Avatar extends TIMUIKitStatelessWidget {
           ClipRRect(
             borderRadius: borderRadius ??
                 selfInfoViewModel.globalConfig?.defaultAvatarBorderRadius ??
-                BorderRadius.circular(4.8),
+                BorderRadius.circular(32),
             child: getImageWidget(context, theme),
           ),
         if (onlineStatus?.statusType != null && onlineStatus?.statusType != 0)

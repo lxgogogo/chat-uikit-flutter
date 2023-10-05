@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_chat_global_model.dart';
-
-
 import 'package:tencent_cloud_chat_uikit/data_services/group/group_services.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-
-
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
-
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 
 typedef GroupApplicationItemBuilder = Widget Function(
@@ -94,8 +89,8 @@ class TIMUIKitGroupApplicationListState
           Container(
             margin: const EdgeInsets.only(right: 12),
             child: SizedBox(
-              height: 40,
-              width: 40,
+              height: 40, // 36.w
+              width: 40, // 36.w
               child: Avatar(
                   faceUrl: applicationInfo.fromUserFaceUrl ?? "",
                   showName: applicationInfo.fromUserNickName ??
@@ -231,7 +226,9 @@ class TIMUIKitGroupApplicationListState
         final isDesktopScreen =
             TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
         return Container(
-          decoration: isDesktopScreen ? null : BoxDecoration(color: theme.weakBackgroundColor),
+          decoration: isDesktopScreen
+              ? null
+              : BoxDecoration(color: theme.weakBackgroundColor),
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: groupApplicationList.length,

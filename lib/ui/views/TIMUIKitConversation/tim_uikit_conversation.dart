@@ -5,6 +5,7 @@ import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_slidable_for_tencent_im/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/life_cycle/conversation_life_cycle.dart';
@@ -18,11 +19,12 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitConversation/tim_uikit_conversation_item.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/customize_ball_pulse_header.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 
 typedef ConversationItemBuilder = Widget Function(
     V2TimConversation conversationItem,
+    bool isShowDraft,
+    LastMessageBuilder? lastMessageBuilder,
     [V2TimUserStatus? onlineStatus]);
 
 typedef ConversationItemSlideBuilder = List<ConversationItemSlidePanel>
@@ -34,6 +36,8 @@ typedef ConversationItemSecondaryMenuBuilder = Widget Function(
 class TIMUIKitConversation extends StatefulWidget {
   /// the callback after clicking conversation item
   final ValueChanged<V2TimConversation>? onTapItem;
+
+  final ValueChanged<List<V2TimConversation?>>? markPrivateConv;
 
   /// conversation controller
   final TIMUIKitConversationController? controller;
@@ -66,20 +70,24 @@ class TIMUIKitConversation extends StatefulWidget {
   /// Control if shows the identifier that the conversation has a draft text, inputted in previous.
   final bool isShowDraft;
 
-  const TIMUIKitConversation(
-      {Key? key,
-      this.lifeCycle,
-      this.onTapItem,
-      this.controller,
-      this.itemSecondaryMenuBuilder,
-      this.itemBuilder,
-      this.isShowDraft = true,
-      this.itemSlideBuilder,
-      this.conversationCollector,
-      this.emptyBuilder,
-      this.lastMessageBuilder,
-      this.isShowOnlineStatus = true})
-      : super(key: key);
+  final List<String> filterIds;
+
+  const TIMUIKitConversation({
+    Key? key,
+    this.lifeCycle,
+    this.onTapItem,
+    this.controller,
+    this.itemBuilder,
+    this.isShowDraft = true,
+    this.itemSlideBuilder,
+    this.conversationCollector,
+    this.emptyBuilder,
+    this.lastMessageBuilder,
+    this.isShowOnlineStatus = true,
+    this.filterIds = const [],
+    this.markPrivateConv,
+    this.itemSecondaryMenuBuilder,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -355,7 +363,15 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
 
                       if (widget.itemBuilder != null) {
                         return widget.itemBuilder!(
-                            conversationItem!, onlineStatus);
+                          conversationItem!,
+                          widget.isShowDraft,
+                          widget.lastMessageBuilder,
+                          (widget.isShowOnlineStatus &&
+                                  conversationItem.userID != null &&
+                                  conversationItem.userID!.isNotEmpty)
+                              ? onlineStatus
+                              : null,
+                        );
                       }
 
                       final slideChildren =

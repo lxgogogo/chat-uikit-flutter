@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
+import 'package:tencent_cloud_chat_uikit/data_services/group/group_services.dart';
+import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/group_member_list.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
@@ -13,13 +15,16 @@ class DeleteGroupMemberPage extends StatefulWidget {
   final TUIGroupProfileModel model;
   final VoidCallback? onClose;
 
-  const DeleteGroupMemberPage({Key? key, required this.model, this.onClose}) : super(key: key);
+  const DeleteGroupMemberPage({Key? key, required this.model, this.onClose})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DeleteGroupMemberPageState();
 }
 
 class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
+  final GroupServices _groupServices = serviceLocator<GroupServices>();
+
   List<V2TimGroupMemberFullInfo> selectedGroupMember = [];
   List<V2TimGroupMemberFullInfo?>? searchMemberList;
 
@@ -29,10 +34,13 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
 
   handleSearchGroupMembers(String searchText, context) async {
     searchText = searchText;
-    List<V2TimGroupMemberFullInfo?> currentGroupMember = Provider.of<TUIGroupProfileModel>(context, listen: false).groupMemberList;
-    final res = await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
+    List<V2TimGroupMemberFullInfo?> currentGroupMember =
+        Provider.of<TUIGroupProfileModel>(context, listen: false)
+            .groupMemberList;
+    final res =
+        await widget.model.searchGroupMember(V2TimGroupMemberSearchParam(
       keywordList: [searchText],
-      groupIDList: [widget.model.groupInfo!.groupID],
+      groupIDList: [widget.model.groupID],
     ));
 
     if (res.code == 0) {
@@ -50,13 +58,22 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
     } else {
       currentGroupMember = [];
     }
+
+    selectedGroupMember.clear();
+
     setState(() {
-      searchMemberList = isSearchTextExist(searchText) ? currentGroupMember : null;
+      searchMemberList =
+          isSearchTextExist(searchText) ? currentGroupMember : null;
     });
   }
 
   handleRole(groupMemberList) {
-    return groupMemberList?.where((value) => value?.role == GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_MEMBER).toList() ?? [];
+    return groupMemberList
+            ?.where((value) =>
+                value?.role ==
+                GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_MEMBER)
+            .toList() ??
+        [];
   }
 
   void submitDelete() async {
@@ -68,6 +85,21 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
   }
 
   @override
+  void initState() {
+    searchMemberList = widget.model.groupMemberList;
+    super.initState();
+  }
+
+  Future<V2TimValueCallback<V2GroupMemberInfoSearchResult>> searchGroupMember(
+      V2TimGroupMemberSearchParam searchParam) async {
+    final res =
+        await _groupServices.searchGroupMembers(searchParam: searchParam);
+
+    if (res.code == 0) {}
+    return res;
+  }
+
+  @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final TUITheme theme = value.theme;
 
@@ -76,7 +108,8 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
         desktopWidget: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GroupProfileMemberList(
-            memberList: handleRole(searchMemberList ?? widget.model.groupMemberList),
+            memberList:
+                handleRole(searchMemberList ?? widget.model.groupMemberList),
             canSelectMember: true,
             canSlideDelete: false,
             onSelectedMemberChange: (selectedMember) {
@@ -109,7 +142,8 @@ class _DeleteGroupMemberPageState extends TIMUIKitState<DeleteGroupMemberPage> {
                   color: theme.appbarTextColor,
                 )),
             body: GroupProfileMemberList(
-              memberList: handleRole(searchMemberList ?? widget.model.groupMemberList),
+              memberList:
+                  handleRole(searchMemberList ?? widget.model.groupMemberList),
               canSelectMember: true,
               canSlideDelete: false,
               onSelectedMemberChange: (selectedMember) {

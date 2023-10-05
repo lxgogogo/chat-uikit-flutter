@@ -7,6 +7,7 @@ import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
+import 'package:tencent_cloud_chat_uikit/extensions/group_member_extension.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_add_group_member.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_delete_group_member.dart';
@@ -18,7 +19,10 @@ import 'package:tencent_im_base/tencent_im_base.dart';
 class GroupMemberTile extends TIMUIKitStatelessWidget {
   GroupMemberTile({
     Key? key,
+    this.addGroupMember,
   }) : super(key: key);
+
+  final Function(List<V2TimGroupMemberFullInfo?> memberList)? addGroupMember;
 
   List<V2TimGroupMemberFullInfo?> _getMemberList(memberList, int showRange) {
     if (memberList.length > showRange) {
@@ -36,10 +40,12 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
     return friendRemark != "" ? friendRemark : showName;
   }
 
-  List<Widget> _groupMemberListBuilder(List memberList, TUITheme theme, TUIGroupProfileModel model, int showRange) {
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor() == DeviceType.Desktop;
+  List<Widget> _groupMemberListBuilder(List memberList, TUITheme theme,
+      TUIGroupProfileModel model, int showRange) {
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor() == DeviceType.Desktop;
     return _getMemberList(memberList, showRange).map((element) {
-      final faceUrl = element?.faceUrl ?? "";
+      final faceUrl = element?.privateAvatar ?? "";
       final showName = _getShowName(element);
       return InkWell(
         onTapDown: (details) {
@@ -57,7 +63,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                 width: isDesktopScreen ? 36 : 50,
                 height: isDesktopScreen ? 36 : 50,
                 child: Avatar(
-                  borderRadius: isDesktopScreen ? BorderRadius.circular(18) : null,
+                  borderRadius:
+                      isDesktopScreen ? BorderRadius.circular(18) : null,
                   faceUrl: faceUrl,
                   showName: showName,
                   type: 1,
@@ -71,7 +78,10 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                 Text(
                   showName,
                   textAlign: TextAlign.center,
-                  style: TextStyle(overflow: TextOverflow.ellipsis, color: theme.weakTextColor, fontSize: 10),
+                  style: TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      color: theme.weakTextColor,
+                      fontSize: 10),
                 )
             ],
           ),
@@ -80,17 +90,21 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
     }).toList();
   }
 
-  List<Widget> _inviteMemberBuilder(bool isCanInviteMember, bool isCanKickOffMember, theme, BuildContext context) {
+  List<Widget> _inviteMemberBuilder(bool isCanInviteMember,
+      bool isCanKickOffMember, theme, BuildContext context) {
     return [];
   }
 
-  void navigateToMemberList(BuildContext context, TUIGroupProfileModel model, List<V2TimGroupMemberFullInfo?> memberList) {
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+  void navigateToMemberList(BuildContext context, TUIGroupProfileModel model,
+      List<V2TimGroupMemberFullInfo?> memberList) {
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     if (!isDesktopScreen) {
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => GroupProfileMemberListPage(model: model, memberList: memberList),
+            builder: (context) => GroupProfileMemberListPage(
+                model: model, memberList: memberList),
           ));
     } else {
       final option1 = memberList.length.toString();
@@ -99,15 +113,18 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
           context: context,
           width: MediaQuery.of(context).size.width * 0.5,
           height: MediaQuery.of(context).size.height * 0.8,
-          title: TIM_t_para("群成员({{option1}}人)", "群成员($option1人)")(option1: option1),
-          child: (onClose) => GroupProfileMemberListPage(model: model, memberList: memberList));
+          title: TIM_t_para("群成员({{option1}}人)", "群成员($option1人)")(
+              option1: option1),
+          child: (onClose) =>
+              GroupProfileMemberListPage(model: model, memberList: memberList));
     }
   }
 
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final TUITheme theme = value.theme;
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     final model = Provider.of<TUIGroupProfileModel>(context);
     final memberAmount = model.groupInfo?.memberCount ?? 0;
     final option1 = memberAmount.toString();
@@ -131,7 +148,13 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.only(bottom: 12),
-            decoration: isDesktopScreen ? null : BoxDecoration(border: Border(bottom: BorderSide(color: theme.weakDividerColor ?? CommonColor.weakDividerColor))),
+            decoration: isDesktopScreen
+                ? null
+                : BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                            color: theme.weakDividerColor ??
+                                CommonColor.weakDividerColor))),
             child: InkWell(
               onTap: () async {
                 navigateToMemberList(context, model, memberList);
@@ -139,12 +162,18 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(TIM_t("群成员"), style: TextStyle(color: theme.darkTextColor, fontSize: isDesktopScreen ? 14 : 16)),
+                  Text(TIM_t("群成员"),
+                      style: TextStyle(
+                          color: theme.darkTextColor,
+                          fontSize: isDesktopScreen ? 14 : 16)),
                   Row(
                     children: [
                       Text(
-                        TIM_t_para("{{option1}}人", "$option1人")(option1: option1),
-                        style: TextStyle(color: theme.darkTextColor, fontSize: isDesktopScreen ? 14 : 16),
+                        TIM_t_para("{{option1}}人", "$option1人")(
+                            option1: option1),
+                        style: TextStyle(
+                            color: theme.darkTextColor,
+                            fontSize: isDesktopScreen ? 14 : 16),
                       ),
                       Icon(
                         Icons.keyboard_arrow_right,
@@ -163,11 +192,15 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: theme.weakDividerColor ?? CommonColor.weakDividerColor),
+                  border: Border.all(
+                      width: 1,
+                      color: theme.weakDividerColor ??
+                          CommonColor.weakDividerColor),
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
                 ),
                 // height: 30,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -209,7 +242,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                             if (isDesktopScreen) {
                               TUIKitWidePopup.showPopupWindow(
                                   context: context,
-                                  operationKey: TUIKitWideModalOperationKey.addGroupMembers,
+                                  operationKey: TUIKitWideModalOperationKey
+                                      .addGroupMembers,
                                   width: 350,
                                   title: TIM_t("添加群成员"),
                                   height: 460,
@@ -222,6 +256,10 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                                         key: addGroupMemberKey,
                                       ));
                             } else {
+                              if (addGroupMember != null) {
+                                addGroupMember?.call(memberList);
+                                return;
+                              }
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -251,13 +289,15 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                           onPressed: () {
                             if (isDesktopScreen) {
                               TUIKitWidePopup.showPopupWindow(
-                                operationKey: TUIKitWideModalOperationKey.kickOffGroupMembers,
+                                operationKey: TUIKitWideModalOperationKey
+                                    .kickOffGroupMembers,
                                 context: context,
                                 width: 350,
                                 title: TIM_t("删除群成员"),
                                 height: 460,
                                 onSubmit: () {
-                                  deleteGroupMemberKey.currentState?.submitDelete();
+                                  deleteGroupMemberKey.currentState
+                                      ?.submitDelete();
                                 },
                                 child: (onClose) => DeleteGroupMemberPage(
                                   model: model,
@@ -269,7 +309,8 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DeleteGroupMemberPage(model: model),
+                                    builder: (context) =>
+                                        DeleteGroupMemberPage(model: model),
                                   ));
                             }
                           },
@@ -290,7 +331,9 @@ class GroupMemberTile extends TIMUIKitStatelessWidget {
                 margin: EdgeInsets.only(top: isDesktopScreen ? 12 : 16),
                 child: Text(
                   TIM_t("查看更多群成员"),
-                  style: TextStyle(color: theme.weakTextColor, fontSize: isDesktopScreen ? 12 : 14),
+                  style: TextStyle(
+                      color: theme.weakTextColor,
+                      fontSize: isDesktopScreen ? 12 : 14),
                 ),
               ),
               onTap: () async {

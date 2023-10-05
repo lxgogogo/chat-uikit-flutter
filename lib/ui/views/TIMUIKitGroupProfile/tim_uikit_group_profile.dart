@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/life_cycle/group_profile_life_cycle.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/listener_model/tui_group_listener_model.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_group_profile_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_member/tui_block_group_member.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/group_profile_widget.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_ui_group_profile_widget.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_uikit_group_button_area.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_uikit_group_manage.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_uikit_group_notification.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitGroupProfile/widgets/tim_uikit_group_shut_up.dart';
+
 export 'package:tencent_cloud_chat_uikit/ui/widgets/transimit_group_owner_select.dart';
 
 typedef GroupProfileBuilder = Widget Function(BuildContext context,
     V2TimGroupInfo groupInfo, List<V2TimGroupMemberFullInfo?> groupMemberList);
+
+typedef GroupProfileOnBlock = Function(
+    Function(V2TimGroupMemberFullInfo memberInfo)? onTapMemberItem);
 
 class TIMUIKitGroupProfile extends StatefulWidget {
   /// Group ID
@@ -61,10 +67,12 @@ class TIMUIKitGroupProfile extends StatefulWidget {
       {Key? key,
       required this.groupID,
       this.backGroundColor,
-      @Deprecated("[operationListBuilder] and [bottomOperationBuilder] merged into [builder], please use it instead")
-          this.bottomOperationBuilder,
-      @Deprecated("[operationListBuilder] and [bottomOperationBuilder] merged into [builder], please use it instead")
-          this.operationListBuilder,
+      @Deprecated(
+          "[operationListBuilder] and [bottomOperationBuilder] merged into [builder], please use it instead")
+      this.bottomOperationBuilder,
+      @Deprecated(
+          "[operationListBuilder] and [bottomOperationBuilder] merged into [builder], please use it instead")
+      this.operationListBuilder,
       this.builder,
       this.profileWidgetBuilder,
       this.onClickUser,
@@ -200,6 +208,26 @@ class _TIMUIKitGroupProfileState extends TIMUIKitState<TIMUIKitGroupProfile> {
                         )));
           }
 
+          void toDefaultShutUpPage() {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GroupProfileGroupShutUpPage(
+                          model: model,
+                        )));
+          }
+
+          void toDefaultBlockPage(
+              Function(V2TimGroupMemberFullInfo memberInfo)? onTapMemberItem) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => BlockGroupMemberPage(
+                          model: model,
+                          onTapMemberItem: onTapMemberItem,
+                        )));
+          }
+
           List<Widget> _renderWidgetsWithOrder(
               List<GroupProfileWidgetEnum> order) {
             final GroupProfileWidgetBuilder? customBuilder =
@@ -230,6 +258,22 @@ class _TIMUIKitGroupProfileState extends TIMUIKitState<TIMUIKitGroupProfile> {
                     return (customBuilder?.groupManage != null
                         ? customBuilder?.groupManage!(toDefaultManagePage)
                         : TIMUIKitGroupProfileWidget.groupManage())!;
+                  } else {
+                    return Container();
+                  }
+                case GroupProfileWidgetEnum.groupShutUp:
+                  if (isAdmin || isGroupOwner) {
+                    return (customBuilder?.groupShutUp != null
+                        ? customBuilder?.groupShutUp!(toDefaultShutUpPage)
+                        : TIMUIKitGroupProfileWidget.groupShutUp())!;
+                  } else {
+                    return Container();
+                  }
+                case GroupProfileWidgetEnum.groupBlock:
+                  if (isGroupOwner) {
+                    return (customBuilder?.groupBlock != null
+                        ? customBuilder?.groupBlock!(toDefaultBlockPage)
+                        : Container())!;
                   } else {
                     return Container();
                   }
