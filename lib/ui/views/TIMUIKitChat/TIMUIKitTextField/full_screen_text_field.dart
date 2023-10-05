@@ -19,7 +19,7 @@ class FullScreenTextField extends StatefulWidget {
     required this.textEditingController,
     required this.isUseDefaultEmoji,
     required this.customEmojiStickerList,
-    required this.chatModel,
+     this.chatModel,
   }) : super(key: key);
 
   final Function(String text) onChanged;
@@ -29,7 +29,7 @@ class FullScreenTextField extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isUseDefaultEmoji;
   final List<CustomEmojiFaceData> customEmojiStickerList;
-  final TUIChatSeparateViewModel chatModel;
+  final TUIChatSeparateViewModel? chatModel;
 
   @override
   State<FullScreenTextField> createState() => _FullScreenTextFieldState();
@@ -104,14 +104,14 @@ class _FullScreenTextFieldState extends State<FullScreenTextField> {
                       specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
                         isUseQQPackage: (widget
                             .chatModel
-                            .chatConfig
+                            ?.chatConfig
                             .stickerPanelConfig
                             ?.useTencentCloudChatStickerPackage ??
                             true) ||
                             widget.isUseDefaultEmoji,
                         isUseTencentCloudChatPackage: widget
                             .chatModel
-                            .chatConfig
+                            ?.chatConfig
                             .stickerPanelConfig
                             ?.useTencentCloudChatStickerPackage ??
                             true,

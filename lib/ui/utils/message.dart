@@ -26,7 +26,7 @@ class MessageUtils {
   }
 
   // 是否是群组TRTC信息
-  static isGroupCallingMessage(V2TimMessage message) {
+  static bool isGroupCallingMessage(V2TimMessage message) {
     final isGroup = message.groupID != null;
     final isCustomMessage =
         message.elemType == MessageElemType.V2TIM_ELEM_TYPE_CUSTOM;
