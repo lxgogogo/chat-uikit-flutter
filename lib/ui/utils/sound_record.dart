@@ -1,4 +1,5 @@
 import 'dart:async';
+
 // import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_plugin_record_plus/const/play_state.dart';
 import 'package:flutter_plugin_record_plus/const/response.dart';
@@ -25,12 +26,17 @@ class SoundPlayer {
     }
   }
 
-  static Future<void> play({required String url}) async {
+  /// custom 语音自动播放
+  static Future<void> play({required String url, required String type}) async {
     _audioPlayer.stop();
     if (_soundInterruptListener != null) {
       _soundInterruptListener!();
     }
-    await _audioPlayer.setUrl(url);
+    if (type == 'url') {
+      await _audioPlayer.setUrl(url);
+    }else{
+      await _audioPlayer.setFilePath(url);
+    }
     await _audioPlayer.play();
   }
 
@@ -44,9 +50,8 @@ class SoundPlayer {
   }
 
   static StreamSubscription<PlayerState> playStateListener(
-      {required void Function(PlayerState)? listener}) =>
+          {required void Function(PlayerState)? listener}) =>
       _audioPlayer.playerStateStream.listen(listener);
-
 
   static setSoundInterruptListener(SoundInterruptListener listener) {
     _soundInterruptListener = listener;

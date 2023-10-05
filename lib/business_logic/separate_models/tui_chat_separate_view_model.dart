@@ -327,7 +327,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       isPlaying = false;
       _currentPlayedMsgId = "";
     } else {
-      SoundPlayer.play(url: url/*, type: type*/);// todo 要测试一下类型不一致能不能播放
+      SoundPlayer.play(url: url, type: type);
       isPlaying = true;
       _currentPlayedMsgId = message.msgID ?? '';
       if (message.localCustomInt != HistoryMessageDartConstant.read) {
