@@ -2,9 +2,10 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_clipboard/image_clipboard.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,11 @@ import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_self_inf
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/message.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/message_reaction_emoji.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_select_emoji.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/tim_uikit_emoji_panel.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/emoji.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/extended_wrap/extended_wrap.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
@@ -58,8 +63,11 @@ class TIMUIKitMessageTooltip extends StatefulWidget {
 
   final bool iSUseDefaultHoverBar;
 
-  const TIMUIKitMessageTooltip(
-      {Key? key,
+  /// custom admin delete message
+  final Future<void> Function(V2TimMessage message)? onCloudDelete;
+
+  const TIMUIKitMessageTooltip({
+    Key? key,
       this.toolTipsConfig,
       this.isUseMessageReaction = true,
       required this.model,
@@ -71,8 +79,9 @@ class TIMUIKitMessageTooltip extends StatefulWidget {
       required this.onSelectSticker,
       this.isShowMoreSticker = false,
       this.groupMemberInfo,
-      required this.iSUseDefaultHoverBar})
-      : super(key: key);
+      required this.iSUseDefaultHoverBar,
+      this.onCloudDelete,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => TIMUIKitMessageTooltipState();
@@ -80,6 +89,10 @@ class TIMUIKitMessageTooltip extends StatefulWidget {
 
 class TIMUIKitMessageTooltipState
     extends TIMUIKitState<TIMUIKitMessageTooltip> {
+  late ValueNotifier<int> _tabIndexNotifier;
+
+  final List<Map<String, Object>> emojiData = messageReactionEmojiData;
+
   final TUIChatGlobalModel globalModal = serviceLocator<TUIChatGlobalModel>();
   final TUISelfInfoViewModel selfInfoViewModel =
       serviceLocator<TUISelfInfoViewModel>();
@@ -89,9 +102,16 @@ class TIMUIKitMessageTooltipState
 
   @override
   void initState() {
+    _tabIndexNotifier = ValueNotifier(0);
     super.initState();
     hasFile();
     isShowMoreSticker = widget.isShowMoreSticker;
+  }
+
+  @override
+  void dispose() {
+    _tabIndexNotifier.dispose();
+    super.dispose();
   }
 
   hasFile() {
@@ -195,17 +215,36 @@ class TIMUIKitMessageTooltipState
   }
 
   _buildLongPressTipItem(
-      TUITheme theme, TUIChatSeparateViewModel model, V2TimMessage message) {
+      TUITheme theme, TUIChatSeparateViewModel model) {
     final isDesktopScreen =
         TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     final isCanRevokeSelf = isRevocable(
         widget.message.timestamp!, model.chatConfig.upperRecallTime);
     final shouldShowRevokeAction = (isCanRevokeSelf || isAdminCanRecall()) &&
-        widget.message.status != MessageStatus.V2TIM_MSG_STATUS_SEND_FAIL;
+        widget.message.status != MessageStatus.V2TIM_MSG_STATUS_SEND_FAIL&&
+        !(widget.message.customElem?.data != null &&
+            (MessageUtils.isCallingData(widget.message.customElem!.data!) ||
+                MessageUtils.isNeedHideMessage(widget.message)));
+
     final shouldShowReplyAction = !(widget.message.customElem?.data != null &&
-        MessageUtils.isCallingData(widget.message.customElem!.data!));
+        (MessageUtils.isCallingData(widget.message.customElem!.data!) ||
+            MessageUtils.isNeedHideMessage(widget.message)));
+
     final shouldShowForwardAction = !(widget.message.customElem?.data != null &&
-        MessageUtils.isCallingData(widget.message.customElem!.data!));
+        (MessageUtils.isCallingData(widget.message.customElem!.data!) ||
+            MessageUtils.isNeedHideMessage(widget.message)));
+
+    final shouldShowMultiSelectAction =
+    !(widget.message.customElem?.data != null &&
+        MessageUtils.isNeedHideMessage(widget.message));
+
+    final shouldShowAdminDeleteAction =
+        widget.model.conversationType == ConvType.group &&
+            (widget.model.groupInfo?.role ==
+                GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_OWNER ||
+                widget.model.groupInfo?.role ==
+                    GroupMemberRoleType.V2TIM_GROUP_MEMBER_ROLE_ADMIN);
+
     final tooltipsConfig = widget.toolTipsConfig;
     final messageCanCopy = widget.message.elemType ==
             MessageElemType.V2TIM_ELEM_TYPE_TEXT ||
@@ -244,16 +283,22 @@ class TIMUIKitMessageTooltipState
             id: "replyMessage",
             iconImageAsset: "images/reply_message.png",
             onClick: () => _onTap("replyMessage", model)),
+      if (shouldShowMultiSelectAction)
+        MessageToolTipItem(
+            label: TIM_t("多选"),
+            id: "multiSelect",
+            iconImageAsset: "images/multi_message.png",
+            onClick: () => _onTap("multiSelect", model)),
       MessageToolTipItem(
-          label: TIM_t("多选"),
-          id: "multiSelect",
-          iconImageAsset: "images/multi_message.png",
-          onClick: () => _onTap("multiSelect", model)),
+          label: '${TIM_t("翻译")}-en',
+          id: "c_e_translate",
+          iconImageAsset: "images/translate_en.png",
+          onClick: () => _onTap("c_e_translate", model)),
       MessageToolTipItem(
-          label: TIM_t("翻译"),
-          id: "translate",
-          iconImageAsset: "images/translate.png",
-          onClick: () => _onTap("translate", model)),
+          label: '${TIM_t("翻译")}-zh',
+          id: "e_c_translate",
+          iconImageAsset: "images/translate_zh.png",
+          onClick: () => _onTap("e_c_translate", model)),
       MessageToolTipItem(
           label: TIM_t("删除"),
           id: "delete",
@@ -265,6 +310,12 @@ class TIMUIKitMessageTooltipState
             id: "revoke",
             iconImageAsset: "images/revoke_message.png",
             onClick: () => _onTap("revoke", model)),
+      if (shouldShowAdminDeleteAction)
+        MessageToolTipItem(
+            label: '${TIM_t("管理员")}${TIM_t("删除")}',
+            id: "cloud_delete",
+            iconImageAsset: "images/revoke_message.png",
+            onClick: () => _onTap("cloud_delete", model)),
     ];
     final defaultTipsIds = defaultTipsList.map((e) => e.id);
     List<MessageToolTipItem> defaultFormattedTipsList = defaultTipsList;
@@ -292,9 +343,12 @@ class TIMUIKitMessageTooltipState
         if (type == "revoke") {
           return tooltipsConfig.showRecallMessage;
         }
-        if (type == "translate") {
+        if (type == "c_e_translate" || type == "e_c_translate") {
           return tooltipsConfig.showTranslation &&
               widget.message.elemType == MessageElemType.V2TIM_ELEM_TYPE_TEXT;
+        }
+        if (type == "cloud_delete") {
+          return !MessageUtils.isHideCustomTooltip(widget.message);
         }
         return true;
       }).toList();
@@ -303,7 +357,7 @@ class TIMUIKitMessageTooltipState
     final List<MessageToolTipItem>? customList =
         widget.toolTipsConfig?.additionalMessageToolTips != null
             ? (widget.toolTipsConfig?.additionalMessageToolTips!(
-                message, widget.onCloseTooltip))
+            widget.message, widget.onCloseTooltip))
             : [];
 
     List<MessageToolTipItem> formattedTipsList = [
@@ -311,92 +365,137 @@ class TIMUIKitMessageTooltipState
       ...?customList,
     ];
 
-    List<dynamic> widgetList = [];
-    if (isDesktopScreen) {
-      widgetList = formattedTipsList
-          .map(
-            (item) => Material(
-              color: Colors.white,
-              child: InkWell(
-                onTap: () {
-                  item.onClick();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        item.iconImageAsset,
-                        package: defaultTipsIds.contains(item.id)
-                            ? 'tencent_cloud_chat_uikit'
-                            : null,
-                        width: 20,
-                        height: 20,
-                      ),
-                      const SizedBox(
-                        height: 4,
-                        width: 8,
-                      ),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          decoration: TextDecoration.none,
-                          color: theme.darkTextColor,
-                          fontSize: 12,
-                        ),
-                      )
-                    ],
+    return GridView.builder(
+      shrinkWrap: true,
+      itemCount: formattedTipsList.length,
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        childAspectRatio: 1.0,
+      ),
+      itemBuilder: (BuildContext context, int index) {
+        final item = formattedTipsList[index];
+        return InkWell(
+          onTap: () {
+            item.onClick();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Center(
+                  child: Image.asset(
+                    item.iconImageAsset,
+                    package: defaultTipsIds.contains(item.id)
+                        ? 'tencent_cloud_chat_uikit'
+                        : null,
+                    width: 20,
+                    height: 20,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
-          )
-          .toList();
-    } else {
-      widgetList = formattedTipsList
-          .map(
-            (item) => Material(
-              color: Colors.white,
-              child: ItemInkWell(
-                onTap: () {
-                  item.onClick();
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      item.iconImageAsset,
-                      package: defaultTipsIds.contains(item.id)
-                          ? 'tencent_cloud_chat_uikit'
-                          : null,
-                      width: 20,
-                      height: 20,
-                    ),
-                    const SizedBox(
-                      height: 4,
-                      width: 60,
-                    ),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        decoration: TextDecoration.none,
-                        color: theme.darkTextColor,
-                        fontSize: 10,
-                      ),
-                    )
-                  ],
+              Text(
+                item.label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
                 ),
-              ),
-            ),
-          )
-          .toList();
-    }
-    if (widgetList.isEmpty && widget.isUseMessageReaction == false) {
-      widget.onCloseTooltip();
-    }
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
+        );
+      },
+    );
+    // List<dynamic> widgetList = [];
+    // if (isDesktopScreen) {
+    //   widgetList = formattedTipsList
+    //       .map(
+    //         (item) => Material(
+    //           color: Colors.white,
+    //           child: InkWell(
+    //             onTap: () {
+    //               item.onClick();
+    //             },
+    //             child: Container(
+    //               padding: const EdgeInsets.all(6),
+    //               child: Row(
+    //                 mainAxisSize: MainAxisSize.min,
+    //                 children: [
+    //                   Image.asset(
+    //                     item.iconImageAsset,
+    //                     package: defaultTipsIds.contains(item.id)
+    //                         ? 'tencent_cloud_chat_uikit'
+    //                         : null,
+    //                     width: 20,
+    //                     height: 20,
+    //                   ),
+    //                   const SizedBox(
+    //                     height: 4,
+    //                     width: 8,
+    //                   ),
+    //                   Text(
+    //                     item.label,
+    //                     style: TextStyle(
+    //                       decoration: TextDecoration.none,
+    //                       color: theme.darkTextColor,
+    //                       fontSize: 12,
+    //                     ),
+    //                   )
+    //                 ],
+    //               ),
+    //             ),
+    //           ),
+    //         ),
+    //       )
+    //       .toList();
+    // } else {
+    //   widgetList = formattedTipsList
+    //       .map(
+    //         (item) => Material(
+    //           color: Colors.white,
+    //           child: ItemInkWell(
+    //             onTap: () {
+    //               item.onClick();
+    //             },
+    //             child: Column(
+    //               crossAxisAlignment: CrossAxisAlignment.center,
+    //               children: [
+    //                 Image.asset(
+    //                   item.iconImageAsset,
+    //                   package: defaultTipsIds.contains(item.id)
+    //                       ? 'tencent_cloud_chat_uikit'
+    //                       : null,
+    //                   width: 20,
+    //                   height: 20,
+    //                 ),
+    //                 const SizedBox(
+    //                   height: 4,
+    //                   width: 60,
+    //                 ),
+    //                 Text(
+    //                   item.label,
+    //                   style: TextStyle(
+    //                     decoration: TextDecoration.none,
+    //                     color: theme.darkTextColor,
+    //                     fontSize: 10,
+    //                   ),
+    //                 )
+    //               ],
+    //             ),
+    //           ),
+    //         ),
+    //       )
+    //       .toList();
+    // }
+    // if (widgetList.isEmpty && widget.isUseMessageReaction == false) {
+    //   widget.onCloseTooltip();
+    // }
 
-    return widgetList;
+    // return widgetList;
   }
 
   _onOpenDesktop(String path) {
@@ -471,15 +570,18 @@ class TIMUIKitMessageTooltipState
                 widget.message.timestamp!, model.chatConfig.upperRecallTime),
             messageItem.messageFromWeb);
         break;
-      case 'translate':
-        model.translateText(widget.message);
+      case 'c_e_translate':
+        model.translateText(widget.message, isEToC: true);
+        break;
+      case 'e_c_translate':
+        model.translateText(widget.message, isEToC: false);
         break;
       case "multiSelect":
         model.updateMultiSelectStatus(true);
         model.addToMultiSelectedMessageList(widget.message);
         break;
       case "forwardMessage":
-        model.addToMultiSelectedMessageList(widget.message);
+        model.addToSingleSelectedMessageList(widget.message);
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -523,6 +625,11 @@ class TIMUIKitMessageTooltipState
             !isAtWhenReply ? null : widget.message.sender,
             !isAtWhenReply ? null : widget.message.nickName);
         break;
+      case "cloud_delete":
+        if (widget.onCloudDelete != null) {
+          await widget.onCloudDelete?.call(widget.message);
+        }
+        break;
       default:
         onTIMCallback(TIMCallback(
             type: TIMCallbackType.INFO,
@@ -550,144 +657,308 @@ class TIMUIKitMessageTooltipState
             ? widget.toolTipsConfig!.additionalItemBuilder!(
                 widget.message, widget.onCloseTooltip, null, context)
             : null;
+
+        final bool messageFormMe = widget.message.isSelf ?? false;
+
+        final bool haveRocketMenuBuilder = widget.toolTipsConfig != null &&
+            widget.toolTipsConfig?.rocketMenuBuilder != null;
+        Widget? rocketMenuBuilder = haveRocketMenuBuilder
+            ? widget.toolTipsConfig!.rocketMenuBuilder!(
+            widget.message, widget.onCloseTooltip, null, context)
+            : null;
         final message = widget.message;
-        return Container(
-            decoration: isDesktopScreen
-                ? BoxDecoration(
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0xCCbebebe),
-                        offset: Offset(2, 2),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                    border: Border.all(
-                      width: 1,
-                      color: hexToColor("dee0e3"),
-                    ),
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  )
-                : null,
-            color: isDesktopScreen ? null : Colors.white,
-            padding: EdgeInsets.symmetric(
-                horizontal: 8, vertical: isDesktopScreen ? 8 : 4),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: min(MediaQuery.of(context).size.width * 0.75, 350),
-              ),
-              child: Column(
+
+        return ValueListenableBuilder<int>(
+            valueListenable: _tabIndexNotifier,
+            builder: (_, tabIndex, __) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if ((!isDesktopScreen || widget.isShowMoreSticker) &&
-                      widget.isUseMessageReaction &&
-                      widget.selectEmojiPanelPosition ==
-                          SelectEmojiPanelPosition.up)
-                    TIMUIKitMessageReactionEmojiSelectPanel(
-                      isShowMoreSticker: isShowMoreSticker,
-                      onSelect: (int value) => widget.onSelectSticker(value),
-                      onClickShowMore: (bool value) {
-                        setState(() {
-                          isShowMoreSticker = value;
-                        });
+                  Row(
+                    children: [
+                      'Message',
+                      'Emoji',
+                      if (rocketMenuBuilder != null) 'Rockets'
+                    ]
+                        .mapIndexed((index, text) => InkWell(
+                      onTap: () {
+                        _tabIndexNotifier.value = index;
                       },
-                    ),
-                  if (!isDesktopScreen &&
-                      widget.isUseMessageReaction &&
-                      widget.selectEmojiPanelPosition ==
-                          SelectEmojiPanelPosition.up &&
-                      isShowMoreSticker == false)
-                    Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: const Divider(
-                            thickness: 1,
-                            indent: 0,
-                            // endIndent: 10,
-                            color: Colors.black12)),
-                  if (isShowMoreSticker == false)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!isDesktopScreen && widget.isUseMessageReaction)
-                          Expanded(
-                              child: Wrap(
-                            direction: Axis.horizontal,
-                            alignment:
-                                TUIKitScreenUtils.getFormFactor(context) ==
-                                        DeviceType.Mobile
-                                    ? WrapAlignment.spaceBetween
-                                    : WrapAlignment.start,
-                            spacing: 4,
-                            runSpacing: 8,
-                            children: [
-                              ..._buildLongPressTipItem(theme, model, message),
-                              if (extraTipsActionItem != null)
-                                extraTipsActionItem
-                            ],
-                          )),
-                        if (!isDesktopScreen && !widget.isUseMessageReaction)
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: min(
-                                  MediaQuery.of(context).size.width * 0.75,
-                                  350),
-                            ),
-                            child: Wrap(
-                              direction: Axis.horizontal,
-                              alignment:
-                                  TUIKitScreenUtils.getFormFactor(context) ==
-                                          DeviceType.Mobile
-                                      ? WrapAlignment.spaceBetween
-                                      : WrapAlignment.start,
-                              spacing: 4,
-                              runSpacing: 8,
-                              children: [
-                                ..._buildLongPressTipItem(
-                                    theme, model, message),
-                                if (extraTipsActionItem != null)
-                                  extraTipsActionItem
-                              ],
-                            ),
-                          ),
-                        if (isDesktopScreen)
-                          Table(columnWidths: const <int, TableColumnWidth>{
-                            0: IntrinsicColumnWidth(),
-                          }, children: <TableRow>[
-                            ..._buildLongPressTipItem(theme, model, message)
-                                .map((e) => TableRow(children: <Widget>[e]))
-                          ])
-                      ],
-                    ),
-                  if (!isDesktopScreen &&
-                      widget.isUseMessageReaction &&
-                      widget.selectEmojiPanelPosition ==
-                          SelectEmojiPanelPosition.down &&
-                      isShowMoreSticker == false)
-                    Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: const Divider(
-                            thickness: 1,
-                            indent: 0,
-                            // endIndent: 10,
-                            color: Colors.black12)),
-                  if ((!isDesktopScreen || widget.isShowMoreSticker) &&
-                      widget.isUseMessageReaction &&
-                      widget.selectEmojiPanelPosition ==
-                          SelectEmojiPanelPosition.down)
-                    TIMUIKitMessageReactionEmojiSelectPanel(
-                      isShowMoreSticker: isShowMoreSticker,
-                      onSelect: (int value) => widget.onSelectSticker(value),
-                      onClickShowMore: (bool value) {
-                        setState(() {
-                          isShowMoreSticker = value;
-                        });
-                      },
-                    ),
+                      child: _ItemTabBar(
+                        theme: theme,
+                        text: text,
+                        isSelected: tabIndex == index,
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                  if (tabIndex == 0)
+                    _buildMessageBody(theme, context, model)
+                  else if (tabIndex == 1)
+                    _buildEmojiBody()
+                  else
+                    rocketMenuBuilder ?? const SizedBox(),
                 ],
-              ),
-            ));
+              );
+            });
+        // return Container(
+        //     decoration: isDesktopScreen
+        //         ? BoxDecoration(
+        //             boxShadow: const [
+        //               BoxShadow(
+        //                 color: Color(0xCCbebebe),
+        //                 offset: Offset(2, 2),
+        //                 blurRadius: 10,
+        //                 spreadRadius: 1,
+        //               ),
+        //             ],
+        //             border: Border.all(
+        //               width: 1,
+        //               color: hexToColor("dee0e3"),
+        //             ),
+        //             color: Colors.white,
+        //             borderRadius: const BorderRadius.all(Radius.circular(10)),
+        //           )
+        //         : null,
+        //     color: isDesktopScreen ? null : Colors.white,
+        //     padding: EdgeInsets.symmetric(
+        //         horizontal: 8, vertical: isDesktopScreen ? 8 : 4),
+        //     child: ConstrainedBox(
+        //       constraints: BoxConstraints(
+        //         maxWidth: min(MediaQuery.of(context).size.width * 0.75, 350),
+        //       ),
+        //       child: Column(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           if ((!isDesktopScreen || widget.isShowMoreSticker) &&
+        //               widget.isUseMessageReaction &&
+        //               widget.selectEmojiPanelPosition ==
+        //                   SelectEmojiPanelPosition.up)
+        //             TIMUIKitMessageReactionEmojiSelectPanel(
+        //               isShowMoreSticker: isShowMoreSticker,
+        //               onSelect: (int value) => widget.onSelectSticker(value),
+        //               onClickShowMore: (bool value) {
+        //                 setState(() {
+        //                   isShowMoreSticker = value;
+        //                 });
+        //               },
+        //             ),
+        //           if (!isDesktopScreen &&
+        //               widget.isUseMessageReaction &&
+        //               widget.selectEmojiPanelPosition ==
+        //                   SelectEmojiPanelPosition.up &&
+        //               isShowMoreSticker == false)
+        //             Container(
+        //                 margin: const EdgeInsets.symmetric(vertical: 6),
+        //                 child: const Divider(
+        //                     thickness: 1,
+        //                     indent: 0,
+        //                     // endIndent: 10,
+        //                     color: Colors.black12)),
+        //           if (isShowMoreSticker == false)
+        //             Row(
+        //               mainAxisSize: MainAxisSize.min,
+        //               children: [
+        //                 if (!isDesktopScreen && widget.isUseMessageReaction)
+        //                   Expanded(
+        //                       child: Wrap(
+        //                     direction: Axis.horizontal,
+        //                     alignment:
+        //                         TUIKitScreenUtils.getFormFactor(context) ==
+        //                                 DeviceType.Mobile
+        //                             ? WrapAlignment.spaceBetween
+        //                             : WrapAlignment.start,
+        //                     spacing: 4,
+        //                     runSpacing: 8,
+        //                     children: [
+        //                       ..._buildLongPressTipItem(theme, model, message),
+        //                       if (extraTipsActionItem != null)
+        //                         extraTipsActionItem
+        //                     ],
+        //                   )),
+        //                 if (!isDesktopScreen && !widget.isUseMessageReaction)
+        //                   ConstrainedBox(
+        //                     constraints: BoxConstraints(
+        //                       maxWidth: min(
+        //                           MediaQuery.of(context).size.width * 0.75,
+        //                           350),
+        //                     ),
+        //                     child: Wrap(
+        //                       direction: Axis.horizontal,
+        //                       alignment:
+        //                           TUIKitScreenUtils.getFormFactor(context) ==
+        //                                   DeviceType.Mobile
+        //                               ? WrapAlignment.spaceBetween
+        //                               : WrapAlignment.start,
+        //                       spacing: 4,
+        //                       runSpacing: 8,
+        //                       children: [
+        //                         ..._buildLongPressTipItem(
+        //                             theme, model, message),
+        //                         if (extraTipsActionItem != null)
+        //                           extraTipsActionItem
+        //                       ],
+        //                     ),
+        //                   ),
+        //                 if (isDesktopScreen)
+        //                   Table(columnWidths: const <int, TableColumnWidth>{
+        //                     0: IntrinsicColumnWidth(),
+        //                   }, children: <TableRow>[
+        //                     ..._buildLongPressTipItem(theme, model, message)
+        //                         .map((e) => TableRow(children: <Widget>[e]))
+        //                   ])
+        //               ],
+        //             ),
+        //           if (!isDesktopScreen &&
+        //               widget.isUseMessageReaction &&
+        //               widget.selectEmojiPanelPosition ==
+        //                   SelectEmojiPanelPosition.down &&
+        //               isShowMoreSticker == false)
+        //             Container(
+        //                 margin: const EdgeInsets.symmetric(vertical: 6),
+        //                 child: const Divider(
+        //                     thickness: 1,
+        //                     indent: 0,
+        //                     // endIndent: 10,
+        //                     color: Colors.black12)),
+        //           if ((!isDesktopScreen || widget.isShowMoreSticker) &&
+        //               widget.isUseMessageReaction &&
+        //               widget.selectEmojiPanelPosition ==
+        //                   SelectEmojiPanelPosition.down)
+        //             TIMUIKitMessageReactionEmojiSelectPanel(
+        //               isShowMoreSticker: isShowMoreSticker,
+        //               onSelect: (int value) => widget.onSelectSticker(value),
+        //               onClickShowMore: (bool value) {
+        //                 setState(() {
+        //                   isShowMoreSticker = value;
+        //                 });
+        //               },
+        //             ),
+        //         ],
+        //       ),
+        //     ));
       },
+    );
+  }
+
+  Widget _buildMessageBody(
+      TUITheme theme,
+      BuildContext context,
+      TUIChatSeparateViewModel model,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.w),
+          decoration: BoxDecoration(
+            border: Border.symmetric(
+              horizontal: BorderSide(
+                color: Colors.white.withOpacity(0.2),
+              ),
+            ),
+          ),
+          child: ExtendedWrap(
+            maxLines: 1,
+            spacing: 16,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 0,
+            children: [
+              ...emojiData.map(
+                    (e) {
+                  var item = Emoji.fromJson(e);
+                  return InkWell(
+                    onTap: () {
+                      widget.onSelectSticker(item.unicode);
+                    },
+                    child: EmojiItem(
+                      name: item.name,
+                      unicode: item.unicode,
+                    ),
+                  );
+                },
+              ).toList()
+            ],
+          ),
+        ),
+        _buildLongPressTipItem(theme, model),
+      ],
+    );
+  }
+
+  Widget _buildEmojiBody() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.w),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withOpacity(0.2),
+          ),
+        ),
+      ),
+      child: ExtendedWrap(
+        maxLines: 5,
+        spacing: 16,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 8,
+        children: [
+          ...emojiData.map(
+                (e) {
+              var item = Emoji.fromJson(e);
+              return InkWell(
+                splashColor: Colors.white,
+                onTap: () {
+                  widget.onSelectSticker(item.unicode);
+                },
+                child: EmojiItem(
+                  name: item.name,
+                  unicode: item.unicode,
+                ),
+              );
+            },
+          ).toList()
+        ],
+      ),
+    );
+  }
+}
+
+class _ItemTabBar extends StatelessWidget {
+  const _ItemTabBar({
+    Key? key,
+    required this.theme,
+    required this.text,
+    this.isSelected = false,
+  }) : super(key: key);
+
+  final TUITheme theme;
+  final String text;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isSelected ? Colors.white : Colors.transparent,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.w),
+        child: Text(
+          text,
+          style: TextStyle(
+            color:
+            isSelected ? const Color(0xffB2F417) : const Color(0xff808080),
+            fontSize: 14.w,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w400,
+          ),
+        ),
+      ),
     );
   }
 }
