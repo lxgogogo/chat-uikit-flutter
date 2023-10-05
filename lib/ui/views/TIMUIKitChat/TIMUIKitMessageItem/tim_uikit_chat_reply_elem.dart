@@ -38,6 +38,12 @@ class TIMUIKitReplyElem extends StatefulWidget {
   final bool? isShowMessageReaction;
   final bool isUseDefaultEmoji;
   final List<CustomEmojiFaceData> customEmojiStickerList;
+  final Function(String qrCode)? onIdentifyQrCode;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
   const TIMUIKitReplyElem({
     Key? key,
@@ -53,6 +59,8 @@ class TIMUIKitReplyElem extends StatefulWidget {
     this.isUseDefaultEmoji = false,
     this.customEmojiStickerList = const [],
     required this.chatModel,
+    this.onIdentifyQrCode,
+    required this.onVideoTap,
   }) : super(key: key);
 
   @override
@@ -196,6 +204,18 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
     }
     switch (messageType) {
       case MessageElemType.V2TIM_ELEM_TYPE_CUSTOM:
+        ////////////////// 自定义视频消息兼容 begin //////////////////
+        if (message.customElem?.extension ==
+            '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
+          return TIMUIKitVideoElem(
+            message,
+            chatModel: widget.chatModel,
+            isFrom: "reply",
+            isShowMessageReaction: false,
+            onVideoTap: widget.onVideoTap,
+          );
+        }
+        ////////////////// 自定义视频消息兼容 end //////////////////
         return _defaultRawMessageText(TIM_t("[自定义]"), theme);
       case MessageElemType.V2TIM_ELEM_TYPE_SOUND:
         return _defaultRawMessageText(TIM_t("[语音消息]"), theme);
@@ -220,26 +240,34 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
             isShowJump: false);
       case MessageElemType.V2TIM_ELEM_TYPE_IMAGE:
         return TIMUIKitImageElem(
-            chatModel: widget.chatModel,
-            message: message,
-            isFrom: "reply",
-            isShowMessageReaction: false);
+          chatModel: widget.chatModel,
+          message: message,
+          isFrom: "reply",
+          isShowMessageReaction: false,
+          onIdentifyQrCode: widget.onIdentifyQrCode,
+        );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
-        return TIMUIKitVideoElem(message,
-            chatModel: widget.chatModel,
-            isFrom: "reply",
-            isShowMessageReaction: false);
+        return TIMUIKitVideoElem(
+          message,
+          chatModel: widget.chatModel,
+          isFrom: "reply",
+          isShowMessageReaction: false,
+          onVideoTap: widget.onVideoTap,
+        );
       case MessageElemType.V2TIM_ELEM_TYPE_LOCATION:
         return _defaultRawMessageText(TIM_t("[位置]"), theme);
       case MessageElemType.V2TIM_ELEM_TYPE_MERGER:
         return TIMUIKitMergerElem(
-            model: widget.chatModel,
-            isShowJump: false,
-            isShowMessageReaction: false,
-            message: message,
-            mergerElem: message.mergerElem!,
-            messageID: message.msgID ?? "",
-            isSelf: isSelf);
+          model: widget.chatModel,
+          isShowJump: false,
+          isShowMessageReaction: false,
+          message: message,
+          mergerElem: message.mergerElem!,
+          messageID: message.msgID ?? "",
+          isSelf: isSelf,
+          onIdentifyQrCode: widget.onIdentifyQrCode,
+          onVideoTap: widget.onVideoTap,
+        );
       default:
         return _renderMessageSummary(theme);
     }
@@ -377,92 +405,178 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
         customEmojiStickerList: widget.customEmojiStickerList,
         isEnableTextSelection:
             widget.chatModel.chatConfig.isEnableTextSelection ?? false);
-    return Container(
-      padding: widget.textPadding ?? EdgeInsets.all(isDesktopScreen ? 12 : 10),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: widget.borderRadius ?? borderRadius,
-      ),
-      constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
-      child: GestureDetector(
-        onTap: _jumpToRawMsg,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              // 这里是引用的部分
-              padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-              constraints: const BoxConstraints(minWidth: 120),
+    return Column(
+      crossAxisAlignment:
+      isFromSelf ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: widget.textPadding ?? const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: widget.borderRadius ?? borderRadius,
+          ),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.55,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // If the [elemType] is text message, it will not be null here.
+              // You can render the widget from extension directly, with a [TextStyle] optionally.
+              widget.chatModel.chatConfig.urlPreviewType != UrlPreviewType.none
+                  ? textWithLink!(
+                  style: widget.fontStyle ??
+                      TextStyle(
+                        fontSize: 16,
+                        textBaseline: TextBaseline.ideographic,
+                        height: widget.chatModel.chatConfig.textHeight,
+                      ))
+                  : ExtendedText(widget.message.textElem?.text ?? "",
+                  softWrap: true,
+                  style: widget.fontStyle ??
+                      TextStyle(
+                        fontSize: 16,
+                        height: widget.chatModel.chatConfig.textHeight,
+                      ),
+                  specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
+                    showAtBackground: true,
+                  )),
+            ],
+          ),
+        ),
+        SizedBox(height: 8.w),
+        GestureDetector(
+          onTap: _jumpToRawMsg,
+          child: Container(
+            padding: EdgeInsets.only(left: 4.w),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+              color: Color(0xffD7D7D7),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
               decoration: const BoxDecoration(
-                  color: Color.fromRGBO(68, 68, 68, 0.05),
-                  border: Border(
-                      left: BorderSide(
-                          color: Color.fromRGBO(68, 68, 68, 0.1), width: 2))),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    repliedMessage != null
-                        ? "${repliedMessage!.messageSender}:"
-                        : "",
-                    style: TextStyle(
+                color: Color(0xffEDEDED),
+                borderRadius:
+                BorderRadius.horizontal(right: Radius.circular(5)),
+              ),
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.6),
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 120),
+                decoration: BoxDecoration(
+                  color: theme.weakBackgroundColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      repliedMessage != null
+                          ? "${repliedMessage!.messageSender.length > 10 ? repliedMessage!.messageSender.substring(0, 10) : repliedMessage!.messageSender}:"
+                          : "",
+                      style: TextStyle(
                         fontSize: 12,
                         color: theme.weakTextColor,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  _rawMessageBuilder(rawMessage, theme)
-                ],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 4.w),
+                    _rawMessageBuilder(rawMessage, theme),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(
-              height: 12,
-            ),
-            // If the [elemType] is text message, it will not be null here.
-            // You can render the widget from extension directly, with a [TextStyle] optionally.
-            widget.chatModel.chatConfig.urlPreviewType != UrlPreviewType.none
-                ? textWithLink!(
-                    style: widget.fontStyle ??
-                        TextStyle(
-                            fontSize: isDesktopScreen ? 14 : 16,
-                            textBaseline: TextBaseline.ideographic,
-                            height: widget.chatModel.chatConfig.textHeight))
-                : ExtendedText(widget.message.textElem?.text ?? "",
-                    softWrap: true,
-                    style: widget.fontStyle ??
-                        TextStyle(
-                            fontSize: isDesktopScreen ? 14 : 16,
-                            height: widget.chatModel.chatConfig.textHeight),
-                    specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
-                      isUseQQPackage: (widget
-                                  .chatModel
-                                  .chatConfig
-                                  .stickerPanelConfig
-                                  ?.useTencentCloudChatStickerPackage ??
-                              true) ||
-                          widget.isUseDefaultEmoji,
-                      isUseTencentCloudChatPackage: widget
-                              .chatModel
-                              .chatConfig
-                              .stickerPanelConfig
-                              ?.useTencentCloudChatStickerPackage ??
-                          true,
-                      customEmojiStickerList: widget.customEmojiStickerList,
-                      showAtBackground: true,
-                    )),
-            // If the link preview info is available, render the preview card.
-            if (_renderPreviewWidget() != null &&
-                widget.chatModel.chatConfig.urlPreviewType ==
-                    UrlPreviewType.previewCardAndHyperlink)
-              _renderPreviewWidget()!,
-            if (widget.isShowMessageReaction ?? true)
-              TIMUIKitMessageReactionShowPanel(message: widget.message)
-          ],
+          ),
         ),
-      ),
+      ],
     );
+    // return Container(
+    //   padding: widget.textPadding ?? EdgeInsets.all(isDesktopScreen ? 12 : 10),
+    //   decoration: BoxDecoration(
+    //     color: backgroundColor,
+    //     borderRadius: widget.borderRadius ?? borderRadius,
+    //   ),
+    //   constraints:
+    //       BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
+    //   child: GestureDetector(
+    //     onTap: _jumpToRawMsg,
+    //     child: Column(
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         Container(
+    //           // 这里是引用的部分
+    //           padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+    //           constraints: const BoxConstraints(minWidth: 120),
+    //           decoration: const BoxDecoration(
+    //               color: Color.fromRGBO(68, 68, 68, 0.05),
+    //               border: Border(
+    //                   left: BorderSide(
+    //                       color: Color.fromRGBO(68, 68, 68, 0.1), width: 2))),
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Text(
+    //                 repliedMessage != null
+    //                     ? "${repliedMessage!.messageSender}:"
+    //                     : "",
+    //                 style: TextStyle(
+    //                     fontSize: 12,
+    //                     color: theme.weakTextColor,
+    //                     fontWeight: FontWeight.w500),
+    //               ),
+    //               const SizedBox(
+    //                 height: 4,
+    //               ),
+    //               _rawMessageBuilder(rawMessage, theme)
+    //             ],
+    //           ),
+    //         ),
+    //         const SizedBox(
+    //           height: 12,
+    //         ),
+    //         // If the [elemType] is text message, it will not be null here.
+    //         // You can render the widget from extension directly, with a [TextStyle] optionally.
+    //         widget.chatModel.chatConfig.urlPreviewType != UrlPreviewType.none
+    //             ? textWithLink!(
+    //                 style: widget.fontStyle ??
+    //                     TextStyle(
+    //                         fontSize: isDesktopScreen ? 14 : 16,
+    //                         textBaseline: TextBaseline.ideographic,
+    //                         height: widget.chatModel.chatConfig.textHeight))
+    //             : ExtendedText(widget.message.textElem?.text ?? "",
+    //                 softWrap: true,
+    //                 style: widget.fontStyle ??
+    //                     TextStyle(
+    //                         fontSize: isDesktopScreen ? 14 : 16,
+    //                         height: widget.chatModel.chatConfig.textHeight),
+    //                 specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
+    //                   isUseQQPackage: (widget
+    //                               .chatModel
+    //                               .chatConfig
+    //                               .stickerPanelConfig
+    //                               ?.useTencentCloudChatStickerPackage ??
+    //                           true) ||
+    //                       widget.isUseDefaultEmoji,
+    //                   isUseTencentCloudChatPackage: widget
+    //                           .chatModel
+    //                           .chatConfig
+    //                           .stickerPanelConfig
+    //                           ?.useTencentCloudChatStickerPackage ??
+    //                       true,
+    //                   customEmojiStickerList: widget.customEmojiStickerList,
+    //                   showAtBackground: true,
+    //                 )),
+    //         // If the link preview info is available, render the preview card.
+    //         if (_renderPreviewWidget() != null &&
+    //             widget.chatModel.chatConfig.urlPreviewType ==
+    //                 UrlPreviewType.previewCardAndHyperlink)
+    //           _renderPreviewWidget()!,
+    //         if (widget.isShowMessageReaction ?? true)
+    //           TIMUIKitMessageReactionShowPanel(message: widget.message)
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }
