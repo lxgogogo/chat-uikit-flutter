@@ -45,6 +45,12 @@ class MorePanelConfig {
   // 发送视频之前的操作：目前针对自定义上传 url
   final Future<String> Function(String videoFilePath)? beforeSendVideoMsg;
 
+  // 自定义视频发送逻辑
+  final Future<void> Function(
+      AssetEntity asset,
+      TUIChatSeparateViewModel model,
+      )? cusSendVideoMsg;
+
   MorePanelConfig({
     this.showFilePickAction = true,
     this.showGalleryPickAction = true,
@@ -56,6 +62,7 @@ class MorePanelConfig {
     this.extraAction,
     this.actionBuilder,
     this.beforeSendVideoMsg,
+    this.cusSendVideoMsg,
   });
 }
 
@@ -321,6 +328,15 @@ class _MorePanelState extends TIMUIKitState<MorePanel> {
   }
 
   _sendVideoMessage(AssetEntity asset, TUIChatSeparateViewModel model) async {
+    ////////////////// 自定义视频消息兼容 begin //////////////////
+    if (widget.morePanelConfig?.cusSendVideoMsg != null) {
+      widget.morePanelConfig?.cusSendVideoMsg?.call(
+        asset,
+        model,
+      );
+      return;
+    }
+    ////////////////// 自定义视频消息兼容 end //////////////////
     final plugin = FcNativeVideoThumbnail();
     final originFile = await asset.originFile;
     final size = await originFile!.length();
