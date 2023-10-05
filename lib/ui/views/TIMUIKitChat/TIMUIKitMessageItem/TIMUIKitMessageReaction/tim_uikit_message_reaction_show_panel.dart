@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_chat_global_model.dart';
@@ -9,19 +13,129 @@ import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_detail.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_item.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_show_item.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/tim_uikit_cloud_custom_data.dart';
 
-class TIMUIKitMessageReactionShowPanel extends TIMUIKitStatelessWidget {
+class TIMUIKitMessageReactionShowPanel extends StatefulWidget {
   /// current message
   final V2TimMessage message;
 
-  TIMUIKitMessageReactionShowPanel({required this.message, Key? key})
-      : super(key: key);
+  final MessageRewardListBuilder? rewardListBuilder;
 
+  const TIMUIKitMessageReactionShowPanel({
+    Key? key,
+    required this.message,
+    this.rewardListBuilder,
+  }) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() =>
+      _TIMUIKitMessageReactionShowPanelState();
+}
+
+class _TIMUIKitMessageReactionShowPanelState
+    extends TIMUIKitState<TIMUIKitMessageReactionShowPanel> {
   final TUISelfInfoViewModel selfInfoModel =
-      serviceLocator<TUISelfInfoViewModel>();
+  serviceLocator<TUISelfInfoViewModel>();
+
+  bool isShowJumpState = false;
+  bool isShining = false;
+
+  @override
+  Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
+    final TUIChatSeparateViewModel model =
+    Provider.of<TUIChatSeparateViewModel>(context);
+
+    CloudCustomData messageCloudCustomData =
+    MessageReactionUtils.getCloudCustomData(widget.message);
+
+    ///打赏的
+    Map<String, dynamic> messageReward = {};
+    if (messageCloudCustomData.messageReward != null &&
+        messageCloudCustomData.messageReward!.isNotEmpty) {
+      messageReward = messageCloudCustomData.messageReward!;
+    }
+
+    ///点赞的
+    Map<String, dynamic> messageReaction = {};
+    if (messageCloudCustomData.messageReaction != null &&
+        messageCloudCustomData.messageReaction!.isNotEmpty) {
+      messageReaction = messageCloudCustomData.messageReaction!;
+    }
+
+    final List<int> messageReactionStickerList = [];
+
+    messageReaction.forEach((key, value) {
+      messageReactionStickerList.add(int.parse(key));
+    });
+
+    final filteredMessageReactionStickerList =
+    messageReactionStickerList.where((sticker) {
+      if (messageReaction[sticker.toString()] == null ||
+          messageReaction[sticker.toString()] is! List ||
+          messageReaction[sticker.toString()].length == 0) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    final ConvType convType = model.conversationType ?? ConvType.c2c;
+    List<V2TimGroupMemberFullInfo?> memberList = [];
+    if (convType == ConvType.group) {
+      memberList = model.groupMemberList ?? [];
+    } else {
+      final V2TimGroupMemberFullInfo selfInfo = V2TimGroupMemberFullInfo(
+        userID: selfInfoModel.loginInfo?.userID ?? "",
+        nickName: selfInfoModel.loginInfo?.nickName,
+        faceUrl: selfInfoModel.loginInfo?.faceUrl,
+      );
+
+      final V2TimGroupMemberFullInfo targetInfo = V2TimGroupMemberFullInfo(
+        userID: model.conversationID,
+      );
+      memberList = [selfInfo, model.currentChatUserInfo ?? targetInfo];
+    }
+
+    return messageReward.isNotEmpty ||
+        filteredMessageReactionStickerList.isNotEmpty
+        ? Container(
+      margin: EdgeInsets.only(top: 4.w),
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.6,
+      ),
+      child: Wrap(
+        spacing: 8.w,
+        runSpacing: (!PlatformUtils().isIOS) ? 12.w : 8.w,
+        children: [
+          if (widget.rewardListBuilder != null)
+            ...widget.rewardListBuilder!(
+              widget.message,
+              messageCloudCustomData.messageReward,
+            ),
+          if (filteredMessageReactionStickerList.isNotEmpty)
+            ...filteredMessageReactionStickerList.map((sticker) {
+              return TIMUIKitMessageReactionItem(
+                  memberList: memberList,
+                  message: widget.message,
+                  nameList: messageReaction[sticker.toString()],
+                  sticker: sticker,
+                  onShowDetail: (int sticker) {
+                    showMore(
+                        context,
+                        memberList,
+                        messageReaction,
+                        sticker,
+                        filteredMessageReactionStickerList,
+                        model);
+                  });
+            }).toList(),
+        ],
+      ),
+    )
+        : const SizedBox();
+  }
 
   void showMore(
       BuildContext context,
@@ -40,7 +154,8 @@ class TIMUIKitMessageReactionShowPanel extends TIMUIKitStatelessWidget {
       Map<String, dynamic> messageReaction,
       int currentSticker,
       List<int> stickerList,
-      TUIChatSeparateViewModel model) async {
+      TUIChatSeparateViewModel model,
+      ) async {
     return showModalBottomSheet<int>(
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -83,87 +198,16 @@ class TIMUIKitMessageReactionShowPanel extends TIMUIKitStatelessWidget {
             const Divider(height: 1.0),
             Expanded(
                 child: TIMUIKitMessageReactionDetail(
-              onTapAvatar: model.onTapAvatar,
-              stickerList: stickerList,
-              currentStickerIndex: stickerList
-                  .indexWhere((element) => element == currentSticker),
-              memberList: memberList,
-              messageReaction: messageReaction,
-            )),
+                  onTapAvatar: model.onTapAvatar,
+                  stickerList: stickerList,
+                  currentStickerIndex: stickerList
+                      .indexWhere((element) => element == currentSticker),
+                  memberList: memberList,
+                  messageReaction: messageReaction,
+                )),
           ]),
         );
       },
     );
-  }
-
-  @override
-  Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
-    Map<String, dynamic> messageReaction = {};
-    CloudCustomData messageCloudCustomData =
-        MessageReactionUtils.getCloudCustomData(message);
-    final TUIChatSeparateViewModel model =
-        Provider.of<TUIChatSeparateViewModel>(context);
-    if (messageCloudCustomData.messageReaction != null &&
-        messageCloudCustomData.messageReaction!.isNotEmpty) {
-      messageReaction = messageCloudCustomData.messageReaction!;
-    } else {
-      return const SizedBox(width: 0, height: 0);
-    }
-
-    final List<int> messageReactionStickerList = [];
-
-    messageReaction.forEach((key, value) {
-      messageReactionStickerList.add(int.parse(key));
-    });
-
-    final filteredMessageReactionStickerList =
-        messageReactionStickerList.where((sticker) {
-      if (messageReaction[sticker.toString()] == null ||
-          messageReaction[sticker.toString()] is! List ||
-          messageReaction[sticker.toString()].length == 0) {
-        return false;
-      }
-      return true;
-    }).toList();
-
-    final ConvType convType = model.conversationType ?? ConvType.c2c;
-    List<V2TimGroupMemberFullInfo?> memberList = [];
-    if (convType == ConvType.group) {
-      memberList = model.groupMemberList ?? [];
-    } else {
-      final V2TimGroupMemberFullInfo selfInfo = V2TimGroupMemberFullInfo(
-        userID: selfInfoModel.loginInfo?.userID ?? "",
-        nickName: selfInfoModel.loginInfo?.nickName,
-        faceUrl: selfInfoModel.loginInfo?.faceUrl,
-      );
-
-      final V2TimGroupMemberFullInfo targetInfo = V2TimGroupMemberFullInfo(
-        userID: model.conversationID,
-      );
-      memberList = [selfInfo, model.currentChatUserInfo ?? targetInfo];
-    }
-
-    return filteredMessageReactionStickerList.isNotEmpty
-        ? Container(
-            margin: const EdgeInsets.only(top: 12),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: (!PlatformUtils().isIOS) ? 12 : 8,
-              children: [
-                ...filteredMessageReactionStickerList.map((sticker) {
-                  return TIMUIKitMessageReactionShowItem(
-                      memberList: memberList,
-                      message: message,
-                      nameList: messageReaction[sticker.toString()],
-                      sticker: sticker,
-                      onShowDetail: (int sticker) {
-                        showMore(context, memberList, messageReaction, sticker,
-                            filteredMessageReactionStickerList, model);
-                      });
-                }).toList(),
-              ],
-            ),
-          )
-        : const SizedBox(width: 0, height: 0);
   }
 }
