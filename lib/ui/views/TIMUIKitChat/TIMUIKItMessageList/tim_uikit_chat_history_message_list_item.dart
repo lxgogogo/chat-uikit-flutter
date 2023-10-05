@@ -517,7 +517,6 @@ class _TIMUIKItHistoryMessageListItemState
               borderRadius: widget.themeData?.messageBorderRadius,
               fontStyle: widget.themeData?.messageTextStyle,
               backgroundColor: widget.themeData?.messageBackgroundColor,
-              backgroundColorFormMe: widget.themeData?.messageBackgroundColorFormMe,
               textPadding: widget.textPadding,
               isShowMessageReaction: widget.isUseMessageReaction,
             );
@@ -540,15 +539,12 @@ class _TIMUIKItHistoryMessageListItemState
                 borderRadius: widget.themeData?.messageBorderRadius,
                 fontStyle: widget.themeData?.messageTextStyle,
                 backgroundColor: widget.themeData?.messageBackgroundColor,
-                backgroundColorFormMe: widget.themeData?.messageBackgroundColorFormMe,
                 textPadding: widget.textPadding,
                 isUseDefaultEmoji: widget.isUseDefaultEmoji,
                 customEmojiStickerList: widget.customEmojiStickerList,
                 chatModel: model,
                 isShowMessageReaction: widget.isUseMessageReaction,
                 onIdentifyQrCode: widget.onIdentifyQrCode,
-                isUseDefaultEmoji: widget.isUseDefaultEmoji,
-                customEmojiStickerList: widget.customEmojiStickerList,
                 onVideoTap: widget.onVideoTap,
               );
         }
@@ -569,7 +565,6 @@ class _TIMUIKItHistoryMessageListItemState
               borderRadius: widget.themeData?.messageBorderRadius,
               fontStyle: widget.themeData?.messageTextStyle,
               backgroundColor: widget.themeData?.messageBackgroundColor,
-              backgroundColorFormMe: widget.themeData?.messageBackgroundColorFormMe,
               textPadding: widget.textPadding,
               isShowMessageReaction: widget.isUseMessageReaction,
               isUseDefaultEmoji: widget.isUseDefaultEmoji,

@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:image_clipboard/image_clipboard.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
@@ -642,8 +642,8 @@ class TIMUIKitMessageTooltipState
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final TUITheme theme = value.theme;
-    final isDesktopScreen =
-        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    // final isDesktopScreen =
+    //     TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: widget.model),
@@ -664,7 +664,7 @@ class TIMUIKitMessageTooltipState
             widget.toolTipsConfig?.rocketMenuBuilder != null;
         Widget? rocketMenuBuilder = haveRocketMenuBuilder
             ? widget.toolTipsConfig!.rocketMenuBuilder!(
-            widget.message, widget.onCloseTooltip, null, context)
+            widget.message, widget.onCloseTooltip)
             : null;
         final message = widget.message;
 

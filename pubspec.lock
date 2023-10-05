@@ -1099,6 +1099,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.2.1"
+  recognition_qrcode:
+    dependency: "direct main"
+    description:
+      name: recognition_qrcode
+      sha256: "796dc53b9225f57adde3c9323f64ea442804c8fad2e557f20efdfb4904212463"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.2+1"
   rxdart:
     dependency: transitive
     description:

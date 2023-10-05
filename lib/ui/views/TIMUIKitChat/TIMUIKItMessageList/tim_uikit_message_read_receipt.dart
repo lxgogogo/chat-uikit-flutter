@@ -71,7 +71,9 @@ class TIMUIKitMessageReadReceipt extends TIMUIKitStatelessWidget {
                             onTapAvatar: onTapAvatar,
                             messageItem: messageItem,
                             unreadCount: value?.unreadCount ?? 0,
-                            readCount: value?.readCount ?? 0)));
+                            readCount: value?.readCount ?? 0,
+                            onVideoTap: onVideoTap,
+                        )));
               }
             }
           },

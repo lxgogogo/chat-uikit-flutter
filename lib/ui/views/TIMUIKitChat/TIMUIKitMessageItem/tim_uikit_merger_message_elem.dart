@@ -24,10 +24,10 @@ class TIMUIKitMergerElem extends StatefulWidget {
   final MessageItemBuilder? messageItemBuilder;
   final Function(String qrCode)? onIdentifyQrCode;
   final void Function(
-      V2TimMessage message,
-      dynamic heroTag,
-      V2TimVideoElem videoElement,
-      ) onVideoTap;
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
   const TIMUIKitMergerElem({
     Key? key,
@@ -110,9 +110,11 @@ class TIMUIKitMergerElemState extends TIMUIKitState<TIMUIKitMergerElem> {
               context,
               MaterialPageRoute(
                 builder: (context) => MergerMessageScreen(
-                    messageItemBuilder: widget.messageItemBuilder,
-                    model: model,
-                    msgID: widget.messageID),
+                  messageItemBuilder: widget.messageItemBuilder,
+                  model: model,
+                  msgID: widget.messageID,
+                  onVideoTap:widget.onVideoTap,
+                ),
               ));
         }
       }
