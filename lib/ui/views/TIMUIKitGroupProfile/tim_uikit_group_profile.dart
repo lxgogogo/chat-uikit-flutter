@@ -63,6 +63,8 @@ class TIMUIKitGroupProfile extends StatefulWidget {
   /// you may navigating to the specific profile page, or anywhere you want.
   final Function(String userID, TapDownDetails? tapDetails)? onClickUser;
 
+  final Function(List<V2TimGroupMemberFullInfo?> memberList)? onAddMember;
+
   const TIMUIKitGroupProfile(
       {Key? key,
       required this.groupID,
@@ -76,6 +78,7 @@ class TIMUIKitGroupProfile extends StatefulWidget {
       this.builder,
       this.profileWidgetBuilder,
       this.onClickUser,
+      this.onAddMember,
       this.profileWidgetsOrder,
       this.lifeCycle})
       : super(key: key);
@@ -234,6 +237,10 @@ class _TIMUIKitGroupProfileState extends TIMUIKitState<TIMUIKitGroupProfile> {
                 widget.profileWidgetBuilder;
             return order.map((element) {
               switch (element) {
+                case GroupProfileWidgetEnum.groupAvatar:
+                  return (customBuilder?.groupAvatar != null
+                      ? customBuilder?.groupAvatar!(groupInfo,model.setGroupFaceUrl,)
+                      : Container())!;
                 case GroupProfileWidgetEnum.detailCard:
                   return (customBuilder?.detailCard != null
                       ? customBuilder?.detailCard!(
@@ -242,9 +249,11 @@ class _TIMUIKitGroupProfileState extends TIMUIKitState<TIMUIKitGroupProfile> {
                           isHavePermission: isAdmin || isGroupOwner,
                           groupInfo: groupInfo))!;
                 case GroupProfileWidgetEnum.memberListTile:
+                  if (memberList.isEmpty) return Container();
                   return (customBuilder?.memberListTile != null
                       ? customBuilder?.memberListTile!(memberList)
-                      : TIMUIKitGroupProfileWidget.memberTile())!;
+                      : TIMUIKitGroupProfileWidget.memberTile(
+                      addGroupMember: widget.onAddMember))!;
                 case GroupProfileWidgetEnum.groupNotice:
                   return (customBuilder?.groupNotice != null
                       ? customBuilder?.groupNotice!(

@@ -335,9 +335,9 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
   onSubmitted() async {
     conversationModel.clearWebDraft(conversationID: widget.conversationID);
     lastText = "";
-    final text = textEditingController.text.trim();
+    final text = textEditingController.text;
     final convType = widget.conversationType;
-    if (text.isNotEmpty && text != zeroWidthSpace) {
+    if (text.trim().isNotEmpty && text != zeroWidthSpace) {
       if (widget.model.repliedMessage != null) {
         MessageUtils.handleMessageError(widget.model.sendReplyMessage(text: text, convID: widget.conversationID, convType: convType, atUserIDList: getUserIdFromMemberInfoMap()), context);
       } else if (mentionedMembersMap.isNotEmpty) {
@@ -392,6 +392,9 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
     if (TencentUtils.checkString(userID) == null) {
       focusNode.requestFocus();
     } else {
+      String text = textEditingController.text;
+      int cursorPos = textEditingController.selection.start; // 获取光标位置
+
       final memberInfo = widget.model.groupMemberList?.firstWhereOrNull((element) => element?.userID == userID) ??
           V2TimGroupMemberFullInfo(
             userID: userID ?? "",
@@ -399,11 +402,30 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
           );
       final showName = _getShowName(memberInfo);
       mentionedMembersMap["@$showName"] = memberInfo;
-      String text = "${textEditingController.text}@$showName ";
-      //please do not delete space
+      String newText = '';
+      if (cursorPos == -1) {
+        cursorPos = 0;
+      }
+      if (cursorPos == 0) {
+        newText = text.substring(0, cursorPos) +
+            '@$showName ' +
+            text.substring(cursorPos);
+      } else {
+        newText = text.substring(0, cursorPos) +
+            '@$showName ' +
+            text.substring(cursorPos);
+      }
+
+      // Future.delayed(const Duration(milliseconds: 500), () {
+      //   if (!focusNode.hasFocus) {
+      //     focusNode.requestFocus();
+      //   }
+      // });
       focusNode.requestFocus();
-      textEditingController.text = text;
-      textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: text.length));
+      textEditingController.text = newText;
+      textEditingController.selection =
+          TextSelection.collapsed(offset: newText.length);
+
       lastText = text;
       _isComposingText = false;
       narrowTextFieldKey.currentState?.showKeyboard = true;
@@ -505,6 +527,7 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
     }
 
     int textLength = text.length;
+    int cursorPos = textEditingController.selection.start; // 获取光标位置
     // 删除的话
     if (originalText.length > textLength) {
       final List<Diff> differencesList = diff(originalText, text);
@@ -606,7 +629,9 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
         model.showAtMemberList = [];
         isAddingAtSearchWords = false;
       }
-    } else if (textLength > 0 && text[textLength - 1] == "@" && lastText.length < textLength) {
+    } else if (textLength > 0 &&
+        (cursorPos == 0 ? text[0] == "@" : text[cursorPos - 1] == "@") &&
+        (lastText.length < textLength || text == "@")) {
       V2TimGroupMemberFullInfo? memberInfo = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -616,8 +641,19 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
       final showName = _getShowName(memberInfo);
       if (memberInfo != null) {
         mentionedMembersMap["@$showName"] = memberInfo;
-        textEditingController.text = "$text$showName ";
-        lastText = "$text$showName ";
+        String newText = '';
+        if (cursorPos == 0) {
+          newText = text.substring(0, cursorPos + 1) +
+              '$showName ' +
+              text.substring(cursorPos + 1);
+        } else {
+          newText = text.substring(0, cursorPos) +
+              '$showName ' +
+              text.substring(cursorPos);
+        }
+        textEditingController.text = newText;
+        textEditingController.selection =
+            TextSelection.collapsed(offset: cursorPos + showName.length + 1);
       }
     }
     lastText = textEditingController.text;
