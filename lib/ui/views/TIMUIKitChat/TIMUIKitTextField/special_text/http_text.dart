@@ -8,7 +8,7 @@ class HttpText extends SpecialText {
   HttpText(TextStyle? textStyle, SpecialTextGestureTapCallback? onTap,
       {this.start})
       : super(flag, flag, textStyle, onTap: onTap);
-  static const String flag = '\$';
+  static const String flag = '\$link\$';
   final int? start;
   @override
   InlineSpan finishText() {

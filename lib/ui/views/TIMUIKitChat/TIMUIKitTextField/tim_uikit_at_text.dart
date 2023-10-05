@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
+import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_self_info_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/group/group_services.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 
@@ -41,6 +42,9 @@ class AtText extends StatefulWidget {
 }
 
 class _AtTextState extends TIMUIKitState<AtText> {
+  final TUISelfInfoViewModel _selfInfoModel =
+  serviceLocator<TUISelfInfoViewModel>();
+
   final GroupServices _groupServices = serviceLocator<GroupServices>();
 
   List<V2TimGroupMemberFullInfo?>? groupMemberList;
@@ -120,6 +124,7 @@ class _AtTextState extends TIMUIKitState<AtText> {
           onTapMemberItem: _onTapMemberItem,
           canAtAll: widget.canAtAll,
           canSlideDelete: false,
+          ignoreUserID: _selfInfoModel.loginInfo?.userID,
           touchBottomCallBack: () {
             // Get all by once, unnecessary to load more
           },
