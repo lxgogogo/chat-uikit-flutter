@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
@@ -72,7 +73,7 @@ class TIMUIKitSearchInputState extends TIMUIKitState<TIMUIKitSearchInput> {
                 child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: isDesktopScreen ? 30 : 50.w,
-                minHeight: isDesktopScreen ? null : 50.w,
+                minHeight: isDesktopScreen ? 0 : 50.w,
               ),
               child: TextField(
                 autofocus: widget.isAutoFocus ?? true,

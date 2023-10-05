@@ -2,6 +2,7 @@
 
 import 'package:azlistview_all_platforms/azlistview_all_platforms.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:flutter_slidable_for_tencent_im/flutter_slidable.dart';
 import 'package:keframe/keframe.dart';
 import 'package:lpinyin/lpinyin.dart';
