@@ -79,7 +79,10 @@ class TUIChatModelTools {
     } else {
       desc = messageSummary;
     }
-
+    /// Custom 文本消息推送内容长度限制
+    if (desc.length > 50) {
+      desc = '${desc.substring(0, 50)}...';
+    }
     return OfflinePushInfo.fromJson({
       "title": title,
       "desc": desc,

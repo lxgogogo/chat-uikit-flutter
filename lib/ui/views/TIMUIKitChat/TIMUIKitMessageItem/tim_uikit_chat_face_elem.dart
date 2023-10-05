@@ -29,7 +29,6 @@ class TIMUIKitFaceElem extends StatefulWidget {
 }
 
 class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitFaceElem> {
-
   bool isFromNetwork() {
     return widget.path.startsWith('http');
   }
@@ -48,21 +47,32 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitFaceElem> {
 
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     return TIMUIKitMessageReactionWrapper(
       chatModel: widget.model,
-        isShowJump: widget.isShowJump,
-        isFromSelf: widget.message.isSelf ?? true,
-        clearJump: widget.clearJump,
-        message: widget.message,
-        isShowMessageReaction: widget.isShowMessageReaction ?? true,
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width * (isDesktopScreen ? 0.1 : 0.3)),
-          child: isFromNetwork()
-              ? Image.network(widget.path)
-              : Image.asset(createPathFromNative(widget.path)),
-        ));
+      isShowJump: widget.isShowJump,
+      isFromSelf: widget.message.isSelf ?? true,
+      clearJump: widget.clearJump,
+      message: widget.message,
+      isShowMessageReaction: widget.isShowMessageReaction ?? true,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width *
+                (isDesktopScreen ? 0.1 : 0.3)),
+        child: isFromNetwork()
+            ? Image.network(
+                widget.path,
+                errorBuilder: (context, error, stackTrace) =>
+                    Text(TIM_t("该版本不支持此消息")),
+              )
+            : Image.asset(
+                createPathFromNative(widget.path),
+                errorBuilder: (context, error, stackTrace) =>
+                    Text(TIM_t("该版本不支持此消息")),
+              ),
+      ),
+    );
   }
 }

@@ -22,19 +22,27 @@ class TIMUIKitMergerElem extends StatefulWidget {
   final bool? isShowMessageReaction;
   final TUIChatSeparateViewModel model;
   final MessageItemBuilder? messageItemBuilder;
+  final Function(String qrCode)? onIdentifyQrCode;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
-  const TIMUIKitMergerElem(
-      {Key? key,
-      required this.message,
-      required this.model,
-      required this.mergerElem,
-      required this.isSelf,
-      this.isShowMessageReaction,
-      required this.messageID,
-      required this.isShowJump,
-      this.clearJump,
-      this.messageItemBuilder})
-      : super(key: key);
+  const TIMUIKitMergerElem({
+    Key? key,
+    required this.message,
+    required this.model,
+    required this.mergerElem,
+    required this.isSelf,
+    this.isShowMessageReaction,
+    required this.messageID,
+    required this.isShowJump,
+    this.clearJump,
+    this.messageItemBuilder,
+    this.onIdentifyQrCode,
+    required this.onVideoTap,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => TIMUIKitMergerElemState();
@@ -89,9 +97,12 @@ class TIMUIKitMergerElemState extends TIMUIKitState<TIMUIKitMergerElem> {
             child: (onClose) => Scrollbar(
               controller: _scrollController,
               child: MergerMessageScreen(
-                  messageItemBuilder: widget.messageItemBuilder,
-                  model: model,
-                  msgID: widget.messageID),
+                messageItemBuilder: widget.messageItemBuilder,
+                model: model,
+                msgID: widget.messageID,
+                onIdentifyQrCode: widget.onIdentifyQrCode,
+                onVideoTap: widget.onVideoTap,
+              ),
             ),
           );
         } else {
@@ -99,9 +110,11 @@ class TIMUIKitMergerElemState extends TIMUIKitState<TIMUIKitMergerElem> {
               context,
               MaterialPageRoute(
                 builder: (context) => MergerMessageScreen(
-                    messageItemBuilder: widget.messageItemBuilder,
-                    model: model,
-                    msgID: widget.messageID),
+                  messageItemBuilder: widget.messageItemBuilder,
+                  model: model,
+                  msgID: widget.messageID,
+                  onVideoTap:widget.onVideoTap,
+                ),
               ));
         }
       }
@@ -133,8 +146,8 @@ class TIMUIKitMergerElemState extends TIMUIKitState<TIMUIKitMergerElem> {
         TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     return Container(
       constraints: BoxConstraints(
-          maxWidth:
-              MediaQuery.of(context).size.width * (isDesktopScreen ? 0.3 : 0.6)),
+          maxWidth: MediaQuery.of(context).size.width *
+              (isDesktopScreen ? 0.3 : 0.6)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(

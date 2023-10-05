@@ -61,17 +61,19 @@ abstract class MessageService {
   Future<V2TimMsgCreateInfoResult?> createTextAtMessage(
       {required String text, required List<String> atUserList});
 
-  Future<V2TimValueCallback<V2TimMessage>> sendMessage(
-      {required String id, // 自己创建的ID
-      required String receiver,
-      required String groupID,
-      MessagePriorityEnum priority = MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
-      bool onlineUserOnly = false,
-      bool isExcludedFromUnreadCount = false,
-      bool needReadReceipt = false,
-      OfflinePushInfo? offlinePushInfo,
-      String? cloudCustomData, // 云自定义消息字段，只能在消息发送前添加
-      String? localCustomData});
+  Future<V2TimValueCallback<V2TimMessage>> sendMessage({
+    required String id, // 自己创建的ID
+    required String receiver,
+    required String groupID,
+    MessagePriorityEnum priority = MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
+    bool onlineUserOnly = false,
+    bool isExcludedFromUnreadCount = false,
+    bool needReadReceipt = false,
+    OfflinePushInfo? offlinePushInfo,
+    String? cloudCustomData, // 云自定义消息字段，只能在消息发送前添加
+    String? localCustomData,
+    bool? isSupportMessageExtension = false,
+  });
 
   Future<V2TimValueCallback<V2TimMessage>> sendReplyMessage({
     required String id, // 自己创建的ID

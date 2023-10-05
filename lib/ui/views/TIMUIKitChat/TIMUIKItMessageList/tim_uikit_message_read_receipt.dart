@@ -13,17 +13,28 @@ import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 class TIMUIKitMessageReadReceipt extends TIMUIKitStatelessWidget {
   final V2TimMessage messageItem;
   final void Function(String, TapDownDetails tapDetails)? onTapAvatar;
+  final Function(String qrCode)? onIdentifyQrCode;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
-  TIMUIKitMessageReadReceipt(
-      {Key? key, this.onTapAvatar, required this.messageItem})
-      : super(key: key);
+  TIMUIKitMessageReadReceipt({
+    Key? key,
+    this.onTapAvatar,
+    required this.messageItem,
+    this.onIdentifyQrCode,
+    required this.onVideoTap,
+  }) : super(key: key);
 
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final TUITheme theme = value.theme;
     final TUIChatSeparateViewModel model =
         Provider.of<TUIChatSeparateViewModel>(context, listen: false);
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
 
     return Selector<TUIChatGlobalModel, V2TimMessageReceipt?>(
       builder: (context, value, child) {
@@ -34,21 +45,24 @@ class TIMUIKitMessageReadReceipt extends TIMUIKitStatelessWidget {
           behavior: HitTestBehavior.opaque,
           onTap: () {
             if ((value?.readCount ?? 0) > 0) {
-              if(isDesktopScreen){
+              if (isDesktopScreen) {
                 TUIKitWidePopup.showPopupWindow(
-                    operationKey: TUIKitWideModalOperationKey.messageReadDetails,
+                    operationKey:
+                        TUIKitWideModalOperationKey.messageReadDetails,
                     context: context,
                     width: MediaQuery.of(context).size.width * 0.5,
                     height: MediaQuery.of(context).size.height * 0.8,
                     title: TIM_t("消息详情"),
                     child: (onClose) => MessageReadReceipt(
-                        model: model,
-                        onTapAvatar: onTapAvatar,
-                        messageItem: messageItem,
-                        unreadCount: value?.unreadCount ?? 0,
-                        readCount: value?.readCount ?? 0)
-                );
-              }else{
+                          model: model,
+                          onTapAvatar: onTapAvatar,
+                          messageItem: messageItem,
+                          unreadCount: value?.unreadCount ?? 0,
+                          readCount: value?.readCount ?? 0,
+                          onIdentifyQrCode: onIdentifyQrCode,
+                          onVideoTap: onVideoTap,
+                        ));
+              } else {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -57,39 +71,42 @@ class TIMUIKitMessageReadReceipt extends TIMUIKitStatelessWidget {
                             onTapAvatar: onTapAvatar,
                             messageItem: messageItem,
                             unreadCount: value?.unreadCount ?? 0,
-                            readCount: value?.readCount ?? 0)));
+                            readCount: value?.readCount ?? 0,
+                            onVideoTap: onVideoTap,
+                        )));
               }
             }
           },
           child: Container(
             padding: EdgeInsets.only(
                 bottom: 3, right: 6, left: 6, top: isDesktopScreen ? 2 : 6),
-            child: ((value?.unreadCount ?? 0) == 0 && (value?.readCount ?? 0) > 0)
-                ? Icon(
-                    Icons.check_circle_outline,
-                    size: 18,
-                    color: theme.weakTextColor,
-                  )
-                : Container(
-                    width: 14,
-                    height: 14,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            width: 1.3,
-                            color: (value?.readCount ?? 0) > 0
-                                ? theme.primaryColor!
-                                : theme.weakTextColor!)),
-                    child: (value?.readCount ?? 0) > 0
-                        ? Text(
-                            '${value?.readCount ?? 0}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 8, color: theme.primaryColor),
-                          )
-                        : null,
-                  ),
+            child:
+                ((value?.unreadCount ?? 0) == 0 && (value?.readCount ?? 0) > 0)
+                    ? Icon(
+                        Icons.check_circle_outline,
+                        size: 18,
+                        color: theme.weakTextColor,
+                      )
+                    : Container(
+                        width: 14,
+                        height: 14,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                width: 1.3,
+                                color: (value?.readCount ?? 0) > 0
+                                    ? theme.primaryColor!
+                                    : theme.weakTextColor!)),
+                        child: (value?.readCount ?? 0) > 0
+                            ? Text(
+                                '${value?.readCount ?? 0}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 8, color: theme.primaryColor),
+                              )
+                            : null,
+                      ),
           ),
         );
       },

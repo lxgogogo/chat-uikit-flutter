@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -24,15 +25,22 @@ class TIMUIKitVideoElem extends StatefulWidget {
   final String? isFrom;
   final TUIChatSeparateViewModel chatModel;
   final bool? isShowMessageReaction;
+  final void Function(
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
-  const TIMUIKitVideoElem(this.message,
-      {Key? key,
-      this.isShowJump = false,
-      this.clearJump,
-      this.isFrom,
-      this.isShowMessageReaction,
-      required this.chatModel})
-      : super(key: key);
+  const TIMUIKitVideoElem(
+    this.message, {
+    Key? key,
+    this.isShowJump = false,
+    this.clearJump,
+    this.isFrom,
+    this.isShowMessageReaction,
+    required this.chatModel,
+    required this.onVideoTap,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TIMUIKitVideoElemState();
@@ -40,7 +48,14 @@ class TIMUIKitVideoElem extends StatefulWidget {
 
 class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
   final MessageService _messageService = serviceLocator<MessageService>();
-  late V2TimVideoElem stateElement = widget.message.videoElem!;
+
+  // late V2TimVideoElem stateElement = widget.message.videoElem!;
+  ////////////////// 自定义视频消息兼容 begin //////////////////
+  late V2TimVideoElem stateElement = widget.message.videoElem ??
+      V2TimVideoElem.fromJson(
+          jsonDecode(widget.message.customElem?.data ?? '{}'));
+  ////////////////// 自定义视频消息兼容 end //////////////////
+
 
   Widget errorDisplay(TUITheme? theme) {
     return Container(
@@ -125,6 +140,10 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
   }
 
   downloadMessageDetailAndSave() async {
+    ////////////////// 自定义视频消息兼容 begin //////////////////
+    // 自定义视频消息不能下载
+    if (widget.message.videoElem == null) return;
+    ////////////////// 自定义视频消息兼容 end //////////////////
     if (TencentUtils.checkString(widget.message.msgID) != null) {
       if (TencentUtils.checkString(widget.message.videoElem!.videoUrl) ==
           null) {
@@ -175,7 +194,6 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
     }
   }
 
-
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final theme = value.theme;
@@ -185,14 +203,16 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
     return GestureDetector(
       onTap: () {
         if (PlatformUtils().isWeb) {
-          final url = widget.message.videoElem?.videoUrl ?? widget.message.videoElem?.videoPath ?? "";
+          final url = widget.message.videoElem?.videoUrl ??
+              widget.message.videoElem?.videoPath ??
+              "";
           TUIKitWidePopup.showMedia(
               context: context,
               mediaURL: url,
               onClickOrigin: () => launchUrl(
-                Uri.parse(url),
-                mode: LaunchMode.externalApplication,
-              ));
+                    Uri.parse(url),
+                    mode: LaunchMode.externalApplication,
+                  ));
           return;
         }
         if (PlatformUtils().isDesktop) {
@@ -224,16 +244,17 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
             }
           }
         } else {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              opaque: false, // set to false
-              pageBuilder: (_, __, ___) => VideoScreen(
-                message: widget.message,
-                heroTag: heroTag,
-                videoElement: stateElement,
-              ),
-            ),
-          );
+          widget.onVideoTap(widget.message, heroTag, stateElement);
+          // Navigator.of(context).push(
+          //   PageRouteBuilder(
+          //     opaque: false, // set to false
+          //     pageBuilder: (_, __, ___) => VideoScreen(
+          //       message: widget.message,
+          //       heroTag: heroTag,
+          //       videoElement: stateElement,
+          //     ),
+          //   ),
+          // );
         }
       },
       child: Hero(
@@ -303,8 +324,8 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                                 right: 10,
                                 bottom: 10,
                                 child: Text(
-                                    MessageUtils.formatVideoTime(widget
-                                                .message.videoElem!.duration!)
+                                    MessageUtils.formatVideoTime(
+                                            stateElement.duration ?? 0)
                                         .toString(),
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 12))),

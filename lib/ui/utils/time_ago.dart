@@ -46,8 +46,11 @@ class TimeAgo {
         date;
   }
 
-  String? getTimeStringForChat(int timeStamp) {
-    final DateTime date = DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
+  String? getTimeStringForChat(
+    int timeStamp, {
+    DateTime? dateTime,
+  }) {
+    final DateTime date = dateTime ?? DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
     final DateTime epochLimit = DateTime.utc(1971);
 
     if (date.isBefore(epochLimit)) {
@@ -125,5 +128,42 @@ class TimeAgo {
     }
     // 同年月日 时间 (24小时制)
     return timeStr;
+  }
+
+  String getTimeDes(
+      DateTime? dateTime,
+      ) {
+    if (dateTime == null) {
+      return '';
+    }
+    DateTime localDateTime = dateTime.toLocal();
+    var nowTime = DateTime.now();
+    nowTime = DateTime(nowTime.year, nowTime.month, nowTime.day);
+    var preFix = localDateTime.hour >= 12 ? TIM_t("下午") : TIM_t("上午");
+    final timeStr = DateFormat('hh:mm').format(localDateTime);
+    // 一年外 年月日 + 上/下午 + 时间 (12小时制)
+    if (nowTime.year != localDateTime.year) {
+      return '${DateFormat('yyyy-MM-dd').format(localDateTime)} $preFix $timeStr';
+    }
+    // 一年内一周外 月日 + 上/下午 + 时间 (12小时制）
+    if (localDateTime.isBefore(nowTime.subtract(const Duration(days: 6)))) {
+      return '${DateFormat('MM-dd').format(localDateTime)} $preFix $timeStr';
+    }
+    // 一周内一天外 星期 + 上/下午 + 时间 (12小时制）
+    if (localDateTime.isBefore(nowTime.subtract(const Duration(days: 1)))) {
+      return '${weekdayMap()[localDateTime.weekday]} $preFix $timeStr';
+    }
+    // 昨日 昨天 + 上/下午 + 时间 (12小时制)
+    if (nowTime.day != localDateTime.day) {
+      String option2 = '$preFix $timeStr';
+      return TIM_t_para("昨天 {{option2}}", "昨天 $option2")(option2: option2);
+    }
+    // 同年月日 上/下午 + 时间 (12小时制)
+    return '$preFix $timeStr';
+  }
+
+  String getTimeByTimeStamp(int timeStamp) {
+    var dateTime = DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
+    return getTimeDes(dateTime);
   }
 }

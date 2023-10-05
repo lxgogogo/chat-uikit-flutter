@@ -8,6 +8,8 @@ import 'package:flutter/cupertino.dart';
 
 // ignore: unnecessary_import
 import 'package:flutter/foundation.dart';
+import 'package:flutter_plugin_record_plus/const/play_state.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_self_info_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -22,6 +24,7 @@ import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/constants/history_message_constant.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/logger.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/sound_record.dart';
 import 'package:uuid/uuid.dart';
 
 enum LoadDirection { previous, latest }
@@ -44,6 +47,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
   ConvType? conversationType;
   bool haveMoreData = false;
   bool haveMoreLatestData = false;
+  bool isPlaying = false;
   String _currentPlayedMsgId = "";
   GroupReceiptAllowType? _groupType;
   List<V2TimMessage> _multiSelectedMessageList = [];
@@ -81,6 +85,9 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
   }
 
   V2TimGroupInfo? get groupInfo => _groupInfo;
+
+  List<V2TimMessage> get soundMessageList =>
+      globalModel.getSoundMessageList(conversationID);
 
   set groupInfo(V2TimGroupInfo? value) {
     _groupInfo = value;
@@ -157,6 +164,10 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get showActions {
+    return isGroupExist && !isNotAMember;
+  }
+
   setLoadingMessageMap(String conversationID, V2TimMessage messageInfo) {
     if (PlatformUtils().isWeb) {
       if (globalModel.loadingMessage[conversationID] != null &&
@@ -169,6 +180,8 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       }
     }
   }
+
+  StreamSubscription<Object>? subscription;
 
   void initForEachConversation(ConvType convType, String convID,
       ValueChanged<String>? onChangeInputField,
@@ -234,10 +247,97 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
         conversationID, HistoryMessagePosition.bottom);
     globalModel.setChatConfig(chatConfig);
     globalModel.clearRecivedNewMessageCount();
+
+    setSoundSubscription();
     _isInit = true;
     Future.delayed(const Duration(milliseconds: 300), () {
       markMessageAsRead();
     });
+  }
+
+  void setSoundSubscription() {
+    subscription = SoundPlayer.playStateListener(
+      listener: (PlayerState data) async {
+        if (data.processingState == ProcessingState.completed) {
+          isPlaying = false;
+          final index = soundMessageList.indexWhere(
+                (e) => e.msgID == _currentPlayedMsgId,
+          );
+          if (index >= soundMessageList.length - 1) {
+            _currentPlayedMsgId = '';
+            notifyListeners();
+            return;
+          }
+          final currentMessage = soundMessageList[index + 1];
+          if (currentMessage.msgID == null) {
+            _currentPlayedMsgId = '';
+            return;
+          }
+          _currentPlayedMsgId = currentMessage.msgID!;
+
+          if (currentMessage.msgID != null) {
+            final localUrl = currentMessage.soundElem?.localUrl ?? '';
+            final url = currentMessage.soundElem?.url ?? '';
+            if (localUrl.isNotEmpty) {
+              playSound(message: currentMessage, url: localUrl, type: 'file');
+            } else if (url.isNotEmpty) {
+              playSound(message: currentMessage, url: url, type: 'url');
+            } else {
+              final response = await _messageService.getMessageOnlineUrl(
+                msgID: currentMessage.msgID!,
+              );
+              if (response.data != null) {
+                final soundElem = response.data!.soundElem;
+                if (soundElem?.url?.isNotEmpty ?? false) {
+                  playSound(
+                    message: currentMessage,
+                    url: response.data!.soundElem?.url ?? '',
+                    type: 'url',
+                  );
+                }
+              }
+            }
+          } else {
+            _currentPlayedMsgId = '';
+          }
+          notifyListeners();
+        }
+      },
+    );
+  }
+
+  void cancelSoundSubscription() {
+    if (isPlaying) {
+      SoundPlayer.stop();
+      _currentPlayedMsgId = "";
+    }
+    subscription?.cancel();
+  }
+
+  void playSound({
+    required V2TimMessage message,
+    required String url,
+    required String type,
+  }) {
+    if (!SoundPlayer.isInited) {
+      SoundPlayer.initSoundPlayer();
+    }
+    if (isPlaying) {
+      SoundPlayer.stop();
+      isPlaying = false;
+      _currentPlayedMsgId = "";
+    } else {
+      SoundPlayer.play(url: url, type: type);
+      isPlaying = true;
+      _currentPlayedMsgId = message.msgID ?? '';
+      if (message.localCustomInt != HistoryMessageDartConstant.read) {
+        globalModel.setLocalCustomInt(
+          _currentPlayedMsgId,
+          HistoryMessageDartConstant.read,
+          conversationID,
+        );
+      }
+    }
   }
 
   Future<bool> loadListForSpecificMessage({
@@ -429,12 +529,17 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     }
   }
 
-  translateText(V2TimMessage message) async {
+  translateText(V2TimMessage message, {
+    required bool isEToC,
+  }) async {
     final String originText = message.textElem?.text ?? "";
-    final String deviceLocale = TIM_getCurrentDeviceLocale();
-    final String targetMessage = deviceLocale.split("-")[0];
+    // final String deviceLocale = TIM_getCurrentDeviceLocale();
+    // final String targetMessage = deviceLocale.split("-")[0];
+    // final translatedText =
+    //     await _messageService.translateText(originText, targetMessage);
+    /// custom 翻译固定中英文
     final translatedText =
-        await _messageService.translateText(originText, targetMessage);
+    await _messageService.translateText(originText, isEToC ? 'en' : 'zh');
 
     final LocalCustomDataModel localCustomData = LocalCustomDataModel.fromMap(
         json.decode(TencentUtils.checkString(message.localCustomData) ?? "{}"));
@@ -443,6 +548,21 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     globalModel.onMessageModified(message);
     TencentImSDKPlugin.v2TIMManager.v2TIMMessageManager.setLocalCustomData(
         msgID: message.msgID!, localCustomData: message.localCustomData ?? "");
+  }
+
+  /// custom 隐藏翻译
+  hideTranslateText(V2TimMessage message) async {
+    final LocalCustomDataModel localCustomData = LocalCustomDataModel.fromMap(
+        json.decode(TencentUtils.checkString(message.localCustomData) ?? "{}"));
+    localCustomData.translatedText = null;
+    final result = await TencentImSDKPlugin.v2TIMManager.v2TIMMessageManager
+        .setLocalCustomData(
+      msgID: message.msgID!,
+      localCustomData: json.encode(localCustomData.toMap()),
+    );
+    if (result.code == 0 && TencentUtils.checkString(message.msgID) != null) {
+      updateMessageFromController(msgID: message.msgID!);
+    }
   }
 
   _setMsgReadReceipt(List<V2TimMessage> message) async {
@@ -594,6 +714,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     String? cloudCustomData,
     String? localCustomData,
     bool? isEditStatusMessage = false,
+    bool? isSupportMessageExtension = false,
   }) async {
     String receiver = convType == ConvType.c2c ? convID : '';
     String groupID = convType == ConvType.group ? convID : '';
@@ -624,15 +745,8 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       groupID: groupID,
       offlinePushInfo: offlinePushInfo,
       onlineUserOnly: onlineUserOnly ?? false,
-      cloudCustomData: cloudCustomData ??
-          (showC2cMessageEditStatus == true
-              ? json.encode({
-                  "messageFeature": {
-                    "needTyping": 1,
-                    "version": 1,
-                  }
-                })
-              : ""),
+      cloudCustomData: cloudCustomData ?? genCloudCustomData(messageInfo),
+      isSupportMessageExtension: isSupportMessageExtension,
     );
     if (isEditStatusMessage == false &&
         globalModel.getMessageListPosition(conversationID) !=
@@ -645,6 +759,27 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     }
 
     return sendMsgRes;
+  }
+
+  /// custom cloudData 为空字符串错误
+  String genCloudCustomData(V2TimMessage? messageInfo) {
+    String cloudCustomData = messageInfo?.cloudCustomData ?? '';
+    if (showC2cMessageEditStatus) {
+      try {
+        cloudCustomData = json.encode({
+          "messageFeature": {
+            "needTyping": 1,
+            "version": 1,
+          },
+          ...json.decode((messageInfo?.cloudCustomData?.isNotEmpty ?? false)
+              ? messageInfo!.cloudCustomData!
+              : '{}'),
+        });
+      } catch (e) {
+        print(e.toString());
+      }
+    }
+    return cloudCustomData;
   }
 
   List<V2TimMessage> getOriginMessageList() {
@@ -986,6 +1121,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       {String? videoPath,
       int? duration,
       String? snapshotPath,
+      Future<String> Function()? cusVideoUrlFn,
       required String convID,
       required ConvType convType,
       dynamic inputElement}) async {
@@ -1018,6 +1154,15 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
         ];
         globalModel.setMessageList(conversationID, currentHistoryMsgList);
         notifyListeners();
+      }
+
+      /// custom 自定义视频上传地址
+      if (cusVideoUrlFn != null) {
+        final cusVideoUrl = await cusVideoUrlFn.call();
+        if (cusVideoUrl.isNotEmpty) {
+          (lifeCycleMsg ?? messageInfoWithSender).cloudCustomData =
+              jsonEncode({'cusVideoUrl': cusVideoUrl});
+        }
       }
 
       return _sendMessage(
@@ -1281,10 +1426,15 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       String videoPath = message.videoElem?.videoPath ?? "";
       int duration = message.videoElem?.duration ?? 0;
       String snapshotPath = message.videoElem?.snapshotPath ?? "";
+      // 自定义的视频上传地址
+      String cusVideoUrl = message.videoElem?.videoUrl ?? "";
       res = await sendVideoMessage(
           videoPath: videoPath,
           duration: duration,
           snapshotPath: snapshotPath,
+          cusVideoUrlFn: () {
+            return Future.value(cusVideoUrl);
+          },
           convID: convID,
           convType: convType);
     }
@@ -1354,6 +1504,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     bool? needReadReceipt,
     String? cloudCustomData,
     String? localCustomData,
+    bool? isSupportMessageExtension = false,
   }) {
     List<V2TimMessage> currentHistoryMsgList = getOriginMessageList();
     if (messageInfo != null) {
@@ -1383,6 +1534,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
         offlinePushInfo: offlinePushInfo ??
             tools.buildMessagePushInfo(
                 messageInfo, conversationID, conversationType ?? ConvType.c2c),
+        isSupportMessageExtension: isSupportMessageExtension,
       );
     }
     return null;
@@ -1438,6 +1590,13 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
       globalModel.onMessageRevoked(msgID, conversationID);
     }
     return res;
+  }
+
+  /// custom 转发消息
+  addToSingleSelectedMessageList(V2TimMessage message) {
+    _multiSelectedMessageList.clear();
+    _multiSelectedMessageList.add(message);
+    notifyListeners();
   }
 
   addToMultiSelectedMessageList(V2TimMessage message) {
@@ -1519,6 +1678,8 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    cancelSoundSubscription();
+
     globalModel.clearCurrentConversation();
     _isInit = false;
     super.dispose();

@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_show_panel.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_text_translate_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/forward_message_screen.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
@@ -65,6 +66,11 @@ typedef MessageItemContent = Widget? Function(
   bool isShowJump,
   VoidCallback clearJump,
 );
+
+typedef MessageRewardListBuilder = List<Widget> Function(
+    V2TimMessage message,
+    Map<String, dynamic>? rewardMap,
+    );
 
 class MessageHoverControlItem {
   String name;
@@ -173,25 +179,36 @@ class ToolTipsConfig {
   final Widget? Function(V2TimMessage message, Function() closeTooltip,
       [Key? key, BuildContext? context])? additionalItemBuilder;
 
+  /// custom 消息打赏UI
+  final Widget? Function(V2TimMessage message, Function() closeTooltip)? rocketMenuBuilder;
+
   /// A list of additional message tooltip menu items, provided with the data only. We recommend using this field instead of the previous `additionalItemBuilder`.
   List<MessageToolTipItem> Function(
       V2TimMessage message, Function() closeTooltip)? additionalMessageToolTips;
 
-  ToolTipsConfig(
-      {this.showDeleteMessage = true,
-      this.showMultipleChoiceMessage = true,
-      this.showRecallMessage = true,
-      this.showReplyMessage = true,
-      this.showTranslation = true,
-      this.showCopyMessage = true,
-      this.showForwardMessage = true,
-      this.additionalMessageToolTips,
-      @Deprecated(
-          "Please use `additionalMessageToolTips` instead. You are now only expected to specify the data, rather than providing a whole widget. This makes usage easier, as you no longer need to worry about the UI display.")
-      this.additionalItemBuilder});
+  ToolTipsConfig({
+    this.showDeleteMessage = true,
+    this.showMultipleChoiceMessage = true,
+    this.showRecallMessage = true,
+    this.showReplyMessage = true,
+    this.showTranslation = true,
+    this.showCopyMessage = true,
+    this.showForwardMessage = true,
+    this.additionalMessageToolTips,
+    @Deprecated(
+        "Please use `additionalMessageToolTips` instead. You are now only expected to specify the data, rather than providing a whole widget. This makes usage easier, as you no longer need to worry about the UI display.")
+    this.additionalItemBuilder,
+    this.rocketMenuBuilder,
+  });
 }
 
 class TIMUIKitHistoryMessageListItem extends StatefulWidget {
+  final void Function(
+      V2TimMessage message,
+      dynamic heroTag,
+      V2TimVideoElem videoElement,
+      ) onVideoTap;
+
   /// message instance
   final V2TimMessage message;
 
@@ -259,7 +276,7 @@ class TIMUIKitHistoryMessageListItem extends StatefulWidget {
   final EdgeInsetsGeometry? textPadding;
 
   /// avatar builder
-  final Widget Function(BuildContext context, V2TimMessage message)?
+  final Widget? Function(BuildContext context, V2TimMessage message)?
       userAvatarBuilder;
 
   /// theme info for message and avatar
@@ -289,40 +306,50 @@ class TIMUIKitHistoryMessageListItem extends StatefulWidget {
   /// If provided, the default message action functionality will appear in the right-click context menu instead.
   final Widget? Function(V2TimMessage message)? customMessageHoverBarOnDesktop;
 
-  const TIMUIKitHistoryMessageListItem(
-      {Key? key,
-      required this.message,
-      @Deprecated(
-          "Nickname will not show in one-to-one chat, if you tend to control it in group chat, please use `isShowSelfNameInGroup` and `isShowOthersNameInGroup` from `config: TIMUIKitChatConfig` instead")
-      this.showNickName = false,
-      this.onScrollToIndex,
-      this.onScrollToIndexBegin,
-      this.onTapForOthersPortrait,
-      this.messageItemBuilder,
-      this.onLongPressForOthersHeadPortrait,
-      this.showAvatar = true,
-      this.showMessageSending = true,
-      this.showMessageReadRecipt = true,
-      this.allowLongPress = true,
-      this.toolTipsConfig,
-      this.onLongPress,
-      this.showGroupMessageReadRecipt = false,
-      this.allowAtUserWhenReply = true,
-      this.allowAvatarTap = true,
-      this.userAvatarBuilder,
-      this.themeData,
-      this.padding,
-      this.textPadding,
-      this.topRowBuilder,
-      this.isUseMessageReaction,
-      this.bottomRowBuilder,
-      this.isUseDefaultEmoji = false,
-      this.customEmojiStickerList = const [],
-      this.textFieldController,
-      this.onSecondaryTapForOthersPortrait,
-      this.groupMemberInfo,
-      this.customMessageHoverBarOnDesktop})
-      : super(key: key);
+  final Function(String qrCode)? onIdentifyQrCode;
+
+  final Future<void> Function(V2TimMessage message)? onCloudDelete;
+
+  final MessageRewardListBuilder? rewardListBuilder;
+
+  const TIMUIKitHistoryMessageListItem({
+    Key? key,
+    required this.message,
+    @Deprecated(
+        "Nickname will not show in one-to-one chat, if you tend to control it in group chat, please use `isShowSelfNameInGroup` and `isShowOthersNameInGroup` from `config: TIMUIKitChatConfig` instead")
+    this.showNickName = false,
+    this.onScrollToIndex,
+    this.onScrollToIndexBegin,
+    this.onTapForOthersPortrait,
+    this.messageItemBuilder,
+    this.onLongPressForOthersHeadPortrait,
+    this.showAvatar = true,
+    this.showMessageSending = true,
+    this.showMessageReadRecipt = true,
+    this.allowLongPress = true,
+    this.toolTipsConfig,
+    this.onLongPress,
+    this.showGroupMessageReadRecipt = false,
+    this.allowAtUserWhenReply = true,
+    this.allowAvatarTap = true,
+    this.userAvatarBuilder,
+    this.themeData,
+    this.padding,
+    this.textPadding,
+    this.topRowBuilder,
+    this.isUseMessageReaction,
+    this.bottomRowBuilder,
+    this.isUseDefaultEmoji = false,
+    this.customEmojiStickerList = const [],
+    this.textFieldController,
+    this.onSecondaryTapForOthersPortrait,
+    this.groupMemberInfo,
+    this.customMessageHoverBarOnDesktop,
+    this.onIdentifyQrCode,
+    this.onCloudDelete,
+    this.rewardListBuilder,
+    required this.onVideoTap,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TIMUIKItHistoryMessageListItemState();
@@ -437,6 +464,19 @@ class _TIMUIKItHistoryMessageListItemState
 
     switch (msgType) {
       case MessageElemType.V2TIM_ELEM_TYPE_CUSTOM:
+      ////////////////// 自定义视频消息兼容 begin //////////////////
+        if (messageItem.customElem?.extension ==
+            '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
+          return TIMUIKitVideoElem(
+            messageItem,
+            isShowJump: isShowJump,
+            chatModel: model,
+            clearJump: clearJump,
+            isShowMessageReaction: widget.isUseMessageReaction,
+            onVideoTap: widget.onVideoTap,
+          );
+        }
+        ////////////////// 自定义视频消息兼容 end //////////////////
         final customWidget =
             messageItemBuilder?.customMessageItemBuilder != null
                 ? messageItemBuilder!.customMessageItemBuilder!(
@@ -504,6 +544,8 @@ class _TIMUIKItHistoryMessageListItemState
                 customEmojiStickerList: widget.customEmojiStickerList,
                 chatModel: model,
                 isShowMessageReaction: widget.isUseMessageReaction,
+                onIdentifyQrCode: widget.onIdentifyQrCode,
+                onVideoTap: widget.onVideoTap,
               );
         }
         final customWidget = messageItemBuilder?.textMessageItemBuilder != null
@@ -590,6 +632,7 @@ class _TIMUIKItHistoryMessageListItemState
               message: messageItem,
               isShowMessageReaction: widget.isUseMessageReaction,
               key: Key("${messageItem.seq}_${messageItem.timestamp}"),
+              onIdentifyQrCode: widget.onIdentifyQrCode,
             );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
         final customWidget = messageItemBuilder?.videoMessageItemBuilder != null
@@ -606,6 +649,7 @@ class _TIMUIKItHistoryMessageListItemState
               chatModel: model,
               clearJump: clearJump,
               isShowMessageReaction: widget.isUseMessageReaction,
+              onVideoTap: widget.onVideoTap,
             );
       case MessageElemType.V2TIM_ELEM_TYPE_LOCATION:
         final customWidget =
@@ -636,7 +680,10 @@ class _TIMUIKItHistoryMessageListItemState
                 isShowMessageReaction: widget.isUseMessageReaction,
                 mergerElem: messageItem.mergerElem!,
                 messageID: messageItem.msgID ?? "",
-                isSelf: messageItem.isSelf ?? true);
+                isSelf: messageItem.isSelf ?? true,
+                onIdentifyQrCode: widget.onIdentifyQrCode,
+                onVideoTap: widget.onVideoTap,
+            );
       default:
         return Text(TIM_t("[未知消息]"));
     }
@@ -761,18 +808,22 @@ class _TIMUIKItHistoryMessageListItemState
     bool? isFromWideTooltip,
     bool? isShowMoreSticker,
   ) {
+    if (MessageUtils.isHideCustomTooltip(message)) {
+      return;
+    }
     if (tooltip != null && tooltip!.isOpen) {
       tooltip!.close();
       return;
     }
     tooltip = null;
 
+    double viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktopScreen =
         TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     final isLongMessage =
-        context.size!.height + 350 > screenHeight && !(isDesktopScreen);
+        viewInsetsBottom > 0 || context.size!.height + 350 > screenHeight;
     final tapDetails =
         (isDesktopScreen || isLongMessage) ? (details ?? _tapDetails) : details;
     final isSelf = message.isSelf ?? true;
@@ -786,7 +837,7 @@ class _TIMUIKItHistoryMessageListItemState
             .toDouble();
     final double dy = min(
             tapDetails?.globalPosition.dy ?? MediaQuery.of(context).size.height,
-            MediaQuery.of(context).size.height - 320)
+            MediaQuery.of(context).size.height - 320 - viewInsetsBottom)
         .toDouble();
     final finalTapDetail = tapDetails != null
         ? TapDownDetails(
@@ -833,44 +884,44 @@ class _TIMUIKItHistoryMessageListItemState
         : model.chatConfig.isUseMessageReaction;
     final isDesktopScreen =
         TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
-    final isSelf = widget.message.isSelf ?? true;
+    // final isSelf = widget.message.isSelf ?? true;
     double arrowTipDistance = 30;
     double arrowBaseWidth = 10;
     double arrowLength = 10;
     bool hasArrow = true;
     TooltipDirection popupDirection = TooltipDirection.up;
-    double? left;
-    double? right;
+    // double? left;
+    // double? right;
     SelectEmojiPanelPosition selectEmojiPanelPosition =
         SelectEmojiPanelPosition.down;
     if (context != null) {
       RenderBox? box = _key.currentContext?.findRenderObject() as RenderBox?;
       if (details != null && box != null) {
-        double screenWidth = MediaQuery.of(context).size.width;
-        final mousePosition = details.globalPosition;
+        // double screenWidth = MediaQuery.of(context).size.width;
+        // final mousePosition = details.globalPosition;
         hasArrow = isDesktopScreen ? false : true;
         arrowTipDistance = 0;
         arrowBaseWidth = 0;
         arrowLength = 0;
         popupDirection = TooltipDirection.down;
-        if (isSelf || (isFromWideToolTip ?? false)) {
-          right = screenWidth - mousePosition.dx;
-        } else {
-          left = mousePosition.dx;
-        }
+        // if (isSelf || (isFromWideToolTip ?? false)) {
+        //   right = screenWidth - mousePosition.dx;
+        // } else {
+        //   left = mousePosition.dx;
+        // }
       } else {
         if (box != null) {
-          double screenWidth = MediaQuery.of(context).size.width;
+          // double screenWidth = MediaQuery.of(context).size.width;
           double viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
           Offset offset = box.localToGlobal(Offset.zero);
-          double boxWidth = box.size.width;
-          if (isSelf) {
-            right = screenWidth -
-                offset.dx -
-                ((isUseMessageReaction) ? boxWidth : (boxWidth / 1.3));
-          } else {
-            left = offset.dx;
-          }
+          // double boxWidth = box.size.width;
+          // if (isSelf) {
+          //   right = screenWidth -
+          //       offset.dx -
+          //       ((isUseMessageReaction) ? boxWidth : (boxWidth / 1.3));
+          // } else {
+          //   left = offset.dx;
+          // }
           if (offset.dy < 300 && !isLongMessage && viewInsetsBottom == 0) {
             selectEmojiPanelPosition = SelectEmojiPanelPosition.up;
             popupDirection = TooltipDirection.down;
@@ -890,15 +941,16 @@ class _TIMUIKItHistoryMessageListItemState
       arrowTipDistance: arrowTipDistance,
       arrowBaseWidth: arrowBaseWidth,
       arrowLength: arrowLength,
-      right: right,
-      left: left,
+      right: 12,
+      left: 12,
       hasArrow: hasArrow,
-      borderColor: theme?.white ?? Colors.white,
-      backgroundColor: theme?.white ?? Colors.white,
+      borderColor: theme?.primaryColor ?? Colors.black,
+      backgroundColor: theme?.primaryColor ?? Colors.black,
       shadowColor: Colors.black26,
       hasShadow: isDesktopScreen ? false : true,
       borderWidth: 1.0,
       showCloseButton: ShowCloseButton.none,
+      borderRadius: 20,
       touchThroughAreaShape: ClipAreaShape.rectangle,
       content: TIMUIKitMessageTooltip(
         iSUseDefaultHoverBar: model.chatConfig.isUseMessageHoverBarOnDesktop &&
@@ -912,6 +964,7 @@ class _TIMUIKItHistoryMessageListItemState
         allowAtUserWhenReply: widget.allowAtUserWhenReply,
         onLongPressForOthersHeadPortrait:
             widget.onLongPressForOthersHeadPortrait,
+        onCloudDelete: widget.onCloudDelete,
         selectEmojiPanelPosition: selectEmojiPanelPosition,
         onCloseTooltip: () => tooltip?.close(),
         onSelectSticker: (int value) {
@@ -1194,6 +1247,8 @@ class _TIMUIKItHistoryMessageListItemState
           TIMUIKitMessageReadReceipt(
             messageItem: widget.message,
             onTapAvatar: widget.onTapForOthersPortrait,
+            onIdentifyQrCode: widget.onIdentifyQrCode,
+            onVideoTap: widget.onVideoTap,
           ),
       ],
     );
@@ -1281,6 +1336,8 @@ class _TIMUIKItHistoryMessageListItemState
       }
     }
 
+    final cusAvatar = widget.userAvatarBuilder?.call(context, message);
+
     return LayoutBuilder(
       builder: (context, constraints) => Container(
         padding: EdgeInsets.only(left: isSelf ? 0 : 16, right: isSelf ? 16 : 0),
@@ -1290,7 +1347,9 @@ class _TIMUIKItHistoryMessageListItemState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (model.isMultiSelect)
+            if (model.isMultiSelect &&
+                !MessageUtils.isNeedHideMessage(message) &&
+                !MessageUtils.isCallingData(message.customElem?.data ?? ''))
               Container(
                 margin:
                     EdgeInsets.only(right: 12, top: 10, left: isSelf ? 16 : 0),
@@ -1393,23 +1452,16 @@ class _TIMUIKItHistoryMessageListItemState
                                   }
                                 }
                               : null,
-                          child: widget.userAvatarBuilder != null
-                              ? widget.userAvatarBuilder!(context, message)
-                              : Container(
-                                  margin: (isSelf && isShowNickNameForSelf) ||
-                                          (!isSelf && isShowNickNameForOthers)
-                                      ? const EdgeInsets.only(top: 2)
-                                      : null,
-                                  child: SizedBox(
-                                    width: 40,
-                                    height: 40,
-                                    child: Avatar(
-                                      faceUrl: message.faceUrl ?? "",
-                                      showName:
-                                          MessageUtils.getDisplayName(message),
-                                    ),
-                                  ),
+                          child: cusAvatar ??
+                              SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: Avatar(
+                                  faceUrl: message.faceUrl ?? "",
+                                  showName:
+                                  MessageUtils.getDisplayName(message),
                                 ),
+                              ),
                         ),
                       if (isSelf &&
                           widget.message.elemType == 6 &&
@@ -1533,7 +1585,9 @@ class _TIMUIKItHistoryMessageListItemState
                                             isFromSelf: message.isSelf ?? true,
                                             isShowJump: false,
                                             clearJump: () {},
-                                            chatModel: model)
+                                            chatModel: model,
+                                            backgroundColor: theme.white,
+                                        )
                                       ],
                                     );
                                   }),
@@ -1559,6 +1613,11 @@ class _TIMUIKItHistoryMessageListItemState
                                       isDownloadWaiting),
                               ],
                             ),
+                            if (widget.isUseMessageReaction ?? true)
+                              TIMUIKitMessageReactionShowPanel(
+                                message: widget.message,
+                                rewardListBuilder: widget.rewardListBuilder,
+                              ),
                             if (widget.bottomRowBuilder != null)
                               widget.bottomRowBuilder!(context, message)
                           ],
@@ -1575,9 +1634,8 @@ class _TIMUIKItHistoryMessageListItemState
                           ),
                         ),
                       if (isSelf && widget.showAvatar)
-                        widget.userAvatarBuilder != null
-                            ? widget.userAvatarBuilder!(context, message)
-                            : SizedBox(
+                        cusAvatar ??
+                            SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: InkWell(

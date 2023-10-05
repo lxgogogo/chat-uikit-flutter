@@ -6,9 +6,12 @@ import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:open_file/open_file.dart';
+import 'package:recognition_qrcode/recognition_qrcode.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/message/message_services.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/image_list_screen.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/img_long_press_bottom_sheet.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 import 'package:universal_html/html.dart' as html;
 import 'dart:io';
@@ -42,16 +45,18 @@ class TIMUIKitImageElem extends StatefulWidget {
   final String? isFrom;
   final bool? isShowMessageReaction;
   final TUIChatSeparateViewModel chatModel;
+  final Function(String qrCode)? onIdentifyQrCode;
 
-  const TIMUIKitImageElem(
-      {required this.message,
-      this.isShowJump = false,
-      required this.chatModel,
-      this.clearJump,
-      this.isFrom,
-      Key? key,
-      this.isShowMessageReaction})
-      : super(key: key);
+  const TIMUIKitImageElem({
+    required this.message,
+    this.isShowJump = false,
+    required this.chatModel,
+    this.clearJump,
+    this.isFrom,
+    Key? key,
+    this.isShowMessageReaction,
+    this.onIdentifyQrCode,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TIMUIKitImageElem();
@@ -288,9 +293,72 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     }
   }
 
+  Future<void> _scanImage() async {
+    try {
+      String? imageUrl;
+      bool isAssetBool = false;
+      final imageElem = widget.message.imageElem;
+      if (imageElem != null) {
+        final originUrl = getOriginImgURL();
+        final localUrl = imageElem.imageList?.firstOrNull?.localUrl;
+        final filePath = imageElem.path;
+        final isWeb = PlatformUtils().isWeb;
+
+        if (!isWeb && filePath != null && File(filePath).existsSync()) {
+          imageUrl = filePath;
+          isAssetBool = true;
+        } else if (localUrl != null &&
+            (!isWeb && File(localUrl).existsSync())) {
+          imageUrl = localUrl;
+          isAssetBool = true;
+        } else {
+          imageUrl = originUrl;
+          isAssetBool = false;
+        }
+      }
+      if (imageUrl != null) {
+        return RecognitionQrcode.recognition(
+          imageUrl,
+        ).then((qrData) {
+          final qrCode = qrData['value'] as String? ?? '';
+          if (qrCode.isNotEmpty) {
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return ImgLongPressBottomSheet(
+                  scanQRCode: () async {
+                    widget.onIdentifyQrCode?.call(qrCode);
+                  },
+                );
+              },
+            );
+          }
+        });
+      }
+    } catch (e) {
+      onTIMCallback(TIMCallback(
+          infoCode: 6660414,
+          infoRecommendText: TIM_t("正在下载中"),
+          type: TIMCallbackType.INFO));
+      return;
+    }
+  }
+
   V2TimImage? getImageFromList(V2TimImageTypesEnum imgType) {
     V2TimImage? img = MessageUtils.getImageFromImgList(
         widget.message.imageElem!.imageList,
+        HistoryMessageDartConstant.imgPriorMap[imgType] ??
+            HistoryMessageDartConstant.oriImgPrior);
+
+    return img;
+  }
+
+  V2TimImage? getImageFromListByElem(
+      V2TimImageTypesEnum imgType,
+      V2TimImageElem? imageElem,
+      ) {
+    V2TimImage? img = MessageUtils.getImageFromImgList(
+        imageElem?.imageList,
         HistoryMessageDartConstant.imgPriorMap[imgType] ??
             HistoryMessageDartConstant.oriImgPrior);
 
@@ -450,6 +518,36 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
         );
       }
     }
+  }
+
+  Future<void> toImageListScreen(
+      TUITheme theme,
+      TUIChatGlobalModel model, {
+        required bool isLocal,
+      }) async {
+    // final List<V2TimMessage> imgMessageList = await getImgMessageList();
+    final List<V2TimMessage> imgMessageList =
+    model.getImgMessageList(widget.chatModel.conversationID);
+
+    Navigator.of(context).push(
+      TransparentPageRoute(
+        pageBuilder: (_, __, ___) => ImageListScreen(
+          messageID: widget.message.msgID,
+          imageDataList: imgMessageList.map((e) {
+            return ImageData(
+              imageUrl: getOriginImgURL(),
+              messageID: e.msgID,
+            );
+          }).toList(),
+          downloadFn: (index) async {
+            return await _saveImg(theme);
+          },
+          scanQRCode: (index) async {
+            return await _scanImage();
+          },
+        ),
+      ),
+    );
   }
 
   Widget _renderAllImage(
@@ -681,4 +779,35 @@ class ImageClipper extends CustomClipper<RRect> {
   bool shouldReclip(CustomClipper<RRect> oldClipper) {
     return oldClipper != this;
   }
+}
+
+/// Transparent Page Route
+class TransparentPageRoute<T> extends PageRouteBuilder<T> {
+  TransparentPageRoute({
+    super.settings,
+    required super.pageBuilder,
+    super.transitionsBuilder = _defaultTransitionsBuilder,
+    super.transitionDuration = const Duration(milliseconds: 150),
+    super.barrierDismissible,
+    super.barrierColor,
+    super.barrierLabel,
+    super.maintainState,
+  }) : super(
+    opaque: false,
+  );
+}
+
+Widget _defaultTransitionsBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+    ) {
+  return FadeTransition(
+    opacity: CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    ),
+    child: child,
+  );
 }

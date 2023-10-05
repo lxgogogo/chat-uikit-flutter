@@ -54,14 +54,14 @@ class TIMUIKitChatController {
   /// Refresh the history message list manually;
   Future<bool> refreshCurrentHistoryList(
       [String? convID, ConvType? convType]) async {
-    if(model != null){
-      try{
+    if (model != null) {
+      try {
         scrollController?.animateTo(
           scrollController!.position.minScrollExtent,
           duration: const Duration(milliseconds: 200),
           curve: Curves.ease,
         );
-      }catch(e){}
+      } catch (e) {}
       return model!.loadDataFromController();
     } else {
       return false;
@@ -136,6 +136,7 @@ class TIMUIKitChatController {
     /// Local custom message data (saved locally, will not be sent to the peer end,
     /// and will become invalid after the app is uninstalled and reinstalled).
     String? localCustomData,
+    bool? isSupportMessageExtension = false,
   }) {
     if (convType != null) {
       /// Sends a message to the specified conversation.
@@ -143,46 +144,50 @@ class TIMUIKitChatController {
       assert(groupID != null || convType != ConvType.group);
       assert(userID != null || convType != ConvType.c2c);
       if (isNavigateToMessageListBottom && scrollController != null) {
-        try{
+        try {
           scrollController?.animateTo(
             scrollController!.position.minScrollExtent,
             duration: const Duration(milliseconds: 200),
             curve: Curves.ease,
           );
-        }catch(e){}
+        } catch (e) {}
       }
       return globalChatModel.sendMessageFromController(
-          priority: priority,
-          onlineUserOnly: onlineUserOnly,
-          isExcludedFromUnreadCount: isExcludedFromUnreadCount,
-          needReadReceipt: needReadReceipt,
-          cloudCustomData: cloudCustomData,
-          localCustomData: localCustomData,
-          messageInfo: messageInfo,
-          convType: convType,
-          convID: (convType == ConvType.group ? groupID : userID) ?? "",
-          setInputField: setInputField,
-          offlinePushInfo: offlinePushInfo);
+        priority: priority,
+        onlineUserOnly: onlineUserOnly,
+        isExcludedFromUnreadCount: isExcludedFromUnreadCount,
+        needReadReceipt: needReadReceipt,
+        cloudCustomData: cloudCustomData,
+        localCustomData: localCustomData,
+        messageInfo: messageInfo,
+        convType: convType,
+        convID: (convType == ConvType.group ? groupID : userID) ?? "",
+        setInputField: setInputField,
+        offlinePushInfo: offlinePushInfo,
+        isSupportMessageExtension: isSupportMessageExtension,
+      );
     } else if (model != null) {
       /// Sends a message to the current conversation specified on `TIMUIKitChat`. 发送到 `TIMUIKitChat` 中指定的当前对话。
       if (isNavigateToMessageListBottom && scrollController != null) {
-        try{
+        try {
           scrollController?.animateTo(
             scrollController!.position.minScrollExtent,
             duration: const Duration(milliseconds: 200),
             curve: Curves.ease,
           );
-        }catch(e){}
+        } catch (e) {}
       }
       return model!.sendMessageFromController(
-          priority: priority,
-          onlineUserOnly: onlineUserOnly,
-          isExcludedFromUnreadCount: isExcludedFromUnreadCount,
-          needReadReceipt: needReadReceipt,
-          cloudCustomData: cloudCustomData,
-          localCustomData: localCustomData,
-          messageInfo: messageInfo,
-          offlinePushInfo: offlinePushInfo);
+        priority: priority,
+        onlineUserOnly: onlineUserOnly,
+        isExcludedFromUnreadCount: isExcludedFromUnreadCount,
+        needReadReceipt: needReadReceipt,
+        cloudCustomData: cloudCustomData,
+        localCustomData: localCustomData,
+        messageInfo: messageInfo,
+        offlinePushInfo: offlinePushInfo,
+        isSupportMessageExtension: isSupportMessageExtension,
+      );
     }
     return null;
   }
@@ -238,13 +243,13 @@ class TIMUIKitChatController {
       assert(groupID != null || convType != ConvType.group);
       assert(userID != null || convType != ConvType.c2c);
       if (isNavigateToMessageListBottom && scrollController != null) {
-        try{
+        try {
           scrollController?.animateTo(
             scrollController!.position.minScrollExtent,
             duration: const Duration(milliseconds: 200),
             curve: Curves.ease,
           );
-        }catch(e){}
+        } catch (e) {}
       }
       return globalChatModel.sendReplyMessageFromController(
           text: messageText,

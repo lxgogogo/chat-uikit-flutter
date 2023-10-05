@@ -42,6 +42,9 @@ class MorePanelConfig {
   final List<MorePanelItem>? extraAction;
   final Widget Function(MorePanelItem item)? actionBuilder;
 
+  // 发送视频之前的操作：目前针对自定义上传 url
+  final Future<String> Function(String videoFilePath)? beforeSendVideoMsg;
+
   MorePanelConfig({
     this.showFilePickAction = true,
     this.showGalleryPickAction = true,
@@ -52,6 +55,7 @@ class MorePanelConfig {
     this.showVideoCall = true,
     this.extraAction,
     this.actionBuilder,
+    this.beforeSendVideoMsg,
   });
 }
 
@@ -137,7 +141,7 @@ class _MorePanelState extends TIMUIKitState<MorePanel> {
       if (!PlatformUtils().isWeb)
         MorePanelItem(
             id: "photo",
-            title: TIM_t("照片"),
+            title: TIM_t("相册"),
             onTap: (c) {
               _onFeatureTap(
                 "photo",
@@ -348,11 +352,21 @@ class _MorePanelState extends TIMUIKitState<MorePanel> {
     );
     MessageUtils.handleMessageError(
         model.sendVideoMessage(
-            videoPath: filePath,
-            duration: duration,
-            snapshotPath: tempPath,
-            convID: convID,
-            convType: convType),
+          videoPath: filePath,
+          duration: duration,
+          snapshotPath: tempPath,
+          cusVideoUrlFn: () async {
+            String cusVideoUrl = '';
+            if (widget.morePanelConfig?.beforeSendVideoMsg != null) {
+              cusVideoUrl = await widget.morePanelConfig?.beforeSendVideoMsg
+                  ?.call(filePath) ??
+                  '';
+            }
+            return cusVideoUrl;
+          },
+          convID: convID,
+          convType: convType,
+        ),
         context);
   }
 
