@@ -23,8 +23,6 @@ import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 
 typedef ConversationItemBuilder = Widget Function(
     V2TimConversation conversationItem,
-    bool isShowDraft,
-    LastMessageBuilder? lastMessageBuilder,
     [V2TimUserStatus? onlineStatus]);
 
 typedef ConversationItemSlideBuilder = List<ConversationItemSlidePanel>
@@ -205,6 +203,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
           .where(widget.conversationCollector!)
           .toList();
     }
+    widget.markPrivateConv?.call(filteredConversationList);
     return filteredConversationList;
   }
 
@@ -266,7 +265,8 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
   ) {
     final theme = themeViewModel.theme;
     return [
-      if (!PlatformUtils().isWeb)
+      if (!PlatformUtils().isWeb &&
+          !widget.filterIds.contains(conversationItem.userID))
         ConversationItemSlidePanel(
           onPressed: (context) {
             _clearHistory(conversationItem);
@@ -287,15 +287,16 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
         foregroundColor: theme.conversationItemSliderTextColor,
         label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
       ),
-      ConversationItemSlidePanel(
-        onPressed: (context) {
-          _deleteConversation(conversationItem);
-        },
-        backgroundColor:
-            theme.conversationItemSliderDeleteBgColor ?? Colors.red,
-        foregroundColor: theme.conversationItemSliderTextColor,
-        label: TIM_t("删除"),
-      )
+      if (!widget.filterIds.contains(conversationItem.userID))
+        ConversationItemSlidePanel(
+          onPressed: (context) {
+            _deleteConversation(conversationItem);
+          },
+          backgroundColor:
+              theme.conversationItemSliderDeleteBgColor ?? Colors.red,
+          foregroundColor: theme.conversationItemSliderTextColor,
+          label: TIM_t("删除"),
+        )
     ];
   }
 
@@ -361,19 +362,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                               (item) => item.userID == conversationItem?.userID,
                               orElse: () => V2TimUserStatus(statusType: 0));
 
-                      if (widget.itemBuilder != null) {
-                        return widget.itemBuilder!(
-                          conversationItem!,
-                          widget.isShowDraft,
-                          widget.lastMessageBuilder,
-                          (widget.isShowOnlineStatus &&
-                                  conversationItem.userID != null &&
-                                  conversationItem.userID!.isNotEmpty)
-                              ? onlineStatus
-                              : null,
-                        );
-                      }
-
                       final slideChildren =
                           _getSlideBuilder()(conversationItem!);
 
@@ -390,26 +378,50 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                                   ? theme.conversationItemPinedBgColor
                                   : theme.conversationItemBgColor,
                           child: GestureDetector(
-                            child: TIMUIKitConversationItem(
-                                isCurrent: isCurrent,
-                                isShowDraft: widget.isShowDraft,
-                                lastMessageBuilder: widget.lastMessageBuilder,
-                                faceUrl: conversationItem.faceUrl ?? "",
-                                nickName: conversationItem.showName ?? "",
-                                isDisturb: conversationItem.recvOpt != 0,
-                                lastMsg: conversationItem.lastMessage,
-                                isPined: isPined,
-                                groupAtInfoList:
-                                    conversationItem.groupAtInfoList ?? [],
-                                unreadCount: conversationItem.unreadCount ?? 0,
-                                draftText: conversationItem.draftText,
-                                onlineStatus: (widget.isShowOnlineStatus &&
-                                        conversationItem.userID != null &&
-                                        conversationItem.userID!.isNotEmpty)
-                                    ? onlineStatus
-                                    : null,
-                                draftTimestamp: conversationItem.draftTimestamp,
-                                convType: conversationItem.type),
+                            child:
+                                //////////////////// 版本迁移 ////////////////////
+                                widget.itemBuilder != null
+                                    ? widget.itemBuilder!(
+                                        conversationItem,
+                                        (widget.isShowOnlineStatus &&
+                                                conversationItem.userID !=
+                                                    null &&
+                                                conversationItem
+                                                    .userID!.isNotEmpty)
+                                            ? onlineStatus
+                                            : null,
+                                      )
+                                    :
+                                    //////////////////// 版本迁移 ////////////////////
+                                    TIMUIKitConversationItem(
+                                        isCurrent: isCurrent,
+                                        isShowDraft: widget.isShowDraft,
+                                        lastMessageBuilder:
+                                            widget.lastMessageBuilder,
+                                        faceUrl: conversationItem.faceUrl ?? "",
+                                        nickName:
+                                            conversationItem.showName ?? "",
+                                        isDisturb:
+                                            conversationItem.recvOpt != 0,
+                                        lastMsg: conversationItem.lastMessage,
+                                        isPined: isPined,
+                                        groupAtInfoList:
+                                            conversationItem.groupAtInfoList ??
+                                                [],
+                                        unreadCount:
+                                            conversationItem.unreadCount ?? 0,
+                                        draftText: conversationItem.draftText,
+                                        onlineStatus:
+                                            (widget.isShowOnlineStatus &&
+                                                    conversationItem.userID !=
+                                                        null &&
+                                                    conversationItem
+                                                        .userID!.isNotEmpty)
+                                                ? onlineStatus
+                                                : null,
+                                        draftTimestamp:
+                                            conversationItem.draftTimestamp,
+                                        convType: conversationItem.type),
                             onTap: () => onTapConvItem(conversationItem),
                           ),
                         );
