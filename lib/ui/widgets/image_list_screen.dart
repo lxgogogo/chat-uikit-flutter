@@ -28,7 +28,7 @@ class ImageListScreen extends StatefulWidget {
   final List<ImageData> imageDataList;
   final String? messageID;
   final Future<void> Function(int index)? downloadFn;
-  final Future<void> Function(int index)? scanQRCode;
+  final Future<void> Function(int index,BuildContext context)? scanQRCode;
 
   @override
   State<StatefulWidget> createState() {
@@ -231,7 +231,7 @@ class _ImageListScreenState extends TIMUIKitState<ImageListScreen>
                             setState(() {
                               isLoading = true;
                             });
-                            await widget.scanQRCode!(_currentIndex)
+                            await widget.scanQRCode!(_currentIndex,context)
                                 .whenComplete(() => Future.delayed(
                                         const Duration(milliseconds: 200), () {
                                       setState(() {

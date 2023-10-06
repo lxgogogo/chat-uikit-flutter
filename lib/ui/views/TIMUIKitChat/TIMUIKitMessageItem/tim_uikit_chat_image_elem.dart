@@ -293,7 +293,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     }
   }
 
-  Future<void> _scanImage() async {
+  Future<void> _scanImage(BuildContext context) async {
     try {
       String? imageUrl;
       bool isAssetBool = false;
@@ -482,20 +482,21 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
           originImgUrl: imgUrl,
         );
       } else {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (_, __, ___) => ImageScreen(
-                  imageProvider: CachedNetworkImageProvider(
-                    imgUrl ?? "",
-                    cacheKey: widget.message.msgID,
-                  ),
-                  heroTag: heroTag,
-                  messageID: widget.message.msgID,
-                  downloadFn: () async {
-                    return await _saveImg(theme);
-                  })),
-        );
+        toImageListScreen(theme,model,isLocal: false);
+        // Navigator.of(context).push(
+        //   PageRouteBuilder(
+        //       opaque: false,
+        //       pageBuilder: (_, __, ___) => ImageScreen(
+        //           imageProvider: CachedNetworkImageProvider(
+        //             imgUrl ?? "",
+        //             cacheKey: widget.message.msgID,
+        //           ),
+        //           heroTag: heroTag,
+        //           messageID: widget.message.msgID,
+        //           downloadFn: () async {
+        //             return await _saveImg(theme);
+        //           })),
+        // );
       }
     } else {
       if (PlatformUtils().isDesktop) {
@@ -504,18 +505,19 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
             context: context,
             onClickOrigin: () => launchDesktopFile(imgPath ?? ""));
       } else {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            opaque: false, // set to false
-            pageBuilder: (_, __, ___) => ImageScreen(
-                imageProvider: FileImage(File(imgPath ?? "")),
-                heroTag: heroTag,
-                messageID: widget.message.msgID,
-                downloadFn: () async {
-                  return await _saveImg(theme);
-                }),
-          ),
-        );
+        toImageListScreen(theme,model,isLocal: true);
+        // Navigator.of(context).push(
+        //   PageRouteBuilder(
+        //     opaque: false, // set to false
+        //     pageBuilder: (_, __, ___) => ImageScreen(
+        //         imageProvider: FileImage(File(imgPath ?? "")),
+        //         heroTag: heroTag,
+        //         messageID: widget.message.msgID,
+        //         downloadFn: () async {
+        //           return await _saveImg(theme);
+        //         }),
+        //   ),
+        // );
       }
     }
   }
@@ -542,8 +544,8 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
           downloadFn: (index) async {
             return await _saveImg(theme);
           },
-          scanQRCode: (index) async {
-            return await _scanImage();
+          scanQRCode: (index,context) async {
+            return await _scanImage(context);
           },
         ),
       ),
@@ -631,7 +633,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
               TencentUtils.checkString(
                       widget.message.imageElem?.imageList?[1]?.localUrl) ==
                   null ||
-          !File(widget.message.imageElem!.imageList![1]!.localUrl!)
+          !File(widget.message.imageElem!.imageList![1]!.localUrl ?? '')
               .existsSync()) {
         _messageService.downloadMessage(
             msgID: widget.message.msgID!,
