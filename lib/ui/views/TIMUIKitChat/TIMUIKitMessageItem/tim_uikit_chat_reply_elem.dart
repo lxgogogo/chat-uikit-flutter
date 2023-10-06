@@ -383,15 +383,15 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
 
     final borderRadius = isFromSelf
         ? const BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(2),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10))
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(5),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20))
         : const BorderRadius.only(
-            topLeft: Radius.circular(2),
-            topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10));
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20));
     final textWithLink = LinkPreviewEntry.getHyperlinksText(
         widget.message.textElem?.text ?? "",
         widget.chatModel.chatConfig.isSupportMarkdownForTextMessage,

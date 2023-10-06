@@ -193,15 +193,15 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
 
     final borderRadius = widget.isFromSelf
         ? const BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(2),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10))
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(5),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20))
         : const BorderRadius.only(
-            topLeft: Radius.circular(2),
-            topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10));
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20));
     if (widget.isShowJump) {
       if (!isShining) {
         Future.delayed(Duration.zero, () {

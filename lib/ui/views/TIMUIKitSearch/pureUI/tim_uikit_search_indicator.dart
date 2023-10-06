@@ -64,7 +64,7 @@ class TIMUIKitSearchIndicator extends TIMUIKitStatelessWidget {
             const SizedBox(height: 4),
             Text(
               TIM_t(titleMap[item]!),
-              style: TextStyle(color: theme.textColor, fontSize: 13),
+              style: TextStyle(color: theme.darkTextColor, fontSize: 13),
             )
           ],
         ),

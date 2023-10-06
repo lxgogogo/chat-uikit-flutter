@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
@@ -1454,8 +1455,8 @@ class _TIMUIKItHistoryMessageListItemState
                               : null,
                           child: cusAvatar ??
                               SizedBox(
-                                width: 40,
-                                height: 40,
+                                width: 36.w,
+                                height: 36.w,
                                 child: Avatar(
                                   faceUrl: message.faceUrl ?? "",
                                   showName:
@@ -1636,8 +1637,8 @@ class _TIMUIKItHistoryMessageListItemState
                       if (isSelf && widget.showAvatar)
                         cusAvatar ??
                             SizedBox(
-                                width: 40,
-                                height: 40,
+                                width: 36.w,
+                                height: 36.w,
                                 child: InkWell(
                                   onTapDown: (details) {
                                     if (widget.onTapForOthersPortrait != null &&
