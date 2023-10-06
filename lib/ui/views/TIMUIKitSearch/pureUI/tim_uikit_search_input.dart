@@ -97,7 +97,9 @@ class TIMUIKitSearchInputState extends TIMUIKitState<TIMUIKitSearchInput> {
                 textAlign: TextAlign.start,
                 style: isDesktopScreen ? const TextStyle(fontSize: 12) : null,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(0),
+                  /////////// 版本迁移 ///////////
+                  // contentPadding: const EdgeInsets.all(0),
+                  /////////// 版本迁移 ///////////
                   border: const OutlineInputBorder(borderSide: BorderSide.none),
                   hintStyle: TextStyle(
                     fontSize: isDesktopScreen ? 12 : 14,
