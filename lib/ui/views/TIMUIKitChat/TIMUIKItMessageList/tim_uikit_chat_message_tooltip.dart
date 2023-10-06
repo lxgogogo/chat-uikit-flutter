@@ -314,7 +314,7 @@ class TIMUIKitMessageTooltipState
         MessageToolTipItem(
             label: '${TIM_t("管理员")}${TIM_t("删除")}',
             id: "cloud_delete",
-            iconImageAsset: "images/revoke_message.png",
+            iconImageAsset: "images/cloud_delete.png",
             onClick: () => _onTap("cloud_delete", model)),
     ];
     final defaultTipsIds = defaultTipsList.map((e) => e.id);

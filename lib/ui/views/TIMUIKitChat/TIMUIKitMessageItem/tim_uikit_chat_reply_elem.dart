@@ -465,10 +465,10 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
                   maxWidth: MediaQuery.of(context).size.width * 0.6),
               child: Container(
                 constraints: const BoxConstraints(minWidth: 120),
-                decoration: BoxDecoration(
-                  color: theme.weakBackgroundColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                ),
+                // decoration: BoxDecoration(
+                //   color: theme.weakBackgroundColor,
+                //   borderRadius: const BorderRadius.all(Radius.circular(2)),
+                // ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

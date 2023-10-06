@@ -220,6 +220,10 @@ class MessageUtils {
         final groupChangeInfoList = groupTipsElem.groupChangeInfoList ?? [];
         String changedInfoString = "";
         for (V2TimGroupChangeInfo? element in groupChangeInfoList) {
+          if(element?.type == GroupChangeInfoType.V2TIM_GROUP_INFO_CHANGE_TYPE_FACE_URL){
+            changedInfoString = TIM_t("群头像");
+            break;
+          }
           final newText = await _getGroupChangeType(element!, groupMemberList);
           changedInfoString +=
               (changedInfoString.isEmpty ? "" : " / ") + newText;

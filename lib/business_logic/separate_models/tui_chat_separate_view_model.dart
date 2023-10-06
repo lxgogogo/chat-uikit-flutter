@@ -555,14 +555,10 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     final LocalCustomDataModel localCustomData = LocalCustomDataModel.fromMap(
         json.decode(TencentUtils.checkString(message.localCustomData) ?? "{}"));
     localCustomData.translatedText = null;
-    final result = await TencentImSDKPlugin.v2TIMManager.v2TIMMessageManager
-        .setLocalCustomData(
-      msgID: message.msgID!,
-      localCustomData: json.encode(localCustomData.toMap()),
-    );
-    if (result.code == 0 && TencentUtils.checkString(message.msgID) != null) {
-      updateMessageFromController(msgID: message.msgID!);
-    }
+    message.localCustomData = json.encode(localCustomData.toMap());
+    globalModel.onMessageModified(message);
+    TencentImSDKPlugin.v2TIMManager.v2TIMMessageManager.setLocalCustomData(
+        msgID: message.msgID!, localCustomData: message.localCustomData ?? "");
   }
 
   _setMsgReadReceipt(List<V2TimMessage> message) async {

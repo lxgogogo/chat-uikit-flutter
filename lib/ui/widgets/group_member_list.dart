@@ -557,8 +557,8 @@ class _GroupProfileMemberListState
                             isChecked: selectedMember.contains(memberInfo)),
                       ),
                     Container(
-                      width: 36.w,
-                      height: 36.w,
+                      width: 40,
+                      height: 40,
                       margin: EdgeInsets.only(right: 10.w),
                       child: Avatar(
                         faceUrl: memberInfo.privateAvatar ?? "",
