@@ -1344,14 +1344,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.6.1"
-  tim_ui_kit_sticker_plugin:
-    dependency: "direct main"
-    description:
-      name: tim_ui_kit_sticker_plugin
-      sha256: db8143aea26eda5feec5ec2efc5a31b2c56928cd807537778829698f3c4efec5
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.0.1+1"
   timing:
     dependency: transitive
     description:

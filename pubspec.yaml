@@ -62,7 +62,7 @@ dependencies:
   uuid: ^3.0.6
   open_file: ^3.3.2
   tencent_keyboard_visibility: ^1.0.1
-  tim_ui_kit_sticker_plugin: ^3.0.1+1
+#  tim_ui_kit_sticker_plugin: ^3.0.1+1
   tencent_im_base: ^3.0.1
   fc_native_video_thumbnail: any
   path: ^1.8.1

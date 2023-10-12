@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:extended_text/extended_text.dart';
-import 'package:tim_ui_kit_sticker_plugin/constant/emoji.dart';
-import 'package:tim_ui_kit_sticker_plugin/utils/tim_custom_face_data.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/constant/emoji.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/utils/tim_custom_face_data.dart';
 
 ///emoji/image text
 class EmojiText extends SpecialText {

@@ -9,7 +9,7 @@ export 'package:tencent_im_base/theme/tui_theme.dart';
 export 'package:tencent_im_base/theme/color.dart';
 
 // Sticker
-export 'package:tim_ui_kit_sticker_plugin/tim_ui_kit_sticker_plugin.dart';
+export 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/tim_ui_kit_sticker_plugin.dart';
 
 // Widgets
 export 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitConversation/tim_uikit_conversation.dart';

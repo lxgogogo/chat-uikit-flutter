@@ -224,6 +224,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                   : [])
           : StickerPanel(
               isWideScreen: false,
+              backgroundColor: Colors.white,
               sendTextMsg: () {
                 widget.onEmojiSubmitted();
                 setSendButton();
@@ -252,6 +253,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                 setSendButton();
               }),
               customStickerPackageList: widget.stickerPackageList,
+              bottomColor: theme.weakBackgroundColor,
               lightPrimaryColor: theme.lightPrimaryColor);
     }
 
@@ -660,7 +662,10 @@ class _TIMUIKitTextFieldLayoutNarrowState
                               }
                             });
                           },
-                          child: Text(TIM_t("发送")),
+                          child: Text(
+                            TIM_t("发送"),
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                   ],
