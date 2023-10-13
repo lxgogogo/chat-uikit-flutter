@@ -9,6 +9,7 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/DefaultSpecialTextSpanBuilder.dart';
 import 'package:extended_text/extended_text.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/utils/tim_custom_face_data.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
@@ -24,7 +25,7 @@ import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/link_preview_en
 import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/models/link_preview_content.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/widgets/link_preview.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/logger.dart';
-import 'package:tim_ui_kit_sticker_plugin/utils/tim_custom_face_data.dart';
+
 
 class TIMUIKitReplyElem extends StatefulWidget {
   final V2TimMessage message;

@@ -6,11 +6,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/compiler/md_text.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/utils/tim_custom_face_data.dart';
 import 'package:tencent_im_base/base_widgets/tim_stateless_widget.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/DefaultSpecialTextSpanBuilder.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/common/utils.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:tim_ui_kit_sticker_plugin/utils/tim_custom_face_data.dart';
 
 typedef ImageBuilder = Widget Function(
     Uri uri, String? imageDirectory, double? width, double? height);

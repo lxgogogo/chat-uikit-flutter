@@ -259,8 +259,6 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
               widget.chatModel.chatConfig.urlPreviewType ==
                   UrlPreviewType.previewCardAndHyperlink)
             _renderPreviewWidget()!,
-          if (widget.isShowMessageReaction ?? true)
-            TIMUIKitMessageReactionShowPanel(message: widget.message)
         ],
       ),
     );
