@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -391,7 +392,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
     }, const Duration(seconds: 1));
 
     final debounceFunc = _debounce((value) {
-      // if (isWebDevice() || isAndroidDevice()) {
+      // if (isWebDevice() || isAndroidDevice()) {// custom 兼容长文编辑
         if (value.isEmpty && showMoreButton != true) {
           // setState(() {
             showMoreButton = true;
@@ -527,6 +528,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                 child: ExtendedTextField(
                                     maxLines: 4,
                                     minLines: 1,
+                                    selectionHeightStyle: BoxHeightStyle.max,
                                     focusNode: widget.focusNode,
                                     onChanged: debounceFunc,
                                     onTap: () {
@@ -538,9 +540,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                       });
                                     },
                                     keyboardType: TextInputType.multiline,
-                                    textInputAction: PlatformUtils().isAndroid
-                                        ? TextInputAction.newline
-                                        : TextInputAction.send,
+                                    textInputAction: TextInputAction.newline,
                                     onEditingComplete: () {
                                       widget.onSubmitted();
                                       if (showKeyboard) {
@@ -553,7 +553,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                         }
                                       });
                                     },
-                                    textAlignVertical: TextAlignVertical.top,
+                                    textAlignVertical: TextAlignVertical.center,
                                     decoration: InputDecoration(
                                         border: InputBorder.none,
                                         hintStyle: const TextStyle(
@@ -646,7 +646,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                 width: 28,
                               ),
                       ),
-                    if ((isAndroidDevice() || isWebDevice()) && !showMoreButton)
+                    if (!showMoreButton)
                       SizedBox(
                         height: 32.0,
                         child: ElevatedButton(
