@@ -391,17 +391,18 @@ class _TIMUIKitTextFieldLayoutNarrowState
     }, const Duration(seconds: 1));
 
     final debounceFunc = _debounce((value) {
-      if (isWebDevice() || isAndroidDevice()) {
+      // if (isWebDevice() || isAndroidDevice()) {
         if (value.isEmpty && showMoreButton != true) {
-          setState(() {
+          // setState(() {
             showMoreButton = true;
-          });
+          // });
         } else if (value.isNotEmpty && showMoreButton == true) {
-          setState(() {
+          // setState(() {
             showMoreButton = false;
-          });
+          // });
         }
-      }
+      // }
+      setState(() {});
       if (widget.onChanged != null) {
         widget.onChanged!(value);
       }
