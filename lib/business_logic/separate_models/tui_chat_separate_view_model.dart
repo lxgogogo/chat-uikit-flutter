@@ -261,19 +261,19 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
         if (data.processingState == ProcessingState.completed) {
           isPlaying = false;
           final index = soundMessageList.indexWhere(
-                (e) => e.msgID == _currentPlayedMsgId,
+                (e) => e.msgID == currentPlayedMsgId,
           );
           if (index >= soundMessageList.length - 1) {
-            _currentPlayedMsgId = '';
+            currentPlayedMsgId = '';
             notifyListeners();
             return;
           }
           final currentMessage = soundMessageList[index + 1];
           if (currentMessage.msgID == null) {
-            _currentPlayedMsgId = '';
+            currentPlayedMsgId = '';
             return;
           }
-          _currentPlayedMsgId = currentMessage.msgID!;
+          currentPlayedMsgId = currentMessage.msgID!;
 
           if (currentMessage.msgID != null) {
             final localUrl = currentMessage.soundElem?.localUrl ?? '';
@@ -298,7 +298,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
               }
             }
           } else {
-            _currentPlayedMsgId = '';
+            currentPlayedMsgId = '';
           }
           notifyListeners();
         }
@@ -309,7 +309,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
   void cancelSoundSubscription() {
     if (isPlaying) {
       SoundPlayer.stop();
-      _currentPlayedMsgId = "";
+      currentPlayedMsgId = "";
     }
     subscription?.cancel();
   }
@@ -325,14 +325,14 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     if (isPlaying) {
       SoundPlayer.stop();
       isPlaying = false;
-      _currentPlayedMsgId = "";
+      currentPlayedMsgId = "";
     } else {
       SoundPlayer.play(url: url, type: type);
       isPlaying = true;
-      _currentPlayedMsgId = message.msgID ?? '';
+      currentPlayedMsgId = message.msgID ?? '';
       if (message.localCustomInt != HistoryMessageDartConstant.read) {
         globalModel.setLocalCustomInt(
-          _currentPlayedMsgId,
+          currentPlayedMsgId,
           HistoryMessageDartConstant.read,
           conversationID,
         );

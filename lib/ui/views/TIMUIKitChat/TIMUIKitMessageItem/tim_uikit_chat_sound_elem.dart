@@ -220,6 +220,8 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
       ],
       builder: (BuildContext context, Widget? w) {
         final chatModel = Provider.of<TUIChatSeparateViewModel>(context);
+        print('xxx : ${chatModel.isPlaying}');
+        print('xxx : ${chatModel.currentPlayedMsgId == widget.msgID}');
         return InkWell(
           onTap: () async {
             final localUrl = widget.message.soundElem?.localUrl ?? '';
