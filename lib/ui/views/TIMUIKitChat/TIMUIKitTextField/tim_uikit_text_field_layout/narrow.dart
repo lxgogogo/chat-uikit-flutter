@@ -17,6 +17,7 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/permission.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/full_screen_text_field.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/DefaultSpecialTextSpanBuilder.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/custom_selection_controls.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/tim_uikit_send_sound_message.dart';
 import 'package:extended_text_field/extended_text_field.dart';
 import 'package:tencent_keyboard_visibility/tencent_keyboard_visibility.dart';
@@ -528,6 +529,7 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                 conversationType: widget.conversationType)
                             : KeyboardVisibility(
                                 child: ExtendedTextField(
+                                    selectionControls: CustomSelectionControls(),
                                     maxLines: 4,
                                     minLines: 1,
                                     selectionHeightStyle: BoxHeightStyle.max,
