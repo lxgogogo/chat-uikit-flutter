@@ -3,7 +3,6 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_config.dart';
 
-
 enum AppStatus { foreground, background }
 
 enum LanguageEnum {
@@ -21,6 +20,10 @@ enum LanguageEnum {
 
   /// Japanese
   ja,
+
+  /// English
+  vi,
+
 }
 
 const languageEnumToString = {
@@ -29,6 +32,7 @@ const languageEnumToString = {
   LanguageEnum.en: "en",
   LanguageEnum.ja: "ja",
   LanguageEnum.ko: "ko",
+  LanguageEnum.vi: "vi",
 };
 
 abstract class CoreServices {
