@@ -7,14 +7,13 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:open_file/open_file.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
-import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/message/message_services.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
+import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/message.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_wrapper.dart';
-import 'package:tencent_cloud_chat_uikit/ui/widgets/video_screen.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -55,7 +54,6 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
       V2TimVideoElem.fromJson(
           jsonDecode(widget.message.customElem?.data ?? '{}'));
   ////////////////// 自定义视频消息兼容 end //////////////////
-
 
   Widget errorDisplay(TUITheme? theme) {
     return Container(
@@ -318,8 +316,8 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                                       package: 'tencent_cloud_chat_uikit',
                                       height: 64)),
                             ),
-                          if (widget.message.videoElem?.duration != null &&
-                              widget.message.videoElem!.duration! > 0)
+                          if (stateElement.duration != null &&
+                              stateElement.duration! > 0)
                             Positioned(
                                 right: 10,
                                 bottom: 10,

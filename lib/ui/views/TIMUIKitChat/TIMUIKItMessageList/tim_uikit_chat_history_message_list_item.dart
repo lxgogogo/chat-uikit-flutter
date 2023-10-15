@@ -7,35 +7,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
-import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
-import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_show_panel.dart';
-import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_text_translate_elem.dart';
-import 'package:tencent_cloud_chat_uikit/ui/widgets/forward_message_screen.dart';
-import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
-import 'package:tencent_super_tooltip/tencent_super_tooltip.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_statelesswidget.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_chat_global_model.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_self_info_view_model.dart';
+import 'package:tencent_cloud_chat_uikit/data_services/core/tim_uikit_wide_modal_operation_key.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/message/message_services.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/ui/constants/history_message_constant.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/message.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/time_ago.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_chat_message_tooltip.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_message_read_receipt.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_show_panel.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/main.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_custom_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_face_elem.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_text_translate_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/tim_uikit_cloud_custom_data.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/forward_message_screen.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/loading.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/radio_button.dart';
-import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
+import 'package:tencent_super_tooltip/tencent_super_tooltip.dart';
 
 import '../TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_select_emoji.dart';
 
@@ -69,9 +70,9 @@ typedef MessageItemContent = Widget? Function(
 );
 
 typedef MessageRewardListBuilder = List<Widget> Function(
-    V2TimMessage message,
-    Map<String, dynamic>? rewardMap,
-    );
+  V2TimMessage message,
+  Map<String, dynamic>? rewardMap,
+);
 
 class MessageHoverControlItem {
   String name;
@@ -181,7 +182,8 @@ class ToolTipsConfig {
       [Key? key, BuildContext? context])? additionalItemBuilder;
 
   /// custom 消息打赏UI
-  final Widget? Function(V2TimMessage message, Function() closeTooltip)? rocketMenuBuilder;
+  final Widget? Function(V2TimMessage message, Function() closeTooltip)?
+      rocketMenuBuilder;
 
   /// A list of additional message tooltip menu items, provided with the data only. We recommend using this field instead of the previous `additionalItemBuilder`.
   List<MessageToolTipItem> Function(
@@ -205,10 +207,10 @@ class ToolTipsConfig {
 
 class TIMUIKitHistoryMessageListItem extends StatefulWidget {
   final void Function(
-      V2TimMessage message,
-      dynamic heroTag,
-      V2TimVideoElem videoElement,
-      ) onVideoTap;
+    V2TimMessage message,
+    dynamic heroTag,
+    V2TimVideoElem videoElement,
+  ) onVideoTap;
 
   /// message instance
   final V2TimMessage message;
@@ -465,7 +467,7 @@ class _TIMUIKItHistoryMessageListItemState
 
     switch (msgType) {
       case MessageElemType.V2TIM_ELEM_TYPE_CUSTOM:
-      ////////////////// 自定义视频消息兼容 begin //////////////////
+        ////////////////// 自定义视频消息兼容 begin //////////////////
         if (messageItem.customElem?.extension ==
             '${MessageElemType.V2TIM_ELEM_TYPE_VIDEO}') {
           return TIMUIKitVideoElem(
@@ -673,17 +675,17 @@ class _TIMUIKItHistoryMessageListItemState
                 : null;
         return customWidget ??
             TIMUIKitMergerElem(
-                messageItemBuilder: messageItemBuilder,
-                model: model,
-                isShowJump: isShowJump,
-                clearJump: clearJump,
-                message: messageItem,
-                isShowMessageReaction: widget.isUseMessageReaction,
-                mergerElem: messageItem.mergerElem!,
-                messageID: messageItem.msgID ?? "",
-                isSelf: messageItem.isSelf ?? true,
-                onIdentifyQrCode: widget.onIdentifyQrCode,
-                onVideoTap: widget.onVideoTap,
+              messageItemBuilder: messageItemBuilder,
+              model: model,
+              isShowJump: isShowJump,
+              clearJump: clearJump,
+              message: messageItem,
+              isShowMessageReaction: widget.isUseMessageReaction,
+              mergerElem: messageItem.mergerElem!,
+              messageID: messageItem.msgID ?? "",
+              isSelf: messageItem.isSelf ?? true,
+              onIdentifyQrCode: widget.onIdentifyQrCode,
+              onVideoTap: widget.onVideoTap,
             );
       default:
         return Text(TIM_t("[未知消息]"));
@@ -1239,6 +1241,16 @@ class _TIMUIKItHistoryMessageListItemState
                   fontSize: 12),
             ),
           ),
+        ////////////////// 恢复 loading //////////////////
+        if (widget.showMessageSending &&
+            isSelf &&
+            message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING)
+          Container(
+            padding: const EdgeInsets.only(bottom: 3),
+            margin: const EdgeInsets.only(right: 6),
+            child: const Loading(),
+          ),
+        ////////////////// 恢复 loading //////////////////
         if (model.chatConfig.isShowGroupReadingStatus &&
             model.chatConfig.isShowGroupMessageReadReceipt &&
             model.conversationType == ConvType.group &&
@@ -1408,12 +1420,15 @@ class _TIMUIKItHistoryMessageListItemState
                       if (!isSelf && widget.showAvatar)
                         GestureDetector(
                           onLongPress: () {
+                            ////////////////// 无效 null 判断修复 //////////////////
                             if (widget.onLongPressForOthersHeadPortrait !=
-                                null) {}
-                            if (model.chatConfig.isAllowLongPressAvatarToAt) {
-                              widget.onLongPressForOthersHeadPortrait!(
-                                  message.sender, message.nickName);
+                                null) {
+                              if (model.chatConfig.isAllowLongPressAvatarToAt) {
+                                widget.onLongPressForOthersHeadPortrait!(
+                                    message.sender, message.nickName);
+                              }
                             }
+                            ////////////////// 无效 null 判断修复 //////////////////
                           },
                           onTapDown: isDesktopScreen
                               ? (details) {
@@ -1460,7 +1475,7 @@ class _TIMUIKItHistoryMessageListItemState
                                 child: Avatar(
                                   faceUrl: message.faceUrl ?? "",
                                   showName:
-                                  MessageUtils.getDisplayName(message),
+                                      MessageUtils.getDisplayName(message),
                                 ),
                               ),
                         ),
@@ -1578,16 +1593,16 @@ class _TIMUIKItHistoryMessageListItemState
                                           },
                                         ),
                                         TIMUIKitTextTranslationElem(
-                                            message: message,
-                                            isUseDefaultEmoji:
-                                                widget.isUseDefaultEmoji,
-                                            customEmojiStickerList:
-                                                widget.customEmojiStickerList,
-                                            isFromSelf: message.isSelf ?? true,
-                                            isShowJump: false,
-                                            clearJump: () {},
-                                            chatModel: model,
-                                            backgroundColor: theme.white,
+                                          message: message,
+                                          isUseDefaultEmoji:
+                                              widget.isUseDefaultEmoji,
+                                          customEmojiStickerList:
+                                              widget.customEmojiStickerList,
+                                          isFromSelf: message.isSelf ?? true,
+                                          isShowJump: false,
+                                          clearJump: () {},
+                                          chatModel: model,
+                                          backgroundColor: theme.white,
                                         )
                                       ],
                                     );
@@ -1637,22 +1652,22 @@ class _TIMUIKItHistoryMessageListItemState
                       if (isSelf && widget.showAvatar)
                         cusAvatar ??
                             SizedBox(
-                                width: 36.w,
-                                height: 36.w,
-                                child: InkWell(
-                                  onTapDown: (details) {
-                                    if (widget.onTapForOthersPortrait != null &&
-                                        widget.allowAvatarTap) {
-                                      widget.onTapForOthersPortrait!(
-                                          message.sender ?? "", details);
-                                    }
-                                  },
-                                  child: Avatar(
-                                      faceUrl: message.faceUrl ?? "",
-                                      showName:
-                                          MessageUtils.getDisplayName(message)),
-                                ),
+                              width: 36.w,
+                              height: 36.w,
+                              child: InkWell(
+                                onTapDown: (details) {
+                                  if (widget.onTapForOthersPortrait != null &&
+                                      widget.allowAvatarTap) {
+                                    widget.onTapForOthersPortrait!(
+                                        message.sender ?? "", details);
+                                  }
+                                },
+                                child: Avatar(
+                                    faceUrl: message.faceUrl ?? "",
+                                    showName:
+                                        MessageUtils.getDisplayName(message)),
                               ),
+                            ),
                     ],
                   ),
                 ),
