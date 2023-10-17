@@ -222,43 +222,44 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // If the [elemType] is text message, it will not be null here.
-          // You can render the widget from extension directly, with a [TextStyle] optionally.
-          widget.chatModel.chatConfig.urlPreviewType != UrlPreviewType.none
-              ? textWithLink!(
-                  style: widget.fontStyle ??
-                      TextStyle(
-                          fontSize: isDesktopScreen ? 14 : 16,
-                          textBaseline: TextBaseline.ideographic,
-                          height: widget.chatModel.chatConfig.textHeight))
-              : ExtendedText(widget.message.textElem?.text ?? "",
-                  softWrap: true,
-                  style: widget.fontStyle ??
-                      TextStyle(
-                          fontSize: isDesktopScreen ? 14 : 16,
-                          height: widget.chatModel.chatConfig.textHeight),
-                  specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
-                    isUseQQPackage: (widget
-                                .chatModel
-                                .chatConfig
-                                .stickerPanelConfig
-                                ?.useTencentCloudChatStickerPackage ??
-                            true) ||
-                        widget.isUseDefaultEmoji,
-                    isUseTencentCloudChatPackage: widget
-                            .chatModel
-                            .chatConfig
-                            .stickerPanelConfig
-                            ?.useTencentCloudChatStickerPackage ??
-                        true,
-                    customEmojiStickerList: widget.customEmojiStickerList,
-                    showAtBackground: true,
-                  )),
           // If the link preview info is available, render the preview card.
           if (_renderPreviewWidget() != null &&
               widget.chatModel.chatConfig.urlPreviewType ==
                   UrlPreviewType.previewCardAndHyperlink)
-            _renderPreviewWidget()!,
+            _renderPreviewWidget()!
+          else
+            // If the [elemType] is text message, it will not be null here.
+            // You can render the widget from extension directly, with a [TextStyle] optionally.
+            widget.chatModel.chatConfig.urlPreviewType != UrlPreviewType.none
+                ? textWithLink!(
+                    style: widget.fontStyle ??
+                        TextStyle(
+                            fontSize: isDesktopScreen ? 14 : 16,
+                            textBaseline: TextBaseline.ideographic,
+                            height: widget.chatModel.chatConfig.textHeight))
+                : ExtendedText(widget.message.textElem?.text ?? "",
+                    softWrap: true,
+                    style: widget.fontStyle ??
+                        TextStyle(
+                            fontSize: isDesktopScreen ? 14 : 16,
+                            height: widget.chatModel.chatConfig.textHeight),
+                    specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
+                      isUseQQPackage: (widget
+                                  .chatModel
+                                  .chatConfig
+                                  .stickerPanelConfig
+                                  ?.useTencentCloudChatStickerPackage ??
+                              true) ||
+                          widget.isUseDefaultEmoji,
+                      isUseTencentCloudChatPackage: widget
+                              .chatModel
+                              .chatConfig
+                              .stickerPanelConfig
+                              ?.useTencentCloudChatStickerPackage ??
+                          true,
+                      customEmojiStickerList: widget.customEmojiStickerList,
+                      showAtBackground: true,
+                    )),
         ],
       ),
     );
