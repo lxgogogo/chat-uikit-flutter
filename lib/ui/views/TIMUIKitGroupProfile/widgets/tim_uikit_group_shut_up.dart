@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable_for_tencent_im/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
@@ -97,6 +98,9 @@ class _GroupProfileGroupShutUpPageState
               Provider.of<TUIGroupProfileModel>(context).groupMemberList;
           final theme = Provider.of<TUIThemeViewModel>(context).theme;
           final isAllMuted = widget.model.groupInfo?.isAllMuted ?? false;
+          List<V2TimGroupMemberFullInfo?> temp = memberList.where((element) => (serverTime != null ? (element?.muteUntil ?? 0) > serverTime! : false)).map((e) {
+            return e;
+          }).toList();
           return Scaffold(
             appBar: AppBar(
               title: Text(
@@ -202,28 +206,25 @@ class _GroupProfileGroupShutUpPageState
                                   )));
                     },
                   ),
-                if (!isAllMuted)
-                  ...memberList
-                      .where((element) => (serverTime != null
-                          ? (element?.muteUntil ?? 0) > serverTime!
-                          : false))
-                      .map((e) => _buildListItem(
-                          context,
-                          e!,
-                          ActionPane(motion: const DrawerMotion(), children: [
-                            SlidableAction(
-                              onPressed: (_) {
-                                widget.model.muteGroupMember(
-                                    e.userID, false, serverTime);
-                              },
-                              flex: 1,
-                              backgroundColor: theme.cautionColor ??
-                                  CommonColor.cautionColor,
-                              autoClose: true,
-                              label: TIM_t("删除"),
-                            )
-                          ])))
-                      .toList()
+                if (!isAllMuted && temp.isNotEmpty)
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      itemCount: temp.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var e = temp[index];
+                        return _buildListItem(
+                            context,
+                            e!,
+                            callback: (){
+                              widget.model.muteGroupMember(e.userID, false, serverTime);
+                            }
+                        );
+                      },
+                    ),
+                  )
               ],
             ),
           );
@@ -245,45 +246,51 @@ _getShowName(V2TimGroupMemberFullInfo? item) {
               : userID;
 }
 
-Widget _buildListItem(BuildContext context, V2TimGroupMemberFullInfo memberInfo,
-    ActionPane? endActionPane) {
+Widget _buildListItem(BuildContext context, V2TimGroupMemberFullInfo memberInfo,{Function? callback}) {
   final theme = Provider.of<TUIThemeViewModel>(context).theme;
   return Container(
       color: Colors.white,
-      child: ListView.builder(
-          itemCount: 1,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            return Slidable(
-                endActionPane: endActionPane,
-                child: Column(children: [
-                  ListTile(
-                    tileColor: Colors.black,
-                    leading: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Avatar(
-                        faceUrl: memberInfo.faceUrl ?? "",
-                        showName: _getShowName(memberInfo),
-                        type: 2,
-                      ),
-                    ),
-                    title: Row(
-                      children: [
-                        Text(_getShowName(memberInfo),
-                            style: const TextStyle(fontSize: 16)),
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
-                  Divider(
-                      thickness: 1,
-                      indent: 74,
-                      endIndent: 0,
-                      color: theme.weakDividerColor,
-                      height: 0)
-                ]));
-          }));
+    child: Column(children: [
+      ListTile(
+        tileColor: Colors.black,
+        leading: SizedBox(
+          width: 36,
+          height: 36,
+          child: Avatar(
+            faceUrl: memberInfo.faceUrl ?? "",
+            showName: _getShowName(memberInfo),
+            type: 2,
+          ),
+        ),
+        title: Row(
+          children: [
+            Text(_getShowName(memberInfo),
+                style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        trailing: GestureDetector(
+          onTap: (){
+            callback!();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                color: const Color(0xFF1F1F1F),
+                borderRadius: BorderRadius.circular(10.w)
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 15.w,vertical: 5.w),
+            child: Text(TIM_t("删除"),style: const TextStyle(color: Color(0xFFB2F417)),),
+          ),
+        ),
+        onTap: () {},
+      ),
+      Divider(
+          thickness: 1,
+          indent: 74,
+          endIndent: 0,
+          color: theme.weakDividerColor,
+          height: 0)
+    ]),
+  );
 }
 
 /// 添加管理员
