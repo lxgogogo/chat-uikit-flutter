@@ -141,12 +141,8 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
             LocalCustomDataModel.fromMap(json.decode(localJSON));
         if (localPreviewInfo != null &&
             !localPreviewInfo.isLinkPreviewEmpty()) {
-          return Container(
-            margin: const EdgeInsets.only(top: 8),
-            child:
-                // You can use this default widget [LinkPreviewWidget] to render preview card, or you can use custom widget.
-                LinkPreviewWidget(linkPreview: localPreviewInfo),
-          );
+          // You can use this default widget [LinkPreviewWidget] to render preview card, or you can use custom widget.
+          return LinkPreviewWidget(linkPreview: localPreviewInfo);
         } else {
           return null;
         }

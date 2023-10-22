@@ -27,18 +27,18 @@ import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField
 enum MuteStatus { none, me, all }
 
 typedef CustomStickerPanel = Widget Function({
-  void Function() sendTextMessage,
-  void Function(int index, String data) sendFaceMessage,
-  void Function() deleteText,
-  void Function(int unicode) addText,
-  void Function(String singleEmojiName) addCustomEmojiText,
-  List<CustomEmojiFaceData> defaultCustomEmojiStickerList,
+void Function() sendTextMessage,
+void Function(int index, String data) sendFaceMessage,
+void Function() deleteText,
+void Function(int unicode) addText,
+void Function(String singleEmojiName) addCustomEmojiText,
+List<CustomEmojiFaceData> defaultCustomEmojiStickerList,
 
-  /// If non-null, requires the child to have exactly this width.
-  double? width,
+/// If non-null, requires the child to have exactly this width.
+double? width,
 
-  /// If non-null, requires the child to have exactly this height.
-  double? height,
+/// If non-null, requires the child to have exactly this height.
+double? height,
 });
 
 class TIMUIKitInputTextField extends StatefulWidget {
@@ -102,27 +102,27 @@ class TIMUIKitInputTextField extends StatefulWidget {
 
   const TIMUIKitInputTextField(
       {Key? key,
-      required this.conversationID,
-      required this.conversationType,
-      this.initText,
-      this.hintText,
-      this.scrollController,
-      this.morePanelConfig,
-      this.customStickerPanel,
-      this.showSendAudio = true,
-      this.showSendEmoji = true,
-      this.showMorePanel = true,
-      this.backgroundColor,
-      this.controller,
-      this.onChanged,
-      this.isUseDefaultEmoji = false,
-      this.customEmojiStickerList = const [],
-      required this.model,
-      required this.currentConversation,
-      this.groupType,
-      this.atMemberPanelScroll,
-      this.groupID,
-      this.chatConfig})
+        required this.conversationID,
+        required this.conversationType,
+        this.initText,
+        this.hintText,
+        this.scrollController,
+        this.morePanelConfig,
+        this.customStickerPanel,
+        this.showSendAudio = true,
+        this.showSendEmoji = true,
+        this.showMorePanel = true,
+        this.backgroundColor,
+        this.controller,
+        this.onChanged,
+        this.isUseDefaultEmoji = false,
+        this.customEmojiStickerList = const [],
+        required this.model,
+        required this.currentConversation,
+        this.groupType,
+        this.atMemberPanelScroll,
+        this.groupID,
+        this.chatConfig})
       : super(key: key);
 
   @override
@@ -335,9 +335,9 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
   onSubmitted() async {
     conversationModel.clearWebDraft(conversationID: widget.conversationID);
     lastText = "";
-    final text = textEditingController.text;
+    final text = textEditingController.text.trim();
     final convType = widget.conversationType;
-    if (text.trim().isNotEmpty && text != zeroWidthSpace) {
+    if (text.isNotEmpty && text != zeroWidthSpace) {
       if (widget.model.repliedMessage != null) {
         MessageUtils.handleMessageError(widget.model.sendReplyMessage(text: text, convID: widget.conversationID, convType: convType, atUserIDList: getUserIdFromMemberInfoMap()), context);
       } else if (mentionedMembersMap.isNotEmpty) {
@@ -392,9 +392,6 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
     if (TencentUtils.checkString(userID) == null) {
       focusNode.requestFocus();
     } else {
-      String text = textEditingController.text;
-      int cursorPos = textEditingController.selection.start; // 获取光标位置
-
       final memberInfo = widget.model.groupMemberList?.firstWhereOrNull((element) => element?.userID == userID) ??
           V2TimGroupMemberFullInfo(
             userID: userID ?? "",
@@ -402,30 +399,11 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
           );
       final showName = _getShowName(memberInfo);
       mentionedMembersMap["@$showName"] = memberInfo;
-      String newText = '';
-      if (cursorPos == -1) {
-        cursorPos = 0;
-      }
-      if (cursorPos == 0) {
-        newText = text.substring(0, cursorPos) +
-            '@$showName ' +
-            text.substring(cursorPos);
-      } else {
-        newText = text.substring(0, cursorPos) +
-            '@$showName ' +
-            text.substring(cursorPos);
-      }
-
-      // Future.delayed(const Duration(milliseconds: 500), () {
-      //   if (!focusNode.hasFocus) {
-      //     focusNode.requestFocus();
-      //   }
-      // });
+      String text = "${textEditingController.text}@$showName ";
+      //please do not delete space
       focusNode.requestFocus();
-      textEditingController.text = newText;
-      textEditingController.selection =
-          TextSelection.collapsed(offset: newText.length);
-
+      textEditingController.text = text;
+      textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: text.length));
       lastText = text;
       _isComposingText = false;
       narrowTextFieldKey.currentState?.showKeyboard = true;
@@ -527,7 +505,6 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
     }
 
     int textLength = text.length;
-    int cursorPos = textEditingController.selection.start; // 获取光标位置
     // 删除的话
     if (originalText.length > textLength) {
       final List<Diff> differencesList = diff(originalText, text);
@@ -582,15 +559,15 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
         }
         List<V2TimGroupMemberFullInfo> showAtMemberList = (model.groupMemberList ?? [])
             .where((element) {
-              final showName = (TencentUtils.checkStringWithoutSpace(element?.friendRemark) ??
-                      TencentUtils.checkStringWithoutSpace(element?.nameCard) ??
-                      TencentUtils.checkStringWithoutSpace(element?.nickName) ??
-                      TencentUtils.checkStringWithoutSpace(element?.userID) ??
-                      "")
-                  .toLowerCase();
-              keyword ??= "";
-              return element != null && showName.contains(keyword!.toLowerCase()) && TencentUtils.checkString(showName) != null && element.userID != widget.model.selfMemberInfo?.userID;
-            })
+          final showName = (TencentUtils.checkStringWithoutSpace(element?.friendRemark) ??
+              TencentUtils.checkStringWithoutSpace(element?.nameCard) ??
+              TencentUtils.checkStringWithoutSpace(element?.nickName) ??
+              TencentUtils.checkStringWithoutSpace(element?.userID) ??
+              "")
+              .toLowerCase();
+          keyword ??= "";
+          return element != null && showName.contains(keyword!.toLowerCase()) && TencentUtils.checkString(showName) != null && element.userID != widget.model.selfMemberInfo?.userID;
+        })
             .whereType<V2TimGroupMemberFullInfo>()
             .toList();
 
@@ -629,9 +606,7 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
         model.showAtMemberList = [];
         isAddingAtSearchWords = false;
       }
-    } else if (textLength > 0 &&
-        (cursorPos == 0 ? text[0] == "@" : text[cursorPos - 1] == "@") &&
-        (lastText.length < textLength || text == "@")) {
+    } else if (textLength > 0 && text[textLength - 1] == "@" && lastText.length < textLength) {
       V2TimGroupMemberFullInfo? memberInfo = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -641,19 +616,8 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
       final showName = _getShowName(memberInfo);
       if (memberInfo != null) {
         mentionedMembersMap["@$showName"] = memberInfo;
-        String newText = '';
-        if (cursorPos == 0) {
-          newText = text.substring(0, cursorPos + 1) +
-              '$showName ' +
-              text.substring(cursorPos + 1);
-        } else {
-          newText = text.substring(0, cursorPos) +
-              '$showName ' +
-              text.substring(cursorPos);
-        }
-        textEditingController.text = newText;
-        textEditingController.selection =
-            TextSelection.collapsed(offset: cursorPos + showName.length + 1);
+        textEditingController.text = "$text$showName ";
+        lastText = "$text$showName ";
       }
     }
     lastText = textEditingController.text;
