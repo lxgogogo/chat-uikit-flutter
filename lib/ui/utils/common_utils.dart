@@ -8,7 +8,7 @@ class TencentUtils{
   }
 
   static String? checkStringWithoutSpace(String? text){
-    if (text == null || text.trim().isEmpty || text.contains(' ')) {
+    if (text == null || text.trim().isEmpty /*|| text.contains(' ') name中间有空格就会@userId*/) {
       return null;
     }
     return text;
