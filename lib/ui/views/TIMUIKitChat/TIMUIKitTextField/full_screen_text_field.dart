@@ -7,6 +7,7 @@ import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat
 import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/DefaultSpecialTextSpanBuilder.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/custom_selection_controls.dart';
 import 'package:tencent_keyboard_visibility/tencent_keyboard_visibility.dart';
 
 class FullScreenTextField extends StatefulWidget {
@@ -79,6 +80,7 @@ class _FullScreenTextFieldState extends State<FullScreenTextField> {
                       selectionColor: Color(0xFFB8B8B8),
                     ),
                     child: ExtendedTextField(
+                      selectionControls: CustomSelectionControls(),
                       autofocus: true,
                       maxLines: showKeyboard ? 16 : null,
                       minLines: 1,

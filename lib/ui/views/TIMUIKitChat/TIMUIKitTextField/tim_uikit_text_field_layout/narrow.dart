@@ -528,69 +528,74 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                 conversationID: widget.conversationID,
                                 conversationType: widget.conversationType)
                             : KeyboardVisibility(
-                                child: ExtendedTextField(
-                                    selectionControls: CustomSelectionControls(),
-                                    maxLines: 4,
-                                    minLines: 1,
-                                    selectionHeightStyle: BoxHeightStyle.max,
-                                    focusNode: widget.focusNode,
-                                    onChanged: debounceFunc,
-                                    onTap: () {
-                                      showKeyboard = true;
-                                      widget.goDownBottom();
-                                      setState(() {
-                                        showEmojiPanel = false;
-                                        showMore = false;
-                                      });
-                                    },
-                                    keyboardType: TextInputType.multiline,
-                                    textInputAction: TextInputAction.newline,
-                                    onEditingComplete: () {
-                                      widget.onSubmitted();
-                                      if (showKeyboard) {
-                                        widget.focusNode.requestFocus();
-                                      }
-                                      setState(() {
-                                        if (widget.textEditingController.text
-                                            .isEmpty) {
-                                          showMoreButton = true;
+                                child: TextSelectionTheme(
+                                  data: const TextSelectionThemeData(
+                                    selectionColor: Color(0xFFB8B8B8),
+                                  ),
+                                  child: ExtendedTextField(
+                                      selectionControls: CustomSelectionControls(),
+                                      maxLines: 4,
+                                      minLines: 1,
+                                      selectionHeightStyle: BoxHeightStyle.max,
+                                      focusNode: widget.focusNode,
+                                      onChanged: debounceFunc,
+                                      onTap: () {
+                                        showKeyboard = true;
+                                        widget.goDownBottom();
+                                        setState(() {
+                                          showEmojiPanel = false;
+                                          showMore = false;
+                                        });
+                                      },
+                                      keyboardType: TextInputType.multiline,
+                                      textInputAction: TextInputAction.newline,
+                                      onEditingComplete: () {
+                                        widget.onSubmitted();
+                                        if (showKeyboard) {
+                                          widget.focusNode.requestFocus();
                                         }
-                                      });
-                                    },
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintStyle: const TextStyle(
-                                          // fontSize: 10,
-                                          color: Color(0xffAEA4A3),
-                                        ),
-                                        fillColor: Colors.white,
-                                        filled: true,
-                                        isDense: true,
-                                        hintText: widget.hintText ?? ''),
-                                    controller: widget.textEditingController,
-                                    specialTextSpanBuilder: PlatformUtils()
-                                            .isWeb
-                                        ? null
-                                        : DefaultSpecialTextSpanBuilder(
-                                            isUseQQPackage: (widget
-                                                        .model
-                                                        .chatConfig
-                                                        .stickerPanelConfig
-                                                        ?.useTencentCloudChatStickerPackage ??
-                                                    true) ||
-                                                widget.isUseDefaultEmoji,
-                                            isUseTencentCloudChatPackage: widget
-                                                    .model
-                                                    .chatConfig
-                                                    .stickerPanelConfig
-                                                    ?.useTencentCloudChatStickerPackage ??
-                                                true,
-                                            customEmojiStickerList:
-                                                widget.customEmojiStickerList,
-                                            showAtBackground: true,
-                                            isUseHttpText: false,
-                                          )),
+                                        setState(() {
+                                          if (widget.textEditingController.text
+                                              .isEmpty) {
+                                            showMoreButton = true;
+                                          }
+                                        });
+                                      },
+                                      textAlignVertical: TextAlignVertical.center,
+                                      decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          hintStyle: const TextStyle(
+                                            // fontSize: 10,
+                                            color: Color(0xffAEA4A3),
+                                          ),
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          isDense: true,
+                                          hintText: widget.hintText ?? ''),
+                                      controller: widget.textEditingController,
+                                      specialTextSpanBuilder: PlatformUtils()
+                                              .isWeb
+                                          ? null
+                                          : DefaultSpecialTextSpanBuilder(
+                                              isUseQQPackage: (widget
+                                                          .model
+                                                          .chatConfig
+                                                          .stickerPanelConfig
+                                                          ?.useTencentCloudChatStickerPackage ??
+                                                      true) ||
+                                                  widget.isUseDefaultEmoji,
+                                              isUseTencentCloudChatPackage: widget
+                                                      .model
+                                                      .chatConfig
+                                                      .stickerPanelConfig
+                                                      ?.useTencentCloudChatStickerPackage ??
+                                                  true,
+                                              customEmojiStickerList:
+                                                  widget.customEmojiStickerList,
+                                              showAtBackground: true,
+                                              isUseHttpText: false,
+                                            )),
+                                ),
                                 onChanged: (bool visibility) {
                                   if (showKeyboard != visibility) {
                                     setState(() {
