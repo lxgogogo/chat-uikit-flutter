@@ -91,7 +91,7 @@ class TimeAgo {
           res = TIM_t_para("{{option2}} 分钟前", "$option2 分钟前")(option2: option2);
         } else {
           res =
-              "${date.hour}:${date.minute < 10 ? date.minute.toString() + "0" : date.minute}";
+              "${date.hour}:${date.minute < 10 ? "0" + date.minute.toString() : date.minute}";
           // res = "$prefix $timeStr";
         }
       } else {
