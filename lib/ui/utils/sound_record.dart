@@ -1,5 +1,4 @@
 import 'dart:async';
-
 // import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_plugin_record_plus/const/play_state.dart';
 import 'package:flutter_plugin_record_plus/const/response.dart';
@@ -15,14 +14,14 @@ class SoundPlayer {
   final ImportProxy importProxy = ImportProxy();
   static final FlutterPluginRecord _recorder = FlutterPluginRecord();
   static SoundInterruptListener? _soundInterruptListener;
-  static bool isInited = false;
+  static bool isInit = false;
   static final AudioPlayer _audioPlayer = AudioPlayer();
 
   static initSoundPlayer() {
-    if (!isInited) {
+    if (!isInit) {
       _recorder.init();
       // AudioPlayer.global.setGlobalAudioContext(const AudioContext());
-      isInited = true;
+      isInit = true;
     }
   }
 
@@ -49,9 +48,7 @@ class SoundPlayer {
     _recorder.dispose();
   }
 
-  static StreamSubscription<PlayerState> playStateListener(
-          {required void Function(PlayerState)? listener}) =>
-      _audioPlayer.playerStateStream.listen(listener);
+  static StreamSubscription<PlayerState> playStateListener({required void Function(PlayerState)? listener}) => _audioPlayer.playerStateStream.listen(listener);
 
   static setSoundInterruptListener(SoundInterruptListener listener) {
     _soundInterruptListener = listener;
@@ -61,13 +58,9 @@ class SoundPlayer {
     _soundInterruptListener = null;
   }
 
-  static StreamSubscription<RecordResponse> responseListener(
-          ResponseListener listener) =>
-      _recorder.response.listen(listener);
+  static StreamSubscription<RecordResponse> responseListener(ResponseListener listener) => _recorder.response.listen(listener);
 
-  static StreamSubscription<RecordResponse> responseFromAmplitudeListener(
-          ResponseListener listener) =>
-      _recorder.responseFromAmplitude.listen(listener);
+  static StreamSubscription<RecordResponse> responseFromAmplitudeListener(ResponseListener listener) => _recorder.responseFromAmplitude.listen(listener);
 
   static startRecord() {
     _recorder.start();

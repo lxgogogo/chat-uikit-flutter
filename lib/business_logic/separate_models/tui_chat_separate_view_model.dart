@@ -319,7 +319,7 @@ class TUIChatSeparateViewModel extends ChangeNotifier {
     required String url,
     required String type,
   }) {
-    if (!SoundPlayer.isInited) {
+    if (!SoundPlayer.isInit) {
       SoundPlayer.initSoundPlayer();
     }
     if (isPlaying) {
