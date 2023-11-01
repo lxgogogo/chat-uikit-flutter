@@ -396,15 +396,15 @@ class _TIMUIKitTextFieldLayoutNarrowState
 
     final debounceFunc = _debounce((value) {
       // if (isWebDevice() || isAndroidDevice()) {// custom 兼容长文编辑
-        if (value.isEmpty && showMoreButton != true) {
-          // setState(() {
-            showMoreButton = true;
-          // });
-        } else if (value.isNotEmpty && showMoreButton == true) {
-          // setState(() {
-            showMoreButton = false;
-          // });
-        }
+      if (value.isEmpty && showMoreButton != true) {
+        // setState(() {
+        showMoreButton = true;
+        // });
+      } else if (value.isNotEmpty && showMoreButton == true) {
+        // setState(() {
+        showMoreButton = false;
+        // });
+      }
       // }
       setState(() {});
       if (widget.onChanged != null) {
@@ -461,12 +461,19 @@ class _TIMUIKitTextFieldLayoutNarrowState
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (widget.textEditingController.text.length >
-                                20 &&
+                            if (widget.textEditingController.text.length > 20 &&
                                 !showSendSoundText) ...[
                               InkWell(
-                                onTap: () => showExpandTextField(context,
-                                    onChanged: debounceFunc),
+                                onTap: () => showExpandTextField(
+                                  context,
+                                  onChanged: (value) {
+                                    if (widget.textEditingController.value
+                                        .isComposingRangeValid) {
+                                      return;
+                                    }
+                                    debounceFunc(value);
+                                  },
+                                ),
                                 child: Container(
                                   width: 28,
                                   height: 28,
@@ -533,12 +540,19 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                     selectionColor: Color(0xFFB8B8B8),
                                   ),
                                   child: ExtendedTextField(
-                                      selectionControls: CustomSelectionControls(),
+                                      selectionControls:
+                                          CustomSelectionControls(),
                                       maxLines: 4,
                                       minLines: 1,
                                       selectionHeightStyle: BoxHeightStyle.max,
                                       focusNode: widget.focusNode,
-                                      onChanged: debounceFunc,
+                                      onChanged: (value) {
+                                        if (widget.textEditingController.value
+                                            .isComposingRangeValid) {
+                                          return;
+                                        }
+                                        debounceFunc(value);
+                                      },
                                       onTap: () {
                                         showKeyboard = true;
                                         widget.goDownBottom();
@@ -561,7 +575,8 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                           }
                                         });
                                       },
-                                      textAlignVertical: TextAlignVertical.center,
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
                                       decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintStyle: const TextStyle(
