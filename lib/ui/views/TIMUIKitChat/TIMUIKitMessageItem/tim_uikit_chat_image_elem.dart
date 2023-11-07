@@ -74,12 +74,11 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     super.didUpdateWidget(oldWidget);
   }
 
-  String getOriginImgURL() {
+  String getOriginImgURL(V2TimImageElem? imageElem) {
     // 实际拿的是原图
     V2TimImage? img = MessageUtils.getImageFromImgList(
-        widget.message.imageElem!.imageList,
-        HistoryMessageDartConstant.oriImgPrior);
-    return img == null ? widget.message.imageElem!.path! : img.url!;
+        imageElem!.imageList, HistoryMessageDartConstant.oriImgPrior);
+    return img == null ? imageElem!.path! : img.url!;
   }
 
   Widget errorDisplay(BuildContext context, TUITheme? theme) {
@@ -121,6 +120,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     String imageUrl, {
     bool isLocalResource = true,
     TUITheme? theme,
+    V2TimImageElem? imageElem,
   }) async {
     if (PlatformUtils().isWeb) {
       download(imageUrl) async {
@@ -175,9 +175,9 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
 
       if (model.getMessageProgress(widget.message.msgID) == 100) {
         String savePath;
-        if (widget.message.imageElem!.path != null &&
-            widget.message.imageElem!.path != '') {
-          savePath = widget.message.imageElem!.path!;
+        if (imageElem?.path != null &&
+            imageElem?.path != '') {
+          savePath = imageElem!.path!;
         } else {
           savePath = model.getFileMessageLocation(widget.message.msgID);
         }
@@ -251,14 +251,13 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     return;
   }
 
-  Future<void> _saveImg(TUITheme theme) async {
+  Future<void> _saveImg(TUITheme theme, V2TimImageElem? imageElem) async {
     try {
       String? imageUrl;
       bool isAssetBool = false;
-      final imageElem = widget.message.imageElem;
 
       if (imageElem != null) {
-        final originUrl = getOriginImgURL();
+        final originUrl = getOriginImgURL(imageElem);
         final localUrl = imageElem.imageList?.firstOrNull?.localUrl;
         final filePath = imageElem.path;
         final isWeb = PlatformUtils().isWeb;
@@ -282,6 +281,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
           imageUrl,
           isLocalResource: isAssetBool,
           theme: theme,
+          imageElem: imageElem,
         );
       }
     } catch (e) {
@@ -293,13 +293,13 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
     }
   }
 
-  Future<void> _scanImage(BuildContext context) async {
+  Future<void> _scanImage(
+      BuildContext context, V2TimImageElem? imageElem) async {
     try {
       String? imageUrl;
       bool isAssetBool = false;
-      final imageElem = widget.message.imageElem;
       if (imageElem != null) {
-        final originUrl = getOriginImgURL();
+        final originUrl = getOriginImgURL(imageElem);
         final localUrl = imageElem.imageList?.firstOrNull?.localUrl;
         final filePath = imageElem.path;
         final isWeb = PlatformUtils().isWeb;
@@ -354,9 +354,9 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
   }
 
   V2TimImage? getImageFromListByElem(
-      V2TimImageTypesEnum imgType,
-      V2TimImageElem? imageElem,
-      ) {
+    V2TimImageTypesEnum imgType,
+    V2TimImageElem? imageElem,
+  ) {
     V2TimImage? img = MessageUtils.getImageFromImgList(
         imageElem?.imageList,
         HistoryMessageDartConstant.imgPriorMap[imgType] ??
@@ -482,7 +482,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
           originImgUrl: imgUrl,
         );
       } else {
-        toImageListScreen(theme,model,isLocal: false);
+        toImageListScreen(theme, model, isLocal: false);
         // Navigator.of(context).push(
         //   PageRouteBuilder(
         //       opaque: false,
@@ -505,7 +505,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
             context: context,
             onClickOrigin: () => launchDesktopFile(imgPath ?? ""));
       } else {
-        toImageListScreen(theme,model,isLocal: true);
+        toImageListScreen(theme, model, isLocal: true);
         // Navigator.of(context).push(
         //   PageRouteBuilder(
         //     opaque: false, // set to false
@@ -523,13 +523,13 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
   }
 
   Future<void> toImageListScreen(
-      TUITheme theme,
-      TUIChatGlobalModel model, {
-        required bool isLocal,
-      }) async {
+    TUITheme theme,
+    TUIChatGlobalModel model, {
+    required bool isLocal,
+  }) async {
     // final List<V2TimMessage> imgMessageList = await getImgMessageList();
     final List<V2TimMessage> imgMessageList =
-    model.getImgMessageList(widget.chatModel.conversationID);
+        model.getImgMessageList(widget.chatModel.conversationID);
 
     Navigator.of(context).push(
       TransparentPageRoute(
@@ -537,15 +537,15 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
           messageID: widget.message.msgID,
           imageDataList: imgMessageList.map((e) {
             return ImageData(
-              imageUrl: getOriginImgURL(),
+              imageUrl: getOriginImgURL(e.imageElem),
               messageID: e.msgID,
             );
           }).toList(),
           downloadFn: (index) async {
-            return await _saveImg(theme);
+            return await _saveImg(theme, imgMessageList[index].imageElem);
           },
-          scanQRCode: (index,context) async {
-            return await _scanImage(context);
+          scanQRCode: (index, context) async {
+            return await _scanImage(context, imgMessageList[index].imageElem);
           },
         ),
       ),
@@ -795,16 +795,16 @@ class TransparentPageRoute<T> extends PageRouteBuilder<T> {
     super.barrierLabel,
     super.maintainState,
   }) : super(
-    opaque: false,
-  );
+          opaque: false,
+        );
 }
 
 Widget _defaultTransitionsBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-    ) {
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) {
   return FadeTransition(
     opacity: CurvedAnimation(
       parent: animation,
