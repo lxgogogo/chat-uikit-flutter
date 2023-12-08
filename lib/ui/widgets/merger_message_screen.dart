@@ -7,6 +7,7 @@ import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_chat_history_message_list_item.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_image_elem_orgin.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_separate_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/data_services/message/message_services.dart';
@@ -202,13 +203,12 @@ class MergerMessageScreenState extends TIMUIKitState<MergerMessageScreen> {
             () {},
           )!;
         }
-        return TIMUIKitImageElem(
+        return TIMUIKitImageElemOrigin(
           chatModel: widget.model,
           isShowMessageReaction: false,
           message: message,
           isFrom: "merger",
           key: Key("${message.seq}_${message.timestamp}"),
-          onIdentifyQrCode: widget.onIdentifyQrCode,
         );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
         if (widget.messageItemBuilder?.videoMessageItemBuilder != null) {

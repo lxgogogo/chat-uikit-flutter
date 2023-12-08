@@ -10,6 +10,7 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/time_ago.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_face_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_file_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_image_elem.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_image_elem_orgin.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_sound_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_video_elem.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_merger_message_elem.dart';
@@ -155,15 +156,12 @@ class _MessageReadReceiptState extends TIMUIKitState<MessageReadReceipt> {
           isShowJump: false,
         );
       case MessageElemType.V2TIM_ELEM_TYPE_IMAGE:
-        return TIMUIKitImageElem(
+        return TIMUIKitImageElemOrigin(
           chatModel: widget.model,
           isShowMessageReaction: false,
           message: message,
           isFrom: "merger",
           key: Key("${message.seq}_${message.timestamp}"),
-          /////////// 版本迁移 ///////////
-          onIdentifyQrCode: widget.onIdentifyQrCode,
-          /////////// 版本迁移 ///////////
         );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
         return TIMUIKitVideoElem(

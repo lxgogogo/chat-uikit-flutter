@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
 import 'package:tencent_cloud_chat_uikit/business_logic/separate_models/tui_chat_model_tools.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/tim_uikit_chat_image_elem_orgin.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitTextField/special_text/DefaultSpecialTextSpanBuilder.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/tim_ui_kit_sticker/utils/tim_custom_face_data.dart';
@@ -241,12 +242,11 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
             isSelf: isSelf,
             isShowJump: false);
       case MessageElemType.V2TIM_ELEM_TYPE_IMAGE:
-        return TIMUIKitImageElem(
+        return TIMUIKitImageElemOrigin(
           chatModel: widget.chatModel,
           message: message,
           isFrom: "reply",
           isShowMessageReaction: false,
-          onIdentifyQrCode: widget.onIdentifyQrCode,
         );
       case MessageElemType.V2TIM_ELEM_TYPE_VIDEO:
         return TIMUIKitVideoElem(
