@@ -39,6 +39,7 @@ class LinkPreviewWidget extends TIMStatelessWidget {
               ),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (linkPreview.image != null && linkPreview.image!.isNotEmpty)
                   Image.network(
@@ -54,6 +55,7 @@ class LinkPreviewWidget extends TIMStatelessWidget {
                     linkPreview.description!,
                     style: const TextStyle(
                         fontSize: 12.0, color: Color(0xFF999999)),
+                        maxLines: 5,overflow: TextOverflow.ellipsis,
                   )),
                 if ((linkPreview.description == null ||
                         linkPreview.description!.isEmpty) &&
