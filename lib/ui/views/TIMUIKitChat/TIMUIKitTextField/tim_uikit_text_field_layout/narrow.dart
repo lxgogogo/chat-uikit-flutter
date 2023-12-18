@@ -410,6 +410,9 @@ class _TIMUIKitTextFieldLayoutNarrowState
       if (widget.onChanged != null) {
         widget.onChanged!(value);
       }
+      if (widget.textEditingController.value.isComposingRangeValid) {
+        return;
+      }
       widget.handleAtText(value);
       widget.handleSendEditStatus(value, true);
       final isEmpty = value.isEmpty;
@@ -467,10 +470,6 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                 onTap: () => showExpandTextField(
                                   context,
                                   onChanged: (value) {
-                                    if (widget.textEditingController.value
-                                        .isComposingRangeValid) {
-                                      return;
-                                    }
                                     debounceFunc(value);
                                   },
                                 ),
@@ -547,10 +546,6 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                       selectionHeightStyle: BoxHeightStyle.max,
                                       focusNode: widget.focusNode,
                                       onChanged: (value) {
-                                        if (widget.textEditingController.value
-                                            .isComposingRangeValid) {
-                                          return;
-                                        }
                                         debounceFunc(value);
                                       },
                                       onTap: () {
