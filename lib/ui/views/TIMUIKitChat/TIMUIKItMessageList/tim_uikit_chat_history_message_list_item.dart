@@ -1390,8 +1390,11 @@ class _TIMUIKItHistoryMessageListItemState
                 onExit: (_) {
                   if (isDesktopScreen &&
                       model.chatConfig.isUseMessageHoverBarOnDesktop) {
-                    setState(() {
-                      isShowWideToolTip = false;
+                    Tooltip.dismissAllToolTips();
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      setState(() {
+                        isShowWideToolTip = false;
+                      });
                     });
                   }
                 },
