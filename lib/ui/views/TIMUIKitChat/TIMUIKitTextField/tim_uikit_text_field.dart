@@ -505,6 +505,7 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
     }
 
     int textLength = text.length;
+    int selectionIndex = textEditingController.selection.start;
     // 删除的话
     if (originalText.length > textLength) {
       final List<Diff> differencesList = diff(originalText, text);
@@ -618,6 +619,21 @@ class _InputTextFieldState extends TIMUIKitState<TIMUIKitInputTextField> {
         mentionedMembersMap["@$showName"] = memberInfo;
         textEditingController.text = "$text$showName ";
         lastText = "$text$showName ";
+      }
+    } else if (textLength > 0 && (selectionIndex == 0 ? text[0] == "@" : text[selectionIndex - 1] == "@") && lastText.length < textLength) {
+      V2TimGroupMemberFullInfo? memberInfo = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AtText(groupMemberList: model.groupMemberList, groupInfo: model.groupInfo, groupID: groupID, canAtAll: canAtAll, groupType: widget.groupType),
+        ),
+      );
+      final showName = _getShowName(memberInfo);
+      if (memberInfo != null) {
+        mentionedMembersMap["@$showName"] = memberInfo;
+        final newText = text.substring(0, selectionIndex) + '$showName ' + text.substring(selectionIndex);
+        textEditingController.text = newText;
+        lastText = newText;
+        textEditingController.selection = TextSelection.collapsed(offset: selectionIndex + showName.length);
       }
     }
     lastText = textEditingController.text;
