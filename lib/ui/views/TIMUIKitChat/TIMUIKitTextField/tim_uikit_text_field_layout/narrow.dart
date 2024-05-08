@@ -450,22 +450,38 @@ class _TIMUIKitTextFieldLayoutNarrowState extends TIMUIKitState<TIMUIKitTextFiel
                               });
                             }
                           },
-                          child: Image.asset(
-                            showSendSoundText ? 'images/hello/send_keyboard.png' : 'images/hello/send_voice.png',
-                            package: 'tencent_cloud_chat_uikit',
-                            // color: const Color.fromRGBO(68, 68, 68, 1),
-                            height: 48,
+                          child: Container(
                             width: 48,
+                            height: 48,
+                            decoration: ShapeDecoration(
+                              color: Colors.white,
+                              shape: const CircleBorder(),
+                              shadows: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 5,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 3),
+                                )
+                              ]
+                            ),
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              showSendSoundText ? 'images/hello/send_keyboard.png' : 'images/hello/send_voice.png',
+                              package: 'tencent_cloud_chat_uikit',
+                              // color: const Color.fromRGBO(68, 68, 68, 1),
+                              height: 24,
+                              width: 24,
+                            ),
                           ),
                         ),
                       if (widget.forbiddenText == null)
                         const SizedBox(
-                          width: 10,
+                          width: 6,
                         ),
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          constraints: const BoxConstraints(minHeight: 48),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
                             color: hexToColor("F1F0F3"),
                             borderRadius: BorderRadius.circular(24),
@@ -577,8 +593,9 @@ class _TIMUIKitTextFieldLayoutNarrowState extends TIMUIKitState<TIMUIKitTextFiel
                         ),
                       ),
                       if ((isAndroidDevice() || isWebDevice()) && !showMoreButton)
-                        SizedBox(
+                        Container(
                           height: 32.0,
+                          padding: const EdgeInsets.only(left: 6),
                           child: ElevatedButton(
                             onPressed: () {
                               widget.onSubmitted();
@@ -602,6 +619,7 @@ class _TIMUIKitTextFieldLayoutNarrowState extends TIMUIKitState<TIMUIKitTextFiel
                   curve: Curves.fastOutSlowIn,
                   height: max(_getBottomHeight(), 0.0),
                   child: ListView(
+                    padding: EdgeInsets.zero,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [_getBottomContainer(theme)],
                   ),
