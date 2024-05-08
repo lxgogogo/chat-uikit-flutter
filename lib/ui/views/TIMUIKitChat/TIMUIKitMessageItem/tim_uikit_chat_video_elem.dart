@@ -178,6 +178,18 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
 
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
+    final borderRadius = widget.message.isSelf ?? true
+        ? const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(0),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(16))
+        : const BorderRadius.only(
+        topLeft: Radius.circular(0),
+        topRight: Radius.circular(16),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(16));
+
     final theme = value.theme;
     final heroTag =
         "${widget.message.msgID ?? widget.message.id ?? widget.message.timestamp ?? DateTime.now().millisecondsSinceEpoch}${widget.isFrom}";
@@ -245,26 +257,31 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
               isShowMessageReaction: widget.isShowMessageReaction ?? true,
               clearJump: widget.clearJump,
               isFromSelf: widget.message.isSelf ?? true,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                child: LayoutBuilder(builder:
-                    (BuildContext context, BoxConstraints constraints) {
-                  double? positionRadio;
-                  if ((stateElement.snapshotWidth) != null &&
-                      stateElement.snapshotHeight != null &&
-                      stateElement.snapshotWidth != 0 &&
-                      stateElement.snapshotHeight != 0) {
-                    positionRadio = (stateElement.snapshotWidth! /
-                        stateElement.snapshotHeight!);
-                  }
-                  return ConstrainedBox(
-                      constraints: BoxConstraints(
-                          maxWidth: PlatformUtils().isWeb
-                              ? 300
-                              : constraints.maxWidth * 0.5,
-                          maxHeight: min(constraints.maxHeight * 0.8, 300),
-                          minHeight: 20,
-                          minWidth: 20),
+              child: LayoutBuilder(builder:
+                  (BuildContext context, BoxConstraints constraints) {
+                double? positionRadio;
+                if ((stateElement.snapshotWidth) != null &&
+                    stateElement.snapshotHeight != null &&
+                    stateElement.snapshotWidth != 0 &&
+                    stateElement.snapshotHeight != 0) {
+                  positionRadio = (stateElement.snapshotWidth! /
+                      stateElement.snapshotHeight!);
+                }
+                return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: hexToColor('D8D6EA'),
+                      borderRadius: borderRadius,
+                    ),
+                    constraints: BoxConstraints(
+                        maxWidth: PlatformUtils().isWeb
+                            ? 300
+                            : constraints.maxWidth * 0.5,
+                        maxHeight: min(constraints.maxHeight * 0.8, 300),
+                        minHeight: 20,
+                        minWidth: 20),
+                    child: ClipRRect(
+                      borderRadius: borderRadius,
                       child: Stack(
                         children: <Widget>[
                           if (positionRadio != null &&
@@ -309,9 +326,9 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 12))),
                         ],
-                      ));
-                }),
-              ))),
+                      ),
+                    ));
+              }))),
     );
   }
 }

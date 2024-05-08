@@ -177,8 +177,8 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
     final backgroundColor = widget.isFromSelf ? (theme.chatMessageItemFromSelfBgColor ?? theme.lightPrimaryMaterialColor.shade50) : (theme.chatMessageItemFromOthersBgColor);
 
     final borderRadius = widget.isFromSelf
-        ? const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(2), bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10))
-        : const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(10), bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10));
+        ? const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(0), bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16))
+        : const BorderRadius.only(topLeft: Radius.circular(0), topRight: Radius.circular(16), bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16));
     if (widget.isShowJump) {
       if (!isShining) {
         Future.delayed(Duration.zero, () {

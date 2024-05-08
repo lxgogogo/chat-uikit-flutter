@@ -84,15 +84,15 @@ class _TIMUIKitTextTranslationElemState
         TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     final borderRadius = widget.isFromSelf
         ? const BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(2),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10))
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(0),
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16))
         : const BorderRadius.only(
-            topLeft: Radius.circular(2),
-            topRight: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10));
+            topLeft: Radius.circular(0),
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16));
     if ((widget.chatModel.jumpMsgID == widget.message.msgID)) {}
     if (widget.isShowJump) {
       if (!isShining) {

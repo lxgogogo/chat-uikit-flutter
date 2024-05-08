@@ -153,7 +153,7 @@ class TIMUIKitMessageTooltipState
       width: 44,
       child: InkWell(
         onTap: onTap,
-        splashColor: Colors.white,
+        splashColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.only(bottom: 6, top: 6),
           child: child,
@@ -319,55 +319,14 @@ class TIMUIKitMessageTooltipState
     if (isDesktopScreen) {
       widgetList = formattedTipsList
           .map(
-            (item) => Material(
-              color: Colors.white,
-              child: InkWell(
-                onTap: () {
-                  item.onClick();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        item.iconImageAsset,
-                        package: defaultTipsIds.contains(item.id)
-                            ? 'tencent_cloud_chat_uikit'
-                            : null,
-                        width: 20,
-                        height: 20,
-                      ),
-                      const SizedBox(
-                        height: 4,
-                        width: 8,
-                      ),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          decoration: TextDecoration.none,
-                          color: theme.darkTextColor,
-                          fontSize: 12,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          )
-          .toList();
-    } else {
-      widgetList = formattedTipsList
-          .map(
-            (item) => Material(
-              color: Colors.white,
-              child: ItemInkWell(
-                onTap: () {
-                  item.onClick();
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+            (item) => InkWell(
+              onTap: () {
+                item.onClick();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
                       item.iconImageAsset,
@@ -379,18 +338,54 @@ class TIMUIKitMessageTooltipState
                     ),
                     const SizedBox(
                       height: 4,
-                      width: 60,
+                      width: 8,
                     ),
                     Text(
                       item.label,
                       style: TextStyle(
                         decoration: TextDecoration.none,
                         color: theme.darkTextColor,
-                        fontSize: 10,
+                        fontSize: 12,
                       ),
                     )
                   ],
                 ),
+              ),
+            ),
+          )
+          .toList();
+    } else {
+      widgetList = formattedTipsList
+          .map(
+            (item) => ItemInkWell(
+              onTap: () {
+                item.onClick();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    item.iconImageAsset,
+                    color: Colors.white,
+                    package: defaultTipsIds.contains(item.id)
+                        ? 'tencent_cloud_chat_uikit'
+                        : null,
+                    width: 20,
+                    height: 20,
+                  ),
+                  const SizedBox(
+                    height: 4,
+                    width: 60,
+                  ),
+                  Text(
+                    item.label,
+                    style: const TextStyle(
+                      decoration: TextDecoration.none,
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  )
+                ],
               ),
             ),
           )
@@ -576,7 +571,7 @@ class TIMUIKitMessageTooltipState
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                   )
                 : null,
-            color: isDesktopScreen ? null : Colors.white,
+            // color: isDesktopScreen ? null : Colors.white,
             padding: EdgeInsets.symmetric(
                 horizontal: 8, vertical: isDesktopScreen ? 8 : 4),
             child: ConstrainedBox(

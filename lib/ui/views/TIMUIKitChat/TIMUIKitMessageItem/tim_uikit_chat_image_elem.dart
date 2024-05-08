@@ -679,6 +679,18 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
 
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
+    final borderRadius = widget.message.isSelf ?? true
+        ? const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(0),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(16))
+        : const BorderRadius.only(
+        topLeft: Radius.circular(0),
+        topRight: Radius.circular(16),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(16));
+
     final theme = value.theme;
     if (widget.message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING) {
       isSent = true;
@@ -699,14 +711,22 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
         message: widget.message,
         child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-          return ConstrainedBox(
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: hexToColor('D8D6EA'),
+              borderRadius: borderRadius,
+            ),
             constraints: BoxConstraints(
               maxWidth: constraints.maxWidth * (isDesktopScreen ? 0.4 : 0.5),
               minWidth: 64,
               maxHeight: 256,
             ),
-            child: _renderImage(heroTag, theme,
-                originalImg: originalImg, smallImg: smallImg),
+            child: ClipRRect(
+              borderRadius: borderRadius,
+              child: _renderImage(heroTag, theme,
+                  originalImg: originalImg, smallImg: smallImg),
+            ),
           );
         }));
   }

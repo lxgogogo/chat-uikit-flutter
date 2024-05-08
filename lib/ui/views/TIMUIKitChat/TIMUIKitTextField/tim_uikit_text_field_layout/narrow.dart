@@ -479,16 +479,16 @@ class _TIMUIKitTextFieldLayoutNarrowState extends TIMUIKitState<TIMUIKitTextFiel
                         const SizedBox(
                           width: 6,
                         ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: hexToColor("F1F0F3"),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Row(
-                            children: [
-                              if (widget.forbiddenText == null)
+                      if (widget.forbiddenText == null)
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: hexToColor("F1F0F3"),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              children: [
                                 Expanded(
                                   child: showSendSoundText
                                       ? SendSoundMessage(onDownBottom: widget.goDownBottom, conversationID: widget.conversationID, conversationType: widget.conversationType)
@@ -547,51 +547,49 @@ class _TIMUIKitTextFieldLayoutNarrowState extends TIMUIKitState<TIMUIKitTextFiel
                                         }
                                       }),
                                 ),
-                              if (widget.forbiddenText == null)
                                 const SizedBox(
                                   width: 10,
                                 ),
-                              if (widget.showSendEmoji && widget.forbiddenText == null)
-                                InkWell(
-                                  onTap: () {
-                                    _openEmojiPanel();
-                                    widget.goDownBottom();
-                                  },
-                                  child: PlatformUtils().isWeb
-                                      ? Icon(showEmojiPanel ? Icons.keyboard_alt_outlined : Icons.mood_outlined, color: hexToColor("5c6168"), size: 32)
-                                      : Image.asset(
-                                    showEmojiPanel ? 'images/hello/send_keyboard.png' : 'images/hello/send_face.png',
-                                    package: 'tencent_cloud_chat_uikit',
-                                    // color: const Color.fromRGBO(68, 68, 68, 1),
-                                    height: 24,
-                                    width: 24,
+                                if (widget.showSendEmoji)
+                                  InkWell(
+                                    onTap: () {
+                                      _openEmojiPanel();
+                                      widget.goDownBottom();
+                                    },
+                                    child: PlatformUtils().isWeb
+                                        ? Icon(showEmojiPanel ? Icons.keyboard_alt_outlined : Icons.mood_outlined, color: hexToColor("5c6168"), size: 32)
+                                        : Image.asset(
+                                      showEmojiPanel ? 'images/hello/send_keyboard.png' : 'images/hello/send_face.png',
+                                      package: 'tencent_cloud_chat_uikit',
+                                      // color: const Color.fromRGBO(68, 68, 68, 1),
+                                      height: 24,
+                                      width: 24,
+                                    ),
                                   ),
-                                ),
-                              if (widget.forbiddenText == null)
                                 const SizedBox(
                                   width: 10,
                                 ),
-                              if (widget.showMorePanel && widget.forbiddenText == null && showMoreButton)
-                                InkWell(
-                                  onTap: () {
-                                    // model.sendCustomMessage(data: "a", convID: model.currentSelectedConv, convType: model.currentSelectedConvType == 1 ? ConvType.c2c : ConvType.group);
-                                    _openMore();
-                                    widget.goDownBottom();
-                                  },
-                                  child: PlatformUtils().isWeb
-                                      ? Icon(Icons.add_circle_outline_outlined, color: hexToColor("5c6168"), size: 32)
-                                      : Image.asset(
-                                    'images/hello/send_add.png',
-                                    package: 'tencent_cloud_chat_uikit',
-                                    // color: const Color.fromRGBO(68, 68, 68, 1),
-                                    height: 20,
-                                    width: 20,
+                                if (widget.showMorePanel && showMoreButton)
+                                  InkWell(
+                                    onTap: () {
+                                      // model.sendCustomMessage(data: "a", convID: model.currentSelectedConv, convType: model.currentSelectedConvType == 1 ? ConvType.c2c : ConvType.group);
+                                      _openMore();
+                                      widget.goDownBottom();
+                                    },
+                                    child: PlatformUtils().isWeb
+                                        ? Icon(Icons.add_circle_outline_outlined, color: hexToColor("5c6168"), size: 32)
+                                        : Image.asset(
+                                      'images/hello/send_add.png',
+                                      package: 'tencent_cloud_chat_uikit',
+                                      // color: const Color.fromRGBO(68, 68, 68, 1),
+                                      height: 20,
+                                      width: 20,
+                                    ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       if ((isAndroidDevice() || isWebDevice()) && !showMoreButton)
                         Container(
                           height: 32.0,

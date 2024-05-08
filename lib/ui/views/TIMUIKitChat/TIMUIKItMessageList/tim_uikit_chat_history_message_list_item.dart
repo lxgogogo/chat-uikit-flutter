@@ -815,9 +815,12 @@ class _TIMUIKItHistoryMessageListItemState extends TIMUIKitState<TIMUIKitHistory
       right: right,
       left: left,
       hasArrow: hasArrow,
-      borderColor: theme?.white ?? Colors.white,
-      backgroundColor: theme?.white ?? Colors.white,
-      shadowColor: Colors.black26,
+      // borderColor: theme?.white ?? Colors.white,
+      borderColor: Colors.black.withOpacity(0.7),
+      // backgroundColor: theme?.white ?? Colors.white,
+      backgroundColor: Colors.black.withOpacity(0.7),
+      // shadowColor: Colors.black26,
+      shadowColor: Colors.transparent,
       hasShadow: isDesktopScreen ? false : true,
       borderWidth: 1.0,
       showCloseButton: ShowCloseButton.none,
@@ -1263,7 +1266,7 @@ class _TIMUIKItHistoryMessageListItemState extends TIMUIKitState<TIMUIKitHistory
                           ),
                         ),
                       Container(
-                        margin: widget.showAvatar ? (isSelf ? const EdgeInsets.only(right: 13) : const EdgeInsets.only(left: 13)) : null,
+                        margin: widget.showAvatar ? (isSelf ? const EdgeInsets.only(right: 13, top: 24) : const EdgeInsets.only(left: 13, top: 24)) : null,
                         child: Column(
                           crossAxisAlignment: isSelf ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
