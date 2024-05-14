@@ -723,7 +723,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
               maxHeight: 256,
             ),
             child: ClipRRect(
-              borderRadius: borderRadius,
+              borderRadius: BorderRadius.circular(16),
               child: _renderImage(heroTag, theme,
                   originalImg: originalImg, smallImg: smallImg),
             ),

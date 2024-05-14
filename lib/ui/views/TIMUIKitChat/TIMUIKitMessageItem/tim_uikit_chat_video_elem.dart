@@ -281,7 +281,7 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                         minHeight: 20,
                         minWidth: 20),
                     child: ClipRRect(
-                      borderRadius: borderRadius,
+                      borderRadius: BorderRadius.circular(16),
                       child: Stack(
                         children: <Widget>[
                           if (positionRadio != null &&
