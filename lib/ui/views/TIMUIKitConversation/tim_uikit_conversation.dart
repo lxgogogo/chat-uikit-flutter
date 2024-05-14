@@ -381,7 +381,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                             key: ValueKey(conversationItem.conversationID),
                             controller: _autoScrollController,
                             index: index,
-                            child: Slidable(groupTag: 'conversation-list', child: conversationLineItem(), endActionPane: ActionPane(extentRatio: slideChildren.length > 2 ? 0.77 : 0.5, motion: const DrawerMotion(), children: slideChildren)),
+                            child: Slidable(groupTag: 'conversation-list', child: conversationLineItem(), endActionPane: ActionPane(extentRatio: slideChildren.length > 2 ? 0.77 : 0.5, motion: const DrawerMotion(), children: slideChildren), enabled: false),
                           ));
                     })
                 : (widget.emptyBuilder != null ? widget.emptyBuilder!() : Container());
