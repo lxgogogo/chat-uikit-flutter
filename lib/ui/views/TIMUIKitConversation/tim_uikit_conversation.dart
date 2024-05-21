@@ -21,7 +21,7 @@ import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitConversation/tim_uikit
 import 'package:tencent_cloud_chat_uikit/ui/widgets/customize_ball_pulse_header.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/wide_popup.dart';
 
-typedef ConversationItemBuilder = Widget Function(V2TimConversation conversationItem, [V2TimUserStatus? onlineStatus]);
+typedef ConversationItemBuilder = Widget? Function(V2TimConversation conversationItem, [V2TimUserStatus? onlineStatus]);
 
 typedef ConversationItemSlideBuilder = List<ConversationItemSlidePanel> Function(V2TimConversation conversationItem);
 
@@ -321,7 +321,9 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                       final V2TimUserStatus? onlineStatus = _friendShipViewModel.userStatusList.firstWhere((item) => item.userID == conversationItem?.userID, orElse: () => V2TimUserStatus(statusType: 0));
 
                       if (widget.itemBuilder != null) {
-                        return widget.itemBuilder!(conversationItem!, onlineStatus);
+                        if (widget.itemBuilder!(conversationItem!, onlineStatus) !=null ) {
+                          return widget.itemBuilder!(conversationItem!, onlineStatus);
+                        }
                       }
 
                       final slideChildren = _getSlideBuilder()(conversationItem!);
