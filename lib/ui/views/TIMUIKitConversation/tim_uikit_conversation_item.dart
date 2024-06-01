@@ -111,15 +111,6 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
     final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     return Container(
       padding: const EdgeInsets.only(top: 6, bottom: 6, left: 16, right: 16),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: theme.conversationItemBorderColor ??
-                CommonColor.weakDividerColor,
-            width: 1,
-          ),
-        ),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -137,17 +128,6 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                       faceUrl: faceUrl,
                       showName: nickName,
                       type: convType),
-                  if (unreadCount != 0)
-                    Positioned(
-                      top: isDisturb ? -2.5 : -4.5,
-                      right: isDisturb ? -2.5 : -4.5,
-                      child: UnconstrainedBox(
-                        child: UnreadMessage(
-                            width: isDisturb ? 10 : 18,
-                            height: isDisturb ? 10 : 18,
-                            unreadCount: isDisturb ? 0 : unreadCount),
-                      ),
-                    )
                 ],
               ),
             ),
@@ -157,6 +137,15 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
             height: 60,
             margin: EdgeInsets.only(left: isDesktopScreen ? 10 : 12),
             padding: const EdgeInsets.only(top: 0, bottom: 0),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.conversationItemBorderColor ??
+                      CommonColor.weakDividerColor,
+                  width: 1,
+                ),
+              ),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -197,6 +186,18 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                           size: isDesktopScreen ? 14 : 16.0,
                         ),
                       )
+                    else
+                      if (unreadCount != 0)
+                        Positioned(
+                          top: isDisturb ? -2.5 : -4.5,
+                          right: isDisturb ? -2.5 : -4.5,
+                          child: UnconstrainedBox(
+                            child: UnreadMessage(
+                                width: isDisturb ? 10 : 18,
+                                height: isDisturb ? 10 : 18,
+                                unreadCount: isDisturb ? 0 : unreadCount),
+                          ),
+                        )
                   ],
                 ),
               ],
