@@ -188,16 +188,10 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                       )
                     else
                       if (unreadCount != 0)
-                        Positioned(
-                          top: isDisturb ? -2.5 : -4.5,
-                          right: isDisturb ? -2.5 : -4.5,
-                          child: UnconstrainedBox(
-                            child: UnreadMessage(
-                                width: isDisturb ? 10 : 18,
-                                height: isDisturb ? 10 : 18,
-                                unreadCount: isDisturb ? 0 : unreadCount),
-                          ),
-                        )
+                        UnreadMessage(
+                            width: isDisturb ? 10 : 18,
+                            height: isDisturb ? 10 : 18,
+                            unreadCount: isDisturb ? 0 : unreadCount)
                   ],
                 ),
               ],
