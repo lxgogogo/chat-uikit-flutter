@@ -180,15 +180,15 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final borderRadius = widget.message.isSelf ?? true
         ? const BorderRadius.only(
-        topLeft: Radius.circular(16),
+        topLeft: Radius.circular(8),
         topRight: Radius.circular(0),
-        bottomLeft: Radius.circular(16),
-        bottomRight: Radius.circular(16))
+        bottomLeft: Radius.circular(8),
+        bottomRight: Radius.circular(8))
         : const BorderRadius.only(
         topLeft: Radius.circular(0),
-        topRight: Radius.circular(16),
-        bottomLeft: Radius.circular(16),
-        bottomRight: Radius.circular(16));
+        topRight: Radius.circular(8),
+        bottomLeft: Radius.circular(8),
+        bottomRight: Radius.circular(8));
 
     final theme = value.theme;
     final heroTag =
@@ -281,7 +281,7 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                         minHeight: 20,
                         minWidth: 20),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(8),
                       child: Stack(
                         children: <Widget>[
                           if (positionRadio != null &&

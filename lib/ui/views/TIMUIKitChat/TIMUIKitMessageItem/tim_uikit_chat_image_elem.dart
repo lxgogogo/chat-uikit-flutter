@@ -681,15 +681,15 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final borderRadius = widget.message.isSelf ?? true
         ? const BorderRadius.only(
-        topLeft: Radius.circular(16),
+        topLeft: Radius.circular(8),
         topRight: Radius.circular(0),
-        bottomLeft: Radius.circular(16),
-        bottomRight: Radius.circular(16))
+        bottomLeft: Radius.circular(8),
+        bottomRight: Radius.circular(8))
         : const BorderRadius.only(
         topLeft: Radius.circular(0),
-        topRight: Radius.circular(16),
-        bottomLeft: Radius.circular(16),
-        bottomRight: Radius.circular(16));
+        topRight: Radius.circular(8),
+        bottomLeft: Radius.circular(8),
+        bottomRight: Radius.circular(8));
 
     final theme = value.theme;
     if (widget.message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING) {
@@ -723,7 +723,7 @@ class _TIMUIKitImageElem extends TIMUIKitState<TIMUIKitImageElem> {
               maxHeight: 256,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(8),
               child: _renderImage(heroTag, theme,
                   originalImg: originalImg, smallImg: smallImg),
             ),

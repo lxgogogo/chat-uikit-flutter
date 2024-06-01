@@ -179,15 +179,15 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
             widget.chatModel.chatConfig.isEnableTextSelection ?? false);
     final borderRadius = widget.isFromSelf
         ? const BorderRadius.only(
-            topLeft: Radius.circular(16),
+            topLeft: Radius.circular(8),
             topRight: Radius.circular(0),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16))
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8))
         : const BorderRadius.only(
             topLeft: Radius.circular(0),
-            topRight: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16));
+            topRight: Radius.circular(8),
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8));
     if ((widget.chatModel.jumpMsgID == widget.message.msgID)) {}
     if (widget.isShowJump) {
       if (!isShining) {
@@ -230,13 +230,17 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
                       TextStyle(
                           fontSize: isDesktopScreen ? 14 : 16,
                           textBaseline: TextBaseline.ideographic,
-                          height: widget.chatModel.chatConfig.textHeight))
+                          height: widget.chatModel.chatConfig.textHeight).copyWith(
+                        color: widget.isFromSelf ? Colors.white : null,
+                      ))
               : ExtendedText(widget.message.textElem?.text ?? "",
                   softWrap: true,
                   style: widget.fontStyle ??
                       TextStyle(
                           fontSize: isDesktopScreen ? 14 : 16,
-                          height: widget.chatModel.chatConfig.textHeight),
+                          height: widget.chatModel.chatConfig.textHeight).copyWith(
+                        color: widget.isFromSelf ? Colors.white : null,
+                      ),
                   specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
                     isUseQQPackage: (widget
                                 .chatModel

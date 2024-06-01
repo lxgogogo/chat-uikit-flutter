@@ -1266,7 +1266,7 @@ class _TIMUIKItHistoryMessageListItemState extends TIMUIKitState<TIMUIKitHistory
                           ),
                         ),
                       Container(
-                        margin: widget.showAvatar ? (isSelf ? const EdgeInsets.only(right: 13, top: 24) : const EdgeInsets.only(left: 13, top: 24)) : null,
+                        margin: widget.showAvatar ? (isSelf ? const EdgeInsets.only(right: 13) : const EdgeInsets.only(left: 13)) : null,
                         child: Column(
                           crossAxisAlignment: isSelf ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                           children: [
@@ -1342,29 +1342,29 @@ class _TIMUIKItHistoryMessageListItemState extends TIMUIKitState<TIMUIKitHistory
                           ],
                         ),
                       ),
-                      if (!isSelf && widget.message.elemType == 6 && isDownloadWaiting)
-                        Container(
-                          margin: const EdgeInsets.only(top: 46, left: 10),
-                          child: LoadingAnimationWidget.threeArchedCircle(
-                            color: theme.weakTextColor ?? Colors.grey,
-                            size: 20,
-                          ),
-                        ),
-                      if (isSelf && widget.showAvatar)
-                        widget.userAvatarBuilder != null
-                            ? widget.userAvatarBuilder!(context, message)
-                            : SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: InkWell(
-                                  onTapDown: (details) {
-                                    if (widget.onTapForOthersPortrait != null && widget.allowAvatarTap) {
-                                      widget.onTapForOthersPortrait!(message.sender ?? "", details);
-                                    }
-                                  },
-                                  child: Avatar(faceUrl: message.faceUrl ?? "", showName: MessageUtils.getDisplayName(message)),
-                                ),
-                              ),
+                      // if (!isSelf && widget.message.elemType == 6 && isDownloadWaiting)
+                      //   Container(
+                      //     margin: const EdgeInsets.only(top: 46, left: 10),
+                      //     child: LoadingAnimationWidget.threeArchedCircle(
+                      //       color: theme.weakTextColor ?? Colors.grey,
+                      //       size: 20,
+                      //     ),
+                      //   ),
+                      // if (isSelf && widget.showAvatar)
+                      //   widget.userAvatarBuilder != null
+                      //       ? widget.userAvatarBuilder!(context, message)
+                      //       : SizedBox(
+                      //           width: 40,
+                      //           height: 40,
+                      //           child: InkWell(
+                      //             onTapDown: (details) {
+                      //               if (widget.onTapForOthersPortrait != null && widget.allowAvatarTap) {
+                      //                 widget.onTapForOthersPortrait!(message.sender ?? "", details);
+                      //               }
+                      //             },
+                      //             child: Avatar(faceUrl: message.faceUrl ?? "", showName: MessageUtils.getDisplayName(message)),
+                      //           ),
+                      //         ),
                     ],
                   ),
                 ),

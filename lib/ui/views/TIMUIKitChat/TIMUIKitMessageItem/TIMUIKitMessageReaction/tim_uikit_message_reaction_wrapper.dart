@@ -119,15 +119,15 @@ class _TIMUIKitMessageReactionWrapperState
     final theme = value.theme;
     final borderRadius = widget.isFromSelf
         ? const BorderRadius.only(
-            topLeft: Radius.circular(16),
+            topLeft: Radius.circular(8),
             topRight: Radius.circular(0),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16))
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8))
         : const BorderRadius.only(
             topLeft: Radius.circular(0),
-            topRight: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16));
+            topRight: Radius.circular(8),
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8));
 
     if (widget.isShowJump) {
       if (!isShining) {
