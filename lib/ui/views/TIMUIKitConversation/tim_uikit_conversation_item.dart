@@ -55,7 +55,8 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
   }) : super(key: key);
 
   Widget _getShowMsgWidget(BuildContext context) {
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     if (isShowDraft && draftText != null && draftText != "") {
       return TIMUIKitDraftText(
         context: context,
@@ -94,7 +95,8 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
               color: theme.conversationItemTitmeTextColor,
             ));
       } else if (lastMsg != null) {
-        return Text(TimeAgo().getTimeStringForChat(lastMsg!.timestamp as int) ?? "",
+        return Text(
+            TimeAgo().getTimeStringForChat(lastMsg!.timestamp as int) ?? "",
             style: TextStyle(
               fontSize: 11,
               color: theme.conversationItemTitmeTextColor,
@@ -108,9 +110,10 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
   @override
   Widget tuiBuild(BuildContext context, TUIKitBuildValue value) {
     final TUITheme theme = value.theme;
-    final isDesktopScreen = TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
     return Container(
-      padding: const EdgeInsets.only(top: 6, bottom: 6, left: 16, right: 16),
+      padding: const EdgeInsets.only(top: 2, bottom: 0, left: 16, right: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -186,12 +189,11 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                           size: isDesktopScreen ? 14 : 16.0,
                         ),
                       )
-                    else
-                      if (unreadCount != 0)
-                        UnreadMessage(
-                            width: isDisturb ? 10 : 18,
-                            height: isDisturb ? 10 : 18,
-                            unreadCount: isDisturb ? 0 : unreadCount)
+                    else if (unreadCount != 0)
+                      UnreadMessage(
+                          width: isDisturb ? 10 : 18,
+                          height: isDisturb ? 10 : 18,
+                          unreadCount: isDisturb ? 0 : unreadCount)
                   ],
                 ),
               ],
