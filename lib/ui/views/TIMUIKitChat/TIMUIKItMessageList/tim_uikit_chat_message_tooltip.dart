@@ -494,7 +494,8 @@ class TIMUIKitMessageTooltipState
                 ClipboardData(text: widget.message.textElem?.text ?? ""));
             onTIMCallback(TIMCallback(
                 type: TIMCallbackType.INFO,
-                infoRecommendText: TIM_t("已复制"),
+                // infoRecommendText: TIM_t("已复制"),
+                infoRecommendText: TIM_t("复制成功"),
                 infoCode: 6660408));
             // ignore: empty_catches
           } catch (e) {}

@@ -12,6 +12,7 @@ import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitConversation/tim_uikit
 import 'package:tencent_cloud_chat_uikit/ui/widgets/avatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/unread_message.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/tim_uikit_cloud_custom_data.dart';
 
 typedef LastMessageBuilder = Widget? Function(
     V2TimMessage? lastMsg, List<V2TimGroupAtInfo?> groupAtInfoList);
@@ -155,6 +156,16 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    if (convType == 2)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Image.asset(
+                          'images/icon_group.png',
+                          package: 'tencent_cloud_chat_uikit',
+                          width: 16,
+                          height: 16,
+                        ),
+                      ),
                     Expanded(
                         child: Text(
                       nickName,
