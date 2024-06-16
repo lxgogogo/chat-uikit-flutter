@@ -13,6 +13,7 @@ import 'package:tencent_cloud_chat_uikit/data_services/services_locatar.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/message.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_select_emoji.dart';
+import 'package:tencent_cloud_chat_uikit/ui/widgets/action_sheet.dart';
 import 'package:tencent_im_base/tencent_im_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_base.dart';
 import 'package:tencent_cloud_chat_uikit/base_widgets/tim_ui_kit_state.dart';
@@ -461,14 +462,48 @@ class TIMUIKitMessageTooltipState
         _onOpenDesktop(fileDir);
         break;
       case "delete":
-        model.deleteMsg(msgID, webMessageInstance: messageItem.messageFromWeb);
+        // model.deleteMsg(msgID, webMessageInstance: messageItem.messageFromWeb);
+
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (context) {
+            return ActionSheet(
+              confirm: () {
+                model.deleteMsg(msgID,
+                    webMessageInstance: messageItem.messageFromWeb);
+                Navigator.of(context).pop(); // 关闭模态弹窗
+              },
+              text: "删除消息",
+            );
+          },
+        );
+
         break;
       case "revoke":
-        model.revokeMsg(
-            msgID,
-            !isRevocable(
-                widget.message.timestamp!, model.chatConfig.upperRecallTime),
-            messageItem.messageFromWeb);
+        // model.revokeMsg(
+        //     msgID,
+        //     !isRevocable(
+        //         widget.message.timestamp!, model.chatConfig.upperRecallTime),
+        //     messageItem.messageFromWeb);
+
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (context) {
+            return ActionSheet(
+              confirm: () {
+                model.revokeMsg(
+                    msgID,
+                    !isRevocable(widget.message.timestamp!,
+                        model.chatConfig.upperRecallTime),
+                    messageItem.messageFromWeb);
+                Navigator.of(context).pop(); // 关闭模态弹窗
+              },
+              text: "撤回消息",
+            );
+          },
+        );
         break;
       case 'translate':
         model.translateText(widget.message);
