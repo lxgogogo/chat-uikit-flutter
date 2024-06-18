@@ -47,8 +47,8 @@ class MessageUtils {
         s = TIM_t("自定义字段");
         break;
       case GroupChangeInfoType.V2TIM_GROUP_INFO_CHANGE_TYPE_FACE_URL:
-        s = TIM_t("群头像");
-        break;
+        // s = TIM_t("群头像"); todo 国际化
+        return TIM_t_para("{{option8}}", TIM_t("群头像"))(option8: TIM_t("群头像"));
       case GroupChangeInfoType.V2TIM_GROUP_INFO_CHANGE_TYPE_INTRODUCTION:
         s = TIM_t("群简介");
         break;
@@ -56,7 +56,8 @@ class MessageUtils {
         s = TIM_t("群名称");
         break;
       case GroupChangeInfoType.V2TIM_GROUP_INFO_CHANGE_TYPE_NOTIFICATION:
-        s = TIM_t("群公告");
+        // s = TIM_t("群公告"); todo 国际化
+        s = TIM_t("群备注");
         break;
       case GroupChangeInfoType.V2TIM_GROUP_INFO_CHANGE_TYPE_OWNER:
         s = TIM_t("群主");
