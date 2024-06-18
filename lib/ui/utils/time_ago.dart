@@ -69,10 +69,16 @@ class TimeAgo {
 
     // 一个礼拜之内
     if (diffDays > 0 && diffDays < 7) {
-      if (diffDays <= 2) {
-        res = dayMap()[diffDays - 1];
+      // if (diffDays <= 2) {
+      //   res = dayMap()[diffDays - 1];
+      // } else {
+      //   res = weekdayMap()[date.weekday];
+      // }
+      //当年内
+      if (date.year == DateTime.now().year) {
+        res = getMonthDate(date);
       } else {
-        res = weekdayMap()[date.weekday];
+        res = getYearMonthDate(date);
       }
     } else if (diffDays >= 7) {
       //当年内

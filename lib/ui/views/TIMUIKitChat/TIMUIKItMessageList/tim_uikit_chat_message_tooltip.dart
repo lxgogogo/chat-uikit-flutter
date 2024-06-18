@@ -474,7 +474,8 @@ class TIMUIKitMessageTooltipState
                     webMessageInstance: messageItem.messageFromWeb);
                 Navigator.of(context).pop(); // 关闭模态弹窗
               },
-              text: "删除消息",
+              text: "删除",
+              title: "是否删除该条消息",
             );
           },
         );
@@ -500,7 +501,8 @@ class TIMUIKitMessageTooltipState
                     messageItem.messageFromWeb);
                 Navigator.of(context).pop(); // 关闭模态弹窗
               },
-              text: "撤回消息",
+              text: "撤回",
+              title: "是否撤回该条消息",
             );
           },
         );

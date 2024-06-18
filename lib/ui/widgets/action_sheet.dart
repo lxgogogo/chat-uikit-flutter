@@ -4,10 +4,12 @@ class ActionSheet extends StatelessWidget {
   const ActionSheet({
     super.key,
     required this.confirm,
+    required this.title,
     required this.text,
   });
 
   final VoidCallback confirm;
+  final String title;
   final String text;
 
   @override
@@ -20,6 +22,24 @@ class ActionSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            width: double.infinity,
+            alignment: Alignment.center,
+            height: 66,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xff212226),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          Container(
+            color: Color(0xff212226).withOpacity(0.1),
+            height: 1,
+          ),
           InkWell(
             onTap: confirm,
             child: Container(
@@ -37,10 +57,6 @@ class ActionSheet extends StatelessWidget {
               ),
             ),
           ),
-          // Container(
-          //   color: Color(0xff212226).withOpacity(0.1),
-          //   height: 1,
-          // ),
           Container(
             color: const Color(0xff949BA5).withOpacity(0.1),
             height: 8,
