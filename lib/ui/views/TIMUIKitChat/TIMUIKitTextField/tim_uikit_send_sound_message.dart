@@ -305,13 +305,23 @@ class _SendSoundMessageState extends TIMUIKitState<SendSoundMessage> {
         // height: 35,
         // color: isRecording ? Colors.transparent : Colors.transparent,
         alignment: Alignment.center,
-        child: Text(
-          TIM_t("按住说话"),
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: theme.darkTextColor,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          decoration: BoxDecoration(
+            // color: hexToColor("F10000"),
+            color: Colors.transparent,
+            border: Border.all(color: hexToColor("D0D1DB"), width: 1.0),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          width: double.infinity,
+          child: Text(
+            TIM_t("按住说话"),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: theme.darkTextColor,
+            ),
           ),
         ),
       ),

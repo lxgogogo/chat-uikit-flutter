@@ -473,31 +473,31 @@ class _TIMUIKitTextFieldLayoutNarrowState
                               });
                             }
                           },
-                          child: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: ShapeDecoration(
-                                color: Colors.white,
-                                shape: const CircleBorder(),
-                                shadows: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 5,
-                                    spreadRadius: 1,
-                                    offset: const Offset(0, 3),
-                                  )
-                                ]),
-                            alignment: Alignment.center,
-                            child: Image.asset(
-                              showSendSoundText
-                                  ? 'images/hello/send_keyboard.png'
-                                  : 'images/hello/send_voice.png',
-                              package: 'tencent_cloud_chat_uikit',
-                              // color: const Color.fromRGBO(68, 68, 68, 1),
-                              height: 24,
-                              width: 24,
-                            ),
+                          // child: Container(
+                          //   width: 48,
+                          //   height: 48,
+                          //   decoration: ShapeDecoration(
+                          //       color: Colors.white,
+                          //       shape: const CircleBorder(),
+                          //       shadows: [
+                          //         BoxShadow(
+                          //           color: Colors.black.withOpacity(0.08),
+                          //           blurRadius: 5,
+                          //           spreadRadius: 1,
+                          //           offset: const Offset(0, 3),
+                          //         )
+                          //       ]),
+                          //   alignment: Alignment.center,
+                          child: Image.asset(
+                            showSendSoundText
+                                ? 'images/hello/send_keyboard.png'
+                                : 'images/hello/send_voice1.png',
+                            package: 'tencent_cloud_chat_uikit',
+                            // color: const Color.fromRGBO(68, 68, 68, 1),
+                            height: 24,
+                            width: 24,
                           ),
+                          // ),
                         ),
                       if (widget.forbiddenText == null)
                         const SizedBox(
@@ -505,23 +505,35 @@ class _TIMUIKitTextFieldLayoutNarrowState
                         ),
                       if (widget.forbiddenText == null)
                         Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: hexToColor("F1F0F3"),
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: showSendSoundText
-                                      ? SendSoundMessage(
-                                          onDownBottom: widget.goDownBottom,
-                                          conversationID: widget.conversationID,
-                                          conversationType:
-                                              widget.conversationType)
-                                      : KeyboardVisibility(
+                          // child: Container(
+                          //   padding: const EdgeInsets.symmetric(
+                          //       horizontal: 0, vertical: 0),
+                          //   decoration: BoxDecoration(
+                          //     color: hexToColor("F1F0F3"),
+                          //     borderRadius: BorderRadius.circular(24),
+                          //   ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: showSendSoundText
+                                    ? SendSoundMessage(
+                                        onDownBottom: widget.goDownBottom,
+                                        conversationID: widget.conversationID,
+                                        conversationType:
+                                            widget.conversationType)
+                                    : KeyboardVisibility(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            // color: hexToColor("F10000"),
+                                            color: Colors.transparent,
+                                            border: Border.all(
+                                                color: hexToColor("D0D1DB"),
+                                                width: 1.0),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
                                           child: ExtendedTextField(
                                               maxLines: 4,
                                               minLines: 1,
@@ -560,6 +572,10 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                                   TextAlignVertical.top,
                                               decoration: InputDecoration(
                                                   border: InputBorder.none,
+                                                  // contentPadding:
+                                                  //     EdgeInsets.symmetric(
+                                                  //         vertical: 12,
+                                                  //         horizontal: 0),
                                                   hintStyle: const TextStyle(
                                                     // fontSize: 10,
                                                     color: Color(0xffAEA4A3),
@@ -595,91 +611,90 @@ class _TIMUIKitTextFieldLayoutNarrowState
                                                           showAtBackground:
                                                               true,
                                                         )),
-                                          onChanged: (bool visibility) {
-                                            if (showKeyboard != visibility) {
-                                              setState(() {
-                                                showKeyboard = visibility;
-                                              });
-                                            }
-                                          }),
+                                        ),
+                                        onChanged: (bool visibility) {
+                                          if (showKeyboard != visibility) {
+                                            setState(() {
+                                              showKeyboard = visibility;
+                                            });
+                                          }
+                                        }),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              if (widget.showSendEmoji)
+                                InkWell(
+                                  onTap: () {
+                                    onTIMCallback(TIMCallback(
+                                        type: TIMCallbackType.INFO,
+                                        infoRecommendText: TIM_t("未开放功能"),
+                                        infoCode: 6660408));
+                                  },
+                                  child: PlatformUtils().isWeb
+                                      ? Icon(
+                                          showEmojiPanel
+                                              ? Icons.keyboard_alt_outlined
+                                              : Icons.mood_outlined,
+                                          color: hexToColor("5c6168"),
+                                          size: 32)
+                                      : Image.asset(
+                                          'images/hello/send_ai1.png',
+                                          package: 'tencent_cloud_chat_uikit',
+                                          color: const Color(0xff4D4054),
+                                          height: 24,
+                                          width: 24,
+                                        ),
                                 ),
-                                const SizedBox(
-                                  width: 10,
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              if (widget.showSendEmoji)
+                                InkWell(
+                                  onTap: () {
+                                    _openEmojiPanel();
+                                    widget.goDownBottom();
+                                  },
+                                  child: PlatformUtils().isWeb
+                                      ? Icon(
+                                          showEmojiPanel
+                                              ? Icons.keyboard_alt_outlined
+                                              : Icons.mood_outlined,
+                                          color: hexToColor("5c6168"),
+                                          size: 32)
+                                      : Image.asset(
+                                          showEmojiPanel
+                                              ? 'images/hello/send_keyboard.png'
+                                              : 'images/hello/send_face1.png',
+                                          package: 'tencent_cloud_chat_uikit',
+                                          // color: const Color.fromRGBO(68, 68, 68, 1),
+                                          height: 24,
+                                          width: 24,
+                                        ),
                                 ),
-                                if (widget.showSendEmoji)
-                                  InkWell(
-                                    onTap: () {
-                                      onTIMCallback(TIMCallback(
-                                          type: TIMCallbackType.INFO,
-                                          infoRecommendText: TIM_t("未开放功能"),
-                                          infoCode: 6660408));
-                                    },
-                                    child: PlatformUtils().isWeb
-                                        ? Icon(
-                                            showEmojiPanel
-                                                ? Icons.keyboard_alt_outlined
-                                                : Icons.mood_outlined,
-                                            color: hexToColor("5c6168"),
-                                            size: 32)
-                                        : Image.asset(
-                                            'images/hello/send_ai.png',
-                                            package: 'tencent_cloud_chat_uikit',
-                                            color: const Color(0xff4D4054),
-                                            height: 24,
-                                            width: 24,
-                                          ),
-                                  ),
-                                const SizedBox(
-                                  width: 10,
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              if (widget.showMorePanel && showMoreButton)
+                                InkWell(
+                                  onTap: () {
+                                    // model.sendCustomMessage(data: "a", convID: model.currentSelectedConv, convType: model.currentSelectedConvType == 1 ? ConvType.c2c : ConvType.group);
+                                    _openMore();
+                                    widget.goDownBottom();
+                                  },
+                                  child: PlatformUtils().isWeb
+                                      ? Icon(Icons.add_circle_outline_outlined,
+                                          color: hexToColor("5c6168"), size: 32)
+                                      : Image.asset(
+                                          'images/hello/send_add1.png',
+                                          package: 'tencent_cloud_chat_uikit',
+                                          // color: const Color.fromRGBO(68, 68, 68, 1),
+                                          height: 24,
+                                          width: 24,
+                                        ),
                                 ),
-                                if (widget.showSendEmoji)
-                                  InkWell(
-                                    onTap: () {
-                                      _openEmojiPanel();
-                                      widget.goDownBottom();
-                                    },
-                                    child: PlatformUtils().isWeb
-                                        ? Icon(
-                                            showEmojiPanel
-                                                ? Icons.keyboard_alt_outlined
-                                                : Icons.mood_outlined,
-                                            color: hexToColor("5c6168"),
-                                            size: 32)
-                                        : Image.asset(
-                                            showEmojiPanel
-                                                ? 'images/hello/send_keyboard.png'
-                                                : 'images/hello/send_face.png',
-                                            package: 'tencent_cloud_chat_uikit',
-                                            // color: const Color.fromRGBO(68, 68, 68, 1),
-                                            height: 24,
-                                            width: 24,
-                                          ),
-                                  ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                if (widget.showMorePanel && showMoreButton)
-                                  InkWell(
-                                    onTap: () {
-                                      // model.sendCustomMessage(data: "a", convID: model.currentSelectedConv, convType: model.currentSelectedConvType == 1 ? ConvType.c2c : ConvType.group);
-                                      _openMore();
-                                      widget.goDownBottom();
-                                    },
-                                    child: PlatformUtils().isWeb
-                                        ? Icon(
-                                            Icons.add_circle_outline_outlined,
-                                            color: hexToColor("5c6168"),
-                                            size: 32)
-                                        : Image.asset(
-                                            'images/hello/send_add.png',
-                                            package: 'tencent_cloud_chat_uikit',
-                                            // color: const Color.fromRGBO(68, 68, 68, 1),
-                                            height: 20,
-                                            width: 20,
-                                          ),
-                                  ),
-                              ],
-                            ),
+                            ],
+                            // ),
                           ),
                         ),
                       if ((isAndroidDevice() || isWebDevice()) &&
@@ -700,6 +715,14 @@ class _TIMUIKitTextFieldLayoutNarrowState
                               }
                             },
                             child: Text(TIM_t("发送")),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color(0xff6E5B7D), // 背景色设置为红色
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(6), // 圆角半径设置为6
+                              ),
+                            ),
                           ),
                         ),
                     ],

@@ -75,18 +75,18 @@ class TimeAgo {
       //   res = weekdayMap()[date.weekday];
       // }
       //当年内
-      if (date.year == DateTime.now().year) {
-        res = getMonthDate(date);
-      } else {
-        res = getYearMonthDate(date);
-      }
+      // if (date.year == DateTime.now().year) {
+      //   res = getMonthDate(date);
+      // } else {
+      res = getYearMonthDate(date);
+      // }
     } else if (diffDays >= 7) {
       //当年内
-      if (date.year == DateTime.now().year) {
-        res = getMonthDate(date);
-      } else {
-        res = getYearMonthDate(date);
-      }
+      // if (date.year == DateTime.now().year) {
+      //   res = getMonthDate(date);
+      // } else {
+      res = getYearMonthDate(date);
+      // }
     } else {
       if (diffMinutes > 1) {
         if (diffMinutes < 60) {
