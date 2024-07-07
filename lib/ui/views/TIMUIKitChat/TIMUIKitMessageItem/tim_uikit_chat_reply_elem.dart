@@ -94,7 +94,7 @@ class _TIMUIKitReplyElemState extends TIMUIKitState<TIMUIKitReplyElem> {
       }
 
       final messageID = cloudCustomData.messageID;
-      if(PlatformUtils().isWeb){
+      if (PlatformUtils().isWeb) {
         return;
       }
       V2TimMessage? message = await widget.chatModel.findMessage(messageID);

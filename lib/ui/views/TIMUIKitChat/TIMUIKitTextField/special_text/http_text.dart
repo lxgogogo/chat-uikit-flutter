@@ -1,4 +1,3 @@
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/link_preview/common/utils.dart';
@@ -21,7 +20,10 @@ class HttpText extends SpecialText {
 
         ///caret can move into special text
         deleteAll: true,
-        style: TextStyle(color: LinkUtils.hexToColor("015fff")),
+        // style: TextStyle(color: LinkUtils.hexToColor("015fff")),
+        style: textStyle?.copyWith(
+          decoration: TextDecoration.underline,
+        ),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
             if (onTap != null) {

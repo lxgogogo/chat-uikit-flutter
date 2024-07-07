@@ -228,17 +228,19 @@ class _TIMUIKitTextElemState extends TIMUIKitState<TIMUIKitTextElem> {
               ? textWithLink!(
                   style: widget.fontStyle ??
                       TextStyle(
-                          fontSize: isDesktopScreen ? 14 : 16,
-                          textBaseline: TextBaseline.ideographic,
-                          height: widget.chatModel.chatConfig.textHeight).copyWith(
+                              fontSize: isDesktopScreen ? 14 : 16,
+                              textBaseline: TextBaseline.ideographic,
+                              height: widget.chatModel.chatConfig.textHeight)
+                          .copyWith(
                         color: widget.isFromSelf ? Colors.white : null,
                       ))
               : ExtendedText(widget.message.textElem?.text ?? "",
                   softWrap: true,
                   style: widget.fontStyle ??
                       TextStyle(
-                          fontSize: isDesktopScreen ? 14 : 16,
-                          height: widget.chatModel.chatConfig.textHeight).copyWith(
+                              fontSize: isDesktopScreen ? 14 : 16,
+                              height: widget.chatModel.chatConfig.textHeight)
+                          .copyWith(
                         color: widget.isFromSelf ? Colors.white : null,
                       ),
                   specialTextSpanBuilder: DefaultSpecialTextSpanBuilder(
