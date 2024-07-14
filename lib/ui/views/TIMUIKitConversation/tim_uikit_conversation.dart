@@ -173,8 +173,12 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
     _timuiKitConversationController.pinConversation(conversationID: conversation.conversationID, isPinned: !conversation.isPinned!);
   }
 
-  _deleteConversation(V2TimConversation conversation) {
-    _timuiKitConversationController.deleteConversation(conversationID: conversation.conversationID);
+  _markConversation(V2TimConversation conversation) {
+    _timuiKitConversationController.markConversation(conversationID: conversation.conversationID);
+  }
+
+  _deleteConversation(V2TimConversation conversation, {bool isClearHistory = false}) {
+    _timuiKitConversationController.deleteConversation(conversationID: conversation.conversationID, isClearHistory: isClearHistory);
   }
 
   List<V2TimConversation?> getFilteredConversation() {
@@ -238,32 +242,31 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
   ) {
     final theme = themeViewModel.theme;
     return [
-      if (!PlatformUtils().isWeb)
         ConversationItemSlidePanel(
           onPressed: (context) {
-            _clearHistory(conversationItem);
+            _markConversation(conversationItem);
           },
           backgroundColor: theme.conversationItemSliderClearBgColor ?? CommonColor.primaryColor,
           foregroundColor: theme.conversationItemSliderTextColor,
-          label: TIM_t("清除"),
+          label: TIM_t("标记未读"),
           spacing: 0,
           autoClose: true,
         ),
-      ConversationItemSlidePanel(
-        onPressed: (context) {
-          _pinConversation(conversationItem);
-        },
-        backgroundColor: theme.conversationItemSliderPinBgColor ?? CommonColor.infoColor,
-        foregroundColor: theme.conversationItemSliderTextColor,
-        label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
-      ),
       ConversationItemSlidePanel(
         onPressed: (context) {
           _deleteConversation(conversationItem);
         },
         backgroundColor: theme.conversationItemSliderDeleteBgColor ?? Colors.red,
         foregroundColor: theme.conversationItemSliderTextColor,
-        label: TIM_t("删除"),
+        label: TIM_t("不显示"),
+      ),
+      ConversationItemSlidePanel(
+        onPressed: (context) {
+          _deleteConversation(conversationItem, isClearHistory: true);
+        },
+        backgroundColor: theme.conversationItemSliderDeleteBgColor ?? Colors.red,
+        foregroundColor: theme.conversationItemSliderTextColor,
+        label: TIM_t("移除"),
       )
     ];
   }
@@ -354,7 +357,9 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                                 draftText: conversationItem.draftText,
                                 onlineStatus: (widget.isShowOnlineStatus && conversationItem.userID != null && conversationItem.userID!.isNotEmpty) ? onlineStatus : null,
                                 draftTimestamp: conversationItem.draftTimestamp,
-                                convType: conversationItem.type),
+                                convType: conversationItem.type,
+                                markList: conversationItem.markList,
+                            ),
                             onTap: () => onTapConvItem(conversationItem),
                           ),
                         );
@@ -383,7 +388,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                             key: ValueKey(conversationItem.conversationID),
                             controller: _autoScrollController,
                             index: index,
-                            child: Slidable(groupTag: 'conversation-list', child: conversationLineItem(), endActionPane: ActionPane(extentRatio: slideChildren.length > 2 ? 0.77 : 0.5, motion: const DrawerMotion(), children: slideChildren), enabled: false),
+                            child: Slidable(groupTag: 'conversation-list', child: conversationLineItem(), endActionPane: ActionPane(extentRatio: slideChildren.length > 2 ? 0.77 : 0.5, motion: const DrawerMotion(), children: slideChildren)),
                           ));
                     })
                 : (widget.emptyBuilder != null ? widget.emptyBuilder!() : Container());

@@ -43,6 +43,22 @@ class ConversationServicesImpl extends ConversationService {
   }
 
   @override
+  Future<bool> markConversation({
+    required String conversationID,
+  }) async {
+    final V2TimValueCallback<List<V2TimConversationOperationResult>> result = await TencentImSDKPlugin.v2TIMManager
+        .getConversationManager()
+        .markConversation(markType: V2TimConversationMarkType.V2TIM_CONVERSATION_MARK_TYPE_UNREAD, enableMark: true, conversationIDList: [conversationID]);
+    if (result.code != 0) {
+      _coreService.callOnCallback(TIMCallback(
+          type: TIMCallbackType.API_ERROR,
+          errorMsg: result.desc,
+          errorCode: result.code));
+    }
+    return result.data?.firstOrNull?.resultCode == 0;
+  }
+
+  @override
   Future<V2TimCallback> deleteConversation({
     required String conversationID,
   }) async {

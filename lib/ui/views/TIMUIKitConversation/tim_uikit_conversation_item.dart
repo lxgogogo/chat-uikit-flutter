@@ -37,6 +37,8 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
   /// to meet the identifier shows here.
   final bool isShowDraft;
 
+  final List<int?>? markList;
+
   TIMUIKitConversationItem({
     Key? key,
     required this.isShowDraft,
@@ -53,6 +55,7 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
     this.draftTimestamp,
     this.lastMessageBuilder,
     this.convType,
+    this.markList,
   }) : super(key: key);
 
   Widget _getShowMsgWidget(BuildContext context) {
@@ -205,6 +208,11 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
                           width: isDisturb ? 10 : 18,
                           height: isDisturb ? 10 : 18,
                           unreadCount: isDisturb ? 0 : unreadCount)
+                    else if (markList?.isNotEmpty == true && (markList?.contains(2) ?? false))
+                        UnreadMessage(
+                            width: 8,
+                            height: 8,
+                            unreadCount: isDisturb ? 0 : unreadCount)
                   ],
                 ),
               ],

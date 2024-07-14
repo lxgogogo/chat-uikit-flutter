@@ -41,6 +41,12 @@ class TIMUIKitConversationController {
         conversationID: conversationID, isPinned: isPinned);
   }
 
+  /// Pin one conversation to the top
+  Future<bool> markConversation(
+      {required String conversationID}) {
+    return model.markConversation(conversationID: conversationID);
+  }
+
   /// Set the draft for a conversation
   Future<V2TimCallback> setConversationDraft(
       {required String conversationID, String? draftText}) {
@@ -60,8 +66,8 @@ class TIMUIKitConversationController {
   }
 
   /// Delete a conversation
-  Future<V2TimCallback?> deleteConversation({required String conversationID}) {
-    return model.deleteConversation(conversationID: conversationID);
+  Future<void> deleteConversation({required String conversationID, bool isClearHistory = false}) {
+    return model.deleteConversation(conversationID: conversationID, isClearHistory: isClearHistory);
   }
 
   /// Clear the conversation list from UI

@@ -175,6 +175,12 @@ class TUIConversationViewModel extends ChangeNotifier {
     return _conversationService.pinConversation(conversationID: conversationID, isPinned: isPinned);
   }
 
+  Future<bool> markConversation({
+    required String conversationID,
+  }) {
+    return _conversationService.markConversation(conversationID: conversationID);
+  }
+
   Future<V2TimCallback?> clearHistoryMessage({required String convID, required int convType}) async {
     if (_lifeCycle?.shouldClearHistoricalMessageForConversation != null && await _lifeCycle!.shouldClearHistoricalMessageForConversation(convID) == false) {
       return null;
@@ -194,16 +200,20 @@ class TUIConversationViewModel extends ChangeNotifier {
     return res;
   }
 
-  Future<V2TimCallback?> deleteConversation({required String conversationID}) async {
+  Future<void> deleteConversation({required String conversationID, bool isClearHistory = false}) async {
     if (_lifeCycle?.shouldDeleteConversation != null && await _lifeCycle!.shouldDeleteConversation(conversationID) == false) {
-      return null;
+      return;
+    }
+    if (!isClearHistory) {
+      _conversationList.removeWhere((element) => element?.conversationID == conversationID);
+      notifyListeners();
+      return;
     }
     final res = await _conversationService.deleteConversation(conversationID: conversationID);
     if (res.code == 0) {
       _conversationList.removeWhere((element) => element?.conversationID == conversationID);
       notifyListeners();
     }
-    return res;
   }
 
   _onConversationListChanged(List<V2TimConversation> list) {

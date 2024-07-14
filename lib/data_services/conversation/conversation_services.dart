@@ -15,6 +15,10 @@ abstract class ConversationService {
     required bool isPinned,
   });
 
+  Future<bool> markConversation({
+    required String conversationID,
+  });
+
   Future<V2TimCallback> deleteConversation({
     required String conversationID,
   });
