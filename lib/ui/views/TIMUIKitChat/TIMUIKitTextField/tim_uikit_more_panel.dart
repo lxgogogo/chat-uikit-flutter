@@ -267,18 +267,19 @@ class _MorePanelState extends TIMUIKitState<MorePanel> {
               );
             },
             icon: Container(
-              height: 64,
-              width: 64,
+              height: 62,
+              width: 62,
               margin: const EdgeInsets.only(bottom: 4),
               decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: SvgPicture.asset(
-                "images/video-call.svg",
-                package: 'tencent_cloud_chat_uikit',
-                height: 64,
-                width: 64,
-              ),
+                  color: Color(0xffF5F5F6),
+                  borderRadius: BorderRadius.all(Radius.circular(8))),
+              child: Center(
+                  child: Image.asset(
+                    "images/hello/video_call.png",
+                    package: 'tencent_cloud_chat_uikit',
+                    height: 24,
+                    width: 24,
+                  )),
             )),
       if (isInstallCallkit && PlatformUtils().isMobile)
         MorePanelItem(
@@ -293,18 +294,19 @@ class _MorePanelState extends TIMUIKitState<MorePanel> {
               );
             },
             icon: Container(
-              height: 64,
-              width: 64,
+              height: 62,
+              width: 62,
               margin: const EdgeInsets.only(bottom: 4),
               decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: SvgPicture.asset(
-                "images/voice-call.svg",
-                package: 'tencent_cloud_chat_uikit',
-                height: 64,
-                width: 64,
-              ),
+                  color: Color(0xffF5F5F6),
+                  borderRadius: BorderRadius.all(Radius.circular(8))),
+              child: Center(
+                  child: Image.asset(
+                    "images/hello/voice_call.png",
+                    package: 'tencent_cloud_chat_uikit',
+                    height: 24,
+                    width: 24,
+                  )),
             )),
       if (config.extraAction != null) ...?config.extraAction,
     ].where((element) {
