@@ -134,6 +134,7 @@ class ConversationItemSlidePanel extends TIMUIKitStatelessWidget {
       autoClose: autoClose,
       label: label,
       spacing: spacing,
+      icon: icon,
     );
   }
 }
@@ -240,33 +241,37 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
   List<ConversationItemSlidePanel> _defaultSlideBuilder(
     V2TimConversation conversationItem,
   ) {
-    final theme = themeViewModel.theme;
     return [
         ConversationItemSlidePanel(
           onPressed: (context) {
             _markConversation(conversationItem);
           },
-          backgroundColor: theme.conversationItemSliderClearBgColor ?? CommonColor.primaryColor,
-          foregroundColor: theme.conversationItemSliderTextColor,
+          backgroundColor: const Color(0xffF6B333),
+          foregroundColor: Colors.white,
           label: TIM_t("标记未读"),
           spacing: 0,
+          icon: Icons.mark_chat_unread,
           autoClose: true,
         ),
       ConversationItemSlidePanel(
         onPressed: (context) {
           _deleteConversation(conversationItem);
         },
-        backgroundColor: theme.conversationItemSliderDeleteBgColor ?? Colors.red,
-        foregroundColor: theme.conversationItemSliderTextColor,
+        backgroundColor: const Color(0xffCACACA),
+        foregroundColor: Colors.white,
+        icon: Icons.not_interested,
         label: TIM_t("不显示"),
+        autoClose: true,
       ),
       ConversationItemSlidePanel(
         onPressed: (context) {
           _deleteConversation(conversationItem, isClearHistory: true);
         },
-        backgroundColor: theme.conversationItemSliderDeleteBgColor ?? Colors.red,
-        foregroundColor: theme.conversationItemSliderTextColor,
+        backgroundColor: const Color(0xffF87171),
+        foregroundColor: Colors.white,
+        icon: Icons.delete_outline,
         label: TIM_t("移除"),
+        autoClose: true,
       )
     ];
   }
