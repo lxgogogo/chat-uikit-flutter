@@ -156,6 +156,13 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
     return soundLen;
   }
 
+  //把时间转化为 00:00 格式
+  String _formatDuration(int duration) {
+    final int minute = duration ~/ 60;
+    final int second = duration % 60;
+    return '${minute.toString()}:${second.toString().padLeft(2, '0')}';
+  }
+
   _showJumpColor() {
     if ((widget.chatModel.jumpMsgID != widget.message.msgID) &&
         (widget.message.msgID?.isNotEmpty ?? true)) {
@@ -230,53 +237,63 @@ class _TIMUIKitSoundElemState extends TIMUIKitState<TIMUIKitSoundElem> {
               mainAxisSize: MainAxisSize.min,
               children: widget.isFromSelf
                   ? [
-                      Container(width: _getSoundLen()),
-                      Text("''${stateElement.duration} ",
+                      // Container(width: _getSoundLen()),
+                      Image.asset(
+                        'images/hello/icon_play_sound.png',
+                        package: 'tencent_cloud_chat_uikit',
+                        width: 14,
+                        height: 14,
+                        color: Colors.white,
+                      ),
+                      Text(" ${_formatDuration(stateElement.duration ?? 0)} ",
                           style: const TextStyle(
                             color: Colors.white,
                           )),
                       isPlaying
                           ? Image.asset(
-                              'images/play_voice_send.gif',
+                              'images/hello/voice_wave.gif',
                               package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
+                              width: 50,
+                              height: 18,
                               colorBlendMode: BlendMode.dstIn,
                               color: Colors.white,
                             )
                           : Image.asset(
-                              'images/voice_send.png',
+                              'images/hello/voice_wave_0.png',
                               package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
+                              width: 50,
+                              height: 18,
                               color: Colors.white,
                             ),
                     ]
                   : [
-                      isPlaying
-                          ? Image.asset(
-                              'images/play_voice_receive.gif',
-                              package: 'tencent_cloud_chat_uikit',
-                              width: 16,
-                              height: 16,
-                              // color: widget.isFromSelf
-                              //     ? Colors.white
-                              //     : const Color(0xff6E5B7D),
-                            )
-                          : Image.asset(
-                              'images/voice_receive.png',
-                              width: 16,
-                              height: 16,
-                              package: 'tencent_cloud_chat_uikit',
-                              // color: widget.isFromSelf
-                              //     ? Colors.white
-                              //     : const Color(0xff6E5B7D),
-                            ),
+                      Image.asset(
+                        'images/hello/icon_play_sound.png',
+                        package: 'tencent_cloud_chat_uikit',
+                        width: 14,
+                        height: 14,
+                        color: const Color(0xff6E5B7D),
+                      ),
                       Text(
-                        " ${stateElement.duration}''",
+                        " ${_formatDuration(stateElement.duration ?? 0)} ",
                         style: widget.fontStyle,
                       ),
-                      Container(width: _getSoundLen()),
+                      isPlaying
+                          ? Image.asset(
+                              'images/hello/voice_wave.gif',
+                              package: 'tencent_cloud_chat_uikit',
+                              width: 50,
+                              height: 18,
+                              color: const Color(0xff6E5B7D),
+                            )
+                          : Image.asset(
+                              'images/hello/voice_wave_0.png',
+                              package: 'tencent_cloud_chat_uikit',
+                              width: 50,
+                              height: 18,
+                              color: const Color(0xff6E5B7D),
+                            ),
+                      // Container(width: _getSoundLen()),
                     ],
             ),
             if (widget.isShowMessageReaction ?? true)

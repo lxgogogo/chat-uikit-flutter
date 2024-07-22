@@ -16,24 +16,25 @@ class LinkPreviewEntry {
       bool isUseTencentCloudChatPackage = false,
       List<CustomEmojiFaceData> customEmojiStickerList = const []}) {
     return ({TextStyle? style}) {
-      return isMarkdown
-          ? LinkTextMarkdown(
-              isUseQQPackage: isUseQQPackage,
-              isUseTencentCloudChatPackage: isUseTencentCloudChatPackage,
-              customEmojiStickerList: customEmojiStickerList,
-              isEnableTextSelection: isEnableTextSelection,
-              messageText: addSpaceAfterLeftBracket(
-                  addSpaceBeforeHttp(replaceSingleNewlineWithTwo(messageText))),
-              style: style,
-              onLinkTap: onLinkTap)
-          : LinkText(
-              isEnableTextSelection: isEnableTextSelection,
-              messageText: messageText,
-              style: style,
-              onLinkTap: onLinkTap,
-              isUseQQPackage: isUseQQPackage,
-              isUseTencentCloudChatPackage: isUseTencentCloudChatPackage,
-              customEmojiStickerList: customEmojiStickerList);
+      // return isMarkdown
+      //     ? LinkTextMarkdown(
+      //         isUseQQPackage: isUseQQPackage,
+      //         isUseTencentCloudChatPackage: isUseTencentCloudChatPackage,
+      //         customEmojiStickerList: customEmojiStickerList,
+      //         isEnableTextSelection: isEnableTextSelection,
+      //         messageText: addSpaceAfterLeftBracket(
+      //             addSpaceBeforeHttp(replaceSingleNewlineWithTwo(messageText))),
+      //         style: style,
+      //         onLinkTap: onLinkTap)
+      //     :
+      return LinkText(
+          isEnableTextSelection: isEnableTextSelection,
+          messageText: messageText,
+          style: style,
+          onLinkTap: onLinkTap,
+          isUseQQPackage: isUseQQPackage,
+          isUseTencentCloudChatPackage: isUseTencentCloudChatPackage,
+          customEmojiStickerList: customEmojiStickerList);
     };
   }
 
