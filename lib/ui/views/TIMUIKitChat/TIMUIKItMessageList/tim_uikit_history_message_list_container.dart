@@ -28,8 +28,10 @@ class TIMUIKitHistoryMessageListContainer extends StatefulWidget {
   final Widget Function(BuildContext, V2TimMessage?)? itemBuilder;
   final AutoScrollController? scrollController;
   final String conversationID;
-  final Function(String? userId, String? nickName)?
-      onLongPressForOthersHeadPortrait;
+  final Function(String? userId, String? nickName)? onLongPressForOthersHeadPortrait;
+  final Function(String? userId, String? nickName)? onViewMessages;
+  final Function(String? userId, String? nickName)? onSearchMessages;
+  final Function(String? userId, String? nickName)? onSendMessages;
   final List<V2TimGroupAtInfo?>? groupAtInfoList;
   final V2TimMessage? initFindingMsg;
 
@@ -111,7 +113,7 @@ class TIMUIKitHistoryMessageListContainer extends StatefulWidget {
     required this.conversation,
     this.onSecondaryTapAvatar,
     this.groupMemberInfo,
-    this.customMessageHoverBarOnDesktop,
+    this.customMessageHoverBarOnDesktop, this.onViewMessages, this.onSearchMessages, this.onSendMessages,
   }) : super(key: key);
 
   @override
@@ -193,8 +195,10 @@ class _TIMUIKitHistoryMessageListContainerState
                 onSecondaryTapForOthersPortrait: widget.onSecondaryTapAvatar,
                 onTapForOthersPortrait: widget.onTapAvatar,
                 messageItemBuilder: widget.messageItemBuilder,
-                onLongPressForOthersHeadPortrait:
-                    widget.onLongPressForOthersHeadPortrait,
+                onLongPressForOthersHeadPortrait: widget.onLongPressForOthersHeadPortrait,
+                onViewMessages: widget.onViewMessages,
+                onSearchMessages: widget.onSearchMessages,
+                onSendMessages: widget.onSendMessages,
                 allowAtUserWhenReply: chatConfig.isAtWhenReply,
                 allowAvatarTap: chatConfig.isAllowClickAvatar,
                 allowLongPress: chatConfig.isAllowLongPressMessage,

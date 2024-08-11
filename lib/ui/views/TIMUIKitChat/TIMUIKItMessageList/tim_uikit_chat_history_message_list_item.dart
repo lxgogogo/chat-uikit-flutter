@@ -22,6 +22,7 @@ import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/screen_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/time_ago.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_chat_message_tooltip.dart';
+import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_chat_other_avatar_tooltip.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKItMessageList/tim_uikit_message_read_receipt.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/TIMUIKitMessageReaction/tim_uikit_message_reaction_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/views/TIMUIKitChat/TIMUIKitMessageItem/main.dart';
@@ -210,8 +211,10 @@ class TIMUIKitHistoryMessageListItem extends StatefulWidget {
   final Function? onScrollToIndexBegin;
 
   /// the callback for long press event, except myself avatar
-  final Function(String? userId, String? nickName)?
-      onLongPressForOthersHeadPortrait;
+  final Function(String? userId, String? nickName)? onLongPressForOthersHeadPortrait;
+  final Function(String? userId, String? nickName)? onViewMessages;
+  final Function(String? userId, String? nickName)? onSearchMessages;
+  final Function(String? userId, String? nickName)? onSendMessages;
 
   /// message item builder, works for customize all message types and row layout.
   final MessageItemBuilder? messageItemBuilder;
@@ -321,7 +324,7 @@ class TIMUIKitHistoryMessageListItem extends StatefulWidget {
       this.textFieldController,
       this.onSecondaryTapForOthersPortrait,
       this.groupMemberInfo,
-      this.customMessageHoverBarOnDesktop})
+      this.customMessageHoverBarOnDesktop, this.onViewMessages, this.onSearchMessages, this.onSendMessages})
       : super(key: key);
 
   @override
@@ -367,6 +370,7 @@ class _TIMUIKItHistoryMessageListItemState
     extends TIMUIKitState<TIMUIKitHistoryMessageListItem>
     with TickerProviderStateMixin {
   SuperTooltip? tooltip;
+  SuperTooltip? avatarTooltip;
 
   // ignore: unused_field
   final MessageService _messageService = serviceLocator<MessageService>();
@@ -381,6 +385,10 @@ class _TIMUIKItHistoryMessageListItemState
 
   closeTooltip() {
     tooltip?.close();
+  }
+
+  closeAvatarTooltip() {
+    avatarTooltip?.close();
   }
 
   bool isReplyMessage(V2TimMessage message) {
@@ -806,6 +814,58 @@ class _TIMUIKItHistoryMessageListItemState
     tooltip!.show(c, targetCenter: finalTapDetail?.globalPosition);
   }
 
+  _onOpenAvatarToolTip(
+    c,
+    V2TimMessage message,
+    TUIChatSeparateViewModel model,
+    TUITheme theme,
+    TapDownDetails? details,
+    bool? isFromWideTooltip,
+    bool? isShowMoreSticker,
+  ) {
+    if (avatarTooltip != null && avatarTooltip!.isOpen) {
+      avatarTooltip!.close();
+      return;
+    }
+    avatarTooltip = null;
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isLongMessage =
+        context.size!.height + 350 > screenHeight && !(isDesktopScreen);
+    final tapDetails =
+        (isDesktopScreen || isLongMessage) ? (details ?? _tapDetails) : details;
+    final isSelf = message.isSelf ?? true;
+
+    final targetWidth =
+        min(MediaQuery.of(context).size.width * 0.84, 350).toDouble();
+    final double dx = !isSelf
+        ? min(tapDetails?.globalPosition.dx ?? targetWidth,
+            screenWidth - targetWidth)
+        : max(tapDetails?.globalPosition.dx ?? targetWidth, targetWidth)
+            .toDouble();
+    final double dy = min(
+            tapDetails?.globalPosition.dy ?? MediaQuery.of(context).size.height,
+            MediaQuery.of(context).size.height - 320)
+        .toDouble();
+    final finalTapDetail = tapDetails != null
+        ? TapDownDetails(
+            globalPosition: Offset(dx, dy),
+          )
+        : null;
+
+    initAvatarTools(
+        context: c,
+        model: model,
+        isShowMoreSticker: isShowMoreSticker,
+        details: finalTapDetail,
+        theme: theme,
+        isFromWideToolTip: isFromWideTooltip);
+    avatarTooltip!.show(c, targetCenter: finalTapDetail?.globalPosition);
+  }
+
   _clickOnCurrentSticker(int sticker) async {
     for (int i = 0; i < 5; i++) {
       final res = await _modifySticker(sticker);
@@ -921,6 +981,113 @@ class _TIMUIKItHistoryMessageListItemState
         onCloseTooltip: () => tooltip?.close(),
         onSelectSticker: (int value) {
           tooltip?.close();
+          _clickOnCurrentSticker(value);
+        },
+      ),
+    );
+  }
+
+  initAvatarTools(
+      {BuildContext? context,
+      bool isLongMessage = false,
+      required TUIChatSeparateViewModel model,
+      TUITheme? theme,
+      bool? isShowMoreSticker,
+      TapDownDetails? details,
+      bool? isFromWideToolTip}) {
+    final isUseMessageReaction = widget.message.elemType == 2
+        ? false
+        : model.chatConfig.isUseMessageReaction;
+    final isDesktopScreen =
+        TUIKitScreenUtils.getFormFactor(context) == DeviceType.Desktop;
+    final isSelf = widget.message.isSelf ?? true;
+    double arrowTipDistance = 30;
+    double arrowBaseWidth = 10;
+    double arrowLength = 10;
+    bool hasArrow = true;
+    TooltipDirection popupDirection = TooltipDirection.up;
+    double? left;
+    double? right;
+    SelectEmojiPanelPosition selectEmojiPanelPosition =
+        SelectEmojiPanelPosition.down;
+    if (context != null) {
+      RenderBox? box = _key.currentContext?.findRenderObject() as RenderBox?;
+      if (details != null && box != null) {
+        double screenWidth = MediaQuery.of(context).size.width;
+        final mousePosition = details.globalPosition;
+        hasArrow = isDesktopScreen ? false : true;
+        arrowTipDistance = 0;
+        arrowBaseWidth = 0;
+        arrowLength = 0;
+        popupDirection = TooltipDirection.down;
+        if (isSelf || (isFromWideToolTip ?? false)) {
+          right = screenWidth - mousePosition.dx;
+        } else {
+          left = mousePosition.dx;
+        }
+      } else {
+        if (box != null) {
+          double screenWidth = MediaQuery.of(context).size.width;
+          double viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
+          Offset offset = box.localToGlobal(Offset.zero);
+          double boxWidth = box.size.width;
+          if (isSelf) {
+            right = screenWidth -
+                offset.dx -
+                ((isUseMessageReaction) ? boxWidth : (boxWidth / 1.3));
+          } else {
+            left = offset.dx;
+          }
+          if (offset.dy < 300 && !isLongMessage && viewInsetsBottom == 0) {
+            selectEmojiPanelPosition = SelectEmojiPanelPosition.up;
+            popupDirection = TooltipDirection.down;
+          } else if (viewInsetsBottom != 0 && offset.dy < 220) {
+            selectEmojiPanelPosition = SelectEmojiPanelPosition.up;
+            popupDirection = TooltipDirection.down;
+          }
+        }
+        arrowTipDistance = (context.size!.height / 2).roundToDouble() +
+            (isLongMessage ? -120 : 10);
+      }
+    }
+
+    avatarTooltip = SuperTooltip(
+      popupDirection: popupDirection,
+      minimumOutSidePadding: 0,
+      arrowTipDistance: arrowTipDistance,
+      arrowBaseWidth: arrowBaseWidth,
+      arrowLength: arrowLength,
+      right: right,
+      left: left,
+      hasArrow: hasArrow,
+      borderColor: theme?.white ?? Colors.white,
+      // borderColor: Colors.black.withOpacity(0.7),
+      backgroundColor: theme?.white ?? Colors.white,
+      // backgroundColor: Colors.black.withOpacity(0.7),
+      shadowColor: Colors.black26,
+      // shadowColor: Colors.transparent,
+      hasShadow: isDesktopScreen ? false : true,
+      borderWidth: 1.0,
+      showCloseButton: ShowCloseButton.none,
+      touchThroughAreaShape: ClipAreaShape.rectangle,
+      content: TIMUIKitOtherAvatarTooltip(
+        iSUseDefaultHoverBar: model.chatConfig.isUseMessageHoverBarOnDesktop &&
+            widget.customMessageHoverBarOnDesktop == null,
+        model: model,
+        groupMemberInfo: widget.groupMemberInfo,
+        isShowMoreSticker: isShowMoreSticker ?? false,
+        toolTipsConfig: widget.toolTipsConfig,
+        isUseMessageReaction: isUseMessageReaction,
+        message: widget.message,
+        allowAtUserWhenReply: widget.allowAtUserWhenReply,
+        onLongPressForOthersHeadPortrait: widget.onLongPressForOthersHeadPortrait,
+        onViewMessages: widget.onViewMessages,
+        onSearchMessages: widget.onSearchMessages,
+        onSendMessages: widget.onSendMessages,
+        selectEmojiPanelPosition: selectEmojiPanelPosition,
+        onCloseTooltip: () => avatarTooltip?.close(),
+        onSelectSticker: (int value) {
+          avatarTooltip?.close();
           _clickOnCurrentSticker(value);
         },
       ),
@@ -1356,70 +1523,83 @@ class _TIMUIKItHistoryMessageListItemState
                         : MainAxisAlignment.start,
                     children: [
                       if (!isSelf && widget.showAvatar)
-                        GestureDetector(
-                          onLongPress: () {
-                            if (widget.onLongPressForOthersHeadPortrait !=
-                                null) {}
-                            if (model.chatConfig.isAllowLongPressAvatarToAt) {
-                              widget.onLongPressForOthersHeadPortrait!(
-                                  message.sender, message.nickName);
-                            }
-                          },
-                          onTapDown: isDesktopScreen
-                              ? (details) {
-                                  if (widget.onTapForOthersPortrait != null &&
-                                      widget.allowAvatarTap) {
-                                    widget.onTapForOthersPortrait!(
-                                        message.sender ?? "", details);
-                                  }
-                                }
-                              : null,
-                          onTap: isDesktopScreen
-                              ? null
-                              : () {
-                                  if (widget.onTapForOthersPortrait != null &&
-                                      widget.allowAvatarTap) {
-                                    widget.onTapForOthersPortrait!(
-                                        message.sender ?? "", TapDownDetails());
-                                  }
-                                },
-                          onSecondaryTap: isDesktopScreen
-                              ? null
-                              : () {
-                                  if (widget.onSecondaryTapForOthersPortrait !=
-                                          null &&
-                                      widget.allowAvatarTap) {
-                                    widget.onSecondaryTapForOthersPortrait!(
-                                        message.sender ?? "", TapDownDetails());
-                                  }
-                                },
-                          onSecondaryTapDown: isDesktopScreen
-                              ? (details) {
-                                  if (widget.onSecondaryTapForOthersPortrait !=
-                                          null &&
-                                      widget.allowAvatarTap) {
-                                    widget.onSecondaryTapForOthersPortrait!(
-                                        message.sender ?? "", details);
-                                  }
-                                }
-                              : null,
-                          child: widget.userAvatarBuilder != null
-                              ? widget.userAvatarBuilder!(context, message)
-                              : Container(
-                                  margin: (isSelf && isShowNickNameForSelf) ||
-                                          (!isSelf && isShowNickNameForOthers)
-                                      ? const EdgeInsets.only(top: 2)
-                                      : null,
-                                  child: SizedBox(
-                                    width: 40,
-                                    height: 40,
-                                    child: Avatar(
-                                      faceUrl: message.faceUrl ?? "",
-                                      showName:
-                                          MessageUtils.getDisplayName(message),
+                        Builder(
+                          builder: (context) {
+                            return GestureDetector(
+                              onLongPress: () {
+                                // if (widget.onLongPressForOthersHeadPortrait !=
+                                //     null) {}
+                                // if (model.chatConfig.isAllowLongPressAvatarToAt) {
+                                //   widget.onLongPressForOthersHeadPortrait!(
+                                //       message.sender, message.nickName);
+                                // }
+                                _onOpenAvatarToolTip(
+                                    context,
+                                    message,
+                                    model,
+                                    theme,
+                                    null,
+                                    false,
+                                    false
+                                );
+                              },
+                              onTapDown: isDesktopScreen
+                                  ? (details) {
+                                      if (widget.onTapForOthersPortrait != null &&
+                                          widget.allowAvatarTap) {
+                                        widget.onTapForOthersPortrait!(
+                                            message.sender ?? "", details);
+                                      }
+                                    }
+                                  : null,
+                              onTap: isDesktopScreen
+                                  ? null
+                                  : () {
+                                      if (widget.onTapForOthersPortrait != null &&
+                                          widget.allowAvatarTap) {
+                                        widget.onTapForOthersPortrait!(
+                                            message.sender ?? "", TapDownDetails());
+                                      }
+                                    },
+                              onSecondaryTap: isDesktopScreen
+                                  ? null
+                                  : () {
+                                      if (widget.onSecondaryTapForOthersPortrait !=
+                                              null &&
+                                          widget.allowAvatarTap) {
+                                        widget.onSecondaryTapForOthersPortrait!(
+                                            message.sender ?? "", TapDownDetails());
+                                      }
+                                    },
+                              onSecondaryTapDown: isDesktopScreen
+                                  ? (details) {
+                                      if (widget.onSecondaryTapForOthersPortrait !=
+                                              null &&
+                                          widget.allowAvatarTap) {
+                                        widget.onSecondaryTapForOthersPortrait!(
+                                            message.sender ?? "", details);
+                                      }
+                                    }
+                                  : null,
+                              child: widget.userAvatarBuilder != null
+                                  ? widget.userAvatarBuilder!(context, message)
+                                  : Container(
+                                      margin: (isSelf && isShowNickNameForSelf) ||
+                                              (!isSelf && isShowNickNameForOthers)
+                                          ? const EdgeInsets.only(top: 2)
+                                          : null,
+                                      child: SizedBox(
+                                        width: 40,
+                                        height: 40,
+                                        child: Avatar(
+                                          faceUrl: message.faceUrl ?? "",
+                                          showName:
+                                              MessageUtils.getDisplayName(message),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
+                            );
+                          }
                         ),
                       if (isSelf &&
                           widget.message.elemType == 6 &&

@@ -162,6 +162,10 @@ class TIMUIKitChat extends StatefulWidget {
   /// additional network requests to fetch the group member information internally.
   List<V2TimGroupMemberFullInfo?>? groupMemberList;
 
+  final Function(String? userId, String? nickName)? onViewMessages;
+  final Function(String? userId, String? nickName)? onSearchMessages;
+  final Function(String? userId, String? nickName)? onSendMessages;
+
   TIMUIKitChat(
       {Key? key,
       this.groupID,
@@ -198,7 +202,7 @@ class TIMUIKitChat extends StatefulWidget {
       this.customAppBar,
       this.inputTopBuilder,
       this.onSecondaryTapAvatar,
-      this.customMessageHoverBarOnDesktop})
+      this.customMessageHoverBarOnDesktop, this.onViewMessages, this.onSearchMessages, this.onSendMessages})
       : super(key: key) {
     startTime = DateTime.now().millisecondsSinceEpoch;
   }
@@ -491,6 +495,9 @@ class _TUIChatState extends TIMUIKitState<TIMUIKitChat> {
                                     onLongPressForOthersHeadPortrait: (String? userId, String? nickName) {
                                       textFieldController.longPressToAt(nickName, userId);
                                     },
+                                    onViewMessages: widget.onViewMessages,
+                                    onSearchMessages: widget.onSearchMessages,
+                                    onSendMessages: widget.onSendMessages,
                                     mainHistoryListConfig: widget.mainHistoryListConfig,
                                     initFindingMsg: widget.initFindingMsg,
                                     extraTipsActionItemBuilder: widget.extraTipsActionItemBuilder ?? widget.exteraTipsActionItemBuilder,
