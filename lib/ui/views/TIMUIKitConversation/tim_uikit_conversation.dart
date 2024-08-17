@@ -25,7 +25,7 @@ typedef ConversationItemBuilder = Widget? Function(
     V2TimConversation conversationItem,
     [V2TimUserStatus? onlineStatus]);
 
-typedef ConversationItemSlideBuilder = List<ConversationItemSlidePanel>
+typedef ConversationItemSlideBuilder = List<Widget>
     Function(V2TimConversation conversationItem);
 
 typedef ConversationItemSecondaryMenuBuilder = Widget Function(
@@ -261,41 +261,137 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
     ]);
   }
 
-  List<ConversationItemSlidePanel> _defaultSlideBuilder(
+  List<Widget> _defaultSlideBuilder(
     V2TimConversation conversationItem,
   ) {
     return [
-      ConversationItemSlidePanel(
+      // ConversationItemSlidePanel(
+      //   onPressed: (context) {
+      //     _markConversation(conversationItem);
+      //   },
+      //   backgroundColor: const Color(0xffF6B333),
+      //   foregroundColor: Colors.white,
+      //   label: TIM_t("标记未读"),
+      //   spacing: 0,
+      //   icon: Icons.mark_chat_unread,
+      //   autoClose: true,
+      // ),
+      CustomSlidableAction(
         onPressed: (context) {
           _markConversation(conversationItem);
         },
+        autoClose: true,
         backgroundColor: const Color(0xffF6B333),
         foregroundColor: Colors.white,
-        label: TIM_t("标记未读"),
-        spacing: 0,
-        icon: Icons.mark_chat_unread,
-        autoClose: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Image.asset(
+                'images/unread_conversation.png',
+                package: 'tencent_cloud_chat_uikit',
+                height: 24,
+                width: 24,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Flexible(
+              child: Text(
+                TIM_t("标记未读"),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      ConversationItemSlidePanel(
+      // ConversationItemSlidePanel(
+      //   onPressed: (context) {
+      //     _deleteConversation(conversationItem);
+      //   },
+      //   backgroundColor: const Color(0xffCACACA),
+      //   foregroundColor: Colors.white,
+      //   icon: Icons.not_interested,
+      //   label: TIM_t("不显示"),
+      //   autoClose: true,
+      // ),
+      CustomSlidableAction(
         onPressed: (context) {
           _deleteConversation(conversationItem);
         },
+        autoClose: true,
         backgroundColor: const Color(0xffCACACA),
         foregroundColor: Colors.white,
-        icon: Icons.not_interested,
-        label: TIM_t("不显示"),
-        autoClose: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Image.asset(
+                'images/hide_conversation.png',
+                package: 'tencent_cloud_chat_uikit',
+                height: 24,
+                width: 24,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Flexible(
+              child: Text(
+                TIM_t("不显示"),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      ConversationItemSlidePanel(
+      // ConversationItemSlidePanel(
+      //   onPressed: (context) {
+      //     _deleteConversation(conversationItem, isClearHistory: true);
+      //   },
+      //   backgroundColor: const Color(0xffF87171),
+      //   foregroundColor: Colors.white,
+      //   icon: Icons.delete_outline,
+      //   label: TIM_t("移除"),
+      //   autoClose: true,
+      // ),
+      CustomSlidableAction(
         onPressed: (context) {
           _deleteConversation(conversationItem, isClearHistory: true);
         },
+        autoClose: true,
         backgroundColor: const Color(0xffF87171),
         foregroundColor: Colors.white,
-        icon: Icons.delete_outline,
-        label: TIM_t("移除"),
-        autoClose: true,
-      )
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Image.asset(
+                'images/delete_conversation.png',
+                package: 'tencent_cloud_chat_uikit',
+                height: 24,
+                width: 24,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Flexible(
+              child: Text(
+                TIM_t("移除"),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     ];
   }
 
