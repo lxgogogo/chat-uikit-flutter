@@ -225,7 +225,7 @@
     },
     {
       "name": "dart_internal",
-      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/dart_internal-0.2.10",
+      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/dart_internal-0.2.12",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -291,9 +291,9 @@
     },
     {
       "name": "extended_text_field",
-      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/extended_text_field-14.0.0",
+      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/extended_text_field-15.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "extended_text_library",
@@ -365,7 +365,7 @@
       "name": "flutter",
       "rootUri": "file:///Users/clove/development/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
     },
     {
       "name": "flutter_cache_manager",
@@ -669,7 +669,7 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/meta-1.11.0",
+      "rootUri": "file:///Users/clove/.pub-cache/hosted/pub.dev/meta-1.12.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -1304,7 +1304,10 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2024-06-26T05:56:44.411382Z",
+  "generated": "2024-08-19T12:13:17.854334Z",
   "generator": "pub",
-  "generatorVersion": "3.3.4"
+  "generatorVersion": "3.4.4",
+  "flutterRoot": "file:///Users/clove/development/flutter",
+  "flutterVersion": "3.22.3",
+  "pubCache": "file:///Users/clove/.pub-cache"
 }
